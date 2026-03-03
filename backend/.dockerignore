@@ -1,0 +1,17 @@
+__pycache__
+*.pyc
+*.pyo
+.venv
+.env
+.env.*
+.git
+.gitignore
+.mypy_cache
+.pytest_cache
+.ruff_cache
+*.egg-info
+dist
+build
+htmlcov
+coverage.xml
+.coverage
