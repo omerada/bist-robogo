@@ -56,16 +56,24 @@
 
 ```
 bist-robogo/
-├── docs/                           # Proje dökümanları
+├── docs/                               # Proje dökümanları (11 adet)
 │   ├── 01-ARGE-GEREKSINIM-ANALIZI.md
 │   ├── 02-SISTEM-MIMARISI.md
 │   ├── 03-VERI-MODELLERI-VE-API.md
 │   ├── 04-FRONTEND-TASARIM-VE-UX.md
-│   └── 05-GELISTIRME-PLANI-VE-MVP.md
+│   ├── 05-GELISTIRME-PLANI-VE-MVP.md
+│   ├── 06-EKSIK-ANALIZ-RAPORU.md
+│   ├── 07-BACKEND-IMPLEMENTASYON-KILAVUZU.md
+│   ├── 08-FRONTEND-IMPLEMENTASYON-KILAVUZU.md
+│   ├── 09-TASARIM-SISTEMI.md
+│   ├── 10-ADIM-ADIM-GELISTIRME-REHBERI.md
+│   └── 11-AI-AGENT-GELISTIRME-PROMPTU.md
 │
-├── backend/                        # Python Backend (FastAPI)
+├── backend/                            # Python Backend (FastAPI)
 │   ├── app/
-│   │   ├── api/                    # API route'ları
+│   │   ├── api/                        # API route'ları
+│   │   │   ├── router.py
+│   │   │   ├── health.py
 │   │   │   └── v1/
 │   │   │       ├── auth.py
 │   │   │       ├── market.py
@@ -75,71 +83,79 @@ bist-robogo/
 │   │   │       ├── backtest.py
 │   │   │       ├── risk.py
 │   │   │       └── analysis.py
-│   │   ├── core/                   # Çekirdek yapılandırma
+│   │   ├── core/                       # Çekirdek yapılandırma
 │   │   │   ├── config.py
 │   │   │   ├── security.py
-│   │   │   └── database.py
-│   │   ├── models/                 # SQLAlchemy modelleri
-│   │   ├── schemas/                # Pydantic şemaları
-│   │   ├── services/               # İş mantığı
-│   │   │   ├── market_data.py
-│   │   │   ├── trading_engine.py
-│   │   │   ├── risk_manager.py
-│   │   │   ├── strategy_engine.py
-│   │   │   ├── backtest_engine.py
-│   │   │   ├── portfolio.py
-│   │   │   └── notification.py
-│   │   ├── strategies/             # Trading stratejileri
+│   │   │   ├── database.py
+│   │   │   └── redis_client.py
+│   │   ├── models/                     # SQLAlchemy modelleri
+│   │   ├── schemas/                    # Pydantic şemaları
+│   │   ├── services/                   # İş mantığı
+│   │   │   ├── auth_service.py
+│   │   │   ├── market_data_service.py
+│   │   │   ├── trading_service.py
+│   │   │   ├── risk_service.py
+│   │   │   ├── strategy_service.py
+│   │   │   ├── backtest_service.py
+│   │   │   ├── portfolio_service.py
+│   │   │   ├── ai_ml_service.py
+│   │   │   └── notification_service.py
+│   │   ├── repositories/              # Repository pattern
+│   │   ├── strategies/                 # Trading stratejileri
 │   │   │   ├── base.py
 │   │   │   ├── ma_crossover.py
 │   │   │   ├── rsi_reversal.py
 │   │   │   └── ai_trend.py
-│   │   ├── ml/                     # Makine öğrenmesi
+│   │   ├── indicators/                 # Teknik gösterge hesaplamaları
+│   │   │   └── momentum.py
+│   │   ├── brokers/                    # Broker adaptörleri
+│   │   │   ├── base.py
+│   │   │   └── paper_broker.py
+│   │   ├── ml/                         # Makine öğrenmesi
 │   │   │   ├── features.py
 │   │   │   ├── models/
 │   │   │   ├── training.py
 │   │   │   └── serving.py
-│   │   ├── adapters/               # Dış servis adaptörleri
-│   │   │   ├── broker_base.py
-│   │   │   ├── is_yatirim.py
-│   │   │   └── yahoo_finance.py
-│   │   ├── workers/                # Celery worker'ları
-│   │   └── main.py                 # FastAPI app
-│   ├── migrations/                 # Alembic migrasyonları
-│   ├── tests/                      # Testler
+│   │   ├── tasks/                      # Celery görevleri
+│   │   │   ├── celery_app.py
+│   │   │   └── market_tasks.py
+│   │   ├── websocket/                  # WebSocket yönetimi
+│   │   │   └── market_stream.py
+│   │   ├── utils/                      # Yardımcı fonksiyonlar
+│   │   └── main.py                     # FastAPI app (create_app factory)
+│   ├── alembic/                        # Alembic migrasyonları
+│   ├── scripts/                        # Yardımcı scriptler
+│   │   └── seed_symbols.py
+│   ├── tests/                          # Testler
 │   ├── pyproject.toml
 │   └── Dockerfile
 │
-├── frontend/                       # Next.js Frontend
+├── frontend/                           # Next.js Frontend
 │   ├── src/
-│   │   ├── app/                    # Next.js App Router
-│   │   ├── components/             # React bileşenleri
-│   │   ├── hooks/                  # Custom hooks
-│   │   ├── lib/                    # Yardımcı kütüphaneler
-│   │   ├── stores/                 # Zustand stores
-│   │   └── types/                  # TypeScript tipleri
+│   │   ├── app/                        # Next.js App Router
+│   │   │   ├── layout.tsx
+│   │   │   ├── globals.css
+│   │   │   ├── (auth)/                 # Auth sayfaları
+│   │   │   └── (dashboard)/            # Dashboard sayfaları
+│   │   ├── components/                 # React bileşenleri
+│   │   │   ├── auth/
+│   │   │   ├── charts/
+│   │   │   ├── layout/
+│   │   │   ├── providers/
+│   │   │   └── shared/
+│   │   ├── hooks/                      # Custom hooks
+│   │   ├── lib/                        # API client ve yardımcılar
+│   │   │   ├── api/
+│   │   │   └── utils/
+│   │   ├── stores/                     # Zustand stores
+│   │   └── types/                      # TypeScript tipleri
 │   ├── package.json
 │   └── Dockerfile
 │
-├── infra/                          # Altyapı yapılandırmaları
-│   ├── docker/
-│   │   ├── docker-compose.yml
-│   │   ├── docker-compose.dev.yml
-│   │   └── docker-compose.prod.yml
-│   ├── nginx/
-│   ├── prometheus/
-│   ├── grafana/
-│   └── terraform/
-│
-├── scripts/                        # Yardımcı scriptler
-│   ├── seed_data.py
-│   ├── fetch_historical.py
-│   └── run_backtest.py
-│
+├── docker-compose.yml                  # Tüm servisler (dev ortam)
 ├── .github/
 │   └── workflows/
-│       ├── ci.yml
-│       └── cd.yml
+│       └── ci.yml
 │
 ├── .env.example
 ├── .gitignore
@@ -151,6 +167,8 @@ bist-robogo/
 
 ## 📚 Dokümantasyon
 
+### Ar-Ge ve Tasarım Dokümanları
+
 | Doküman                                                                | Açıklama                                           |
 | ---------------------------------------------------------------------- | -------------------------------------------------- |
 | [01 — Ar-Ge ve Gereksinim Analizi](docs/01-ARGE-GEREKSINIM-ANALIZI.md) | Teknoloji araştırması, gereksinimler, risk analizi |
@@ -158,6 +176,22 @@ bist-robogo/
 | [03 — Veri Modelleri ve API](docs/03-VERI-MODELLERI-VE-API.md)         | DB şemaları, API sözleşmeleri, event flow          |
 | [04 — Frontend Tasarım](docs/04-FRONTEND-TASARIM-VE-UX.md)             | UI/UX, ekran planları, component mimari            |
 | [05 — Geliştirme Planı](docs/05-GELISTIRME-PLANI-VE-MVP.md)            | MVP, sprintler, yol haritası                       |
+
+### Implementasyon ve Geliştirme Dokümanları
+
+| Doküman                                                                              | Açıklama                                          |
+| ------------------------------------------------------------------------------------ | ------------------------------------------------- |
+| [06 — Eksik Analiz Raporu](docs/06-EKSIK-ANALIZ-RAPORU.md)                           | Mevcut dokümanların gap analizi                   |
+| [07 — Backend Implementasyon Kılavuzu](docs/07-BACKEND-IMPLEMENTASYON-KILAVUZU.md)   | Backend dosya yapısı, kod şablonları, pattern'ler |
+| [08 — Frontend Implementasyon Kılavuzu](docs/08-FRONTEND-IMPLEMENTASYON-KILAVUZU.md) | Frontend bileşenler, hook'lar, store'lar          |
+| [09 — Tasarım Sistemi](docs/09-TASARIM-SISTEMI.md)                                   | Renk token'ları, tipografi, component catalog     |
+| [10 — Adım Adım Geliştirme Rehberi](docs/10-ADIM-ADIM-GELISTIRME-REHBERI.md)         | Docker, CI/CD, faz bazlı görev sırası             |
+
+### Geliştirme Prompt Dokümanı
+
+| Doküman                                                                    | Açıklama                                         |
+| -------------------------------------------------------------------------- | ------------------------------------------------ |
+| [11 — AI Agent Geliştirme Promptu](docs/11-AI-AGENT-GELISTIRME-PROMPTU.md) | Uçtan uca geliştirme için AI Agent master prompt |
 
 ---
 
@@ -168,18 +202,30 @@ bist-robogo/
 git clone https://github.com/your-username/bist-robogo.git
 cd bist-robogo
 
-# Docker ile tüm servisleri başlat
-docker-compose -f infra/docker/docker-compose.dev.yml up -d
+# Ortam değişkenlerini ayarla
+cp .env.example .env
+# .env dosyasını düzenle
 
-# Backend (geliştirme)
+# Docker ile tüm servisleri başlat
+docker compose up -d --build
+
+# Servis durumlarını kontrol et
+docker compose ps
+
+# Backend (geliştirme — Docker dışında çalıştırmak için)
 cd backend
 poetry install
-poetry run uvicorn app.main:app --reload --port 8000
+poetry run alembic upgrade head
+poetry run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 
-# Frontend (geliştirme)
+# Frontend (geliştirme — Docker dışında çalıştırmak için)
 cd frontend
 pnpm install
 pnpm dev
+
+# Doğrulama
+# http://localhost:8000/health → 200 OK
+# http://localhost:3000 → Next.js sayfası
 ```
 
 ---

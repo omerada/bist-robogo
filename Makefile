@@ -6,16 +6,16 @@ help: ## Bu yardım mesajını gösterir
 
 # ─── Geliştirme ───
 dev: ## Tüm servisleri geliştirme modunda başlat
-	docker-compose -f infra/docker/docker-compose.dev.yml up -d
+	docker compose up -d --build
 
 up: ## Tüm servisleri başlat
-	docker-compose -f infra/docker/docker-compose.yml up -d
+	docker compose up -d
 
 down: ## Tüm servisleri durdur
-	docker-compose -f infra/docker/docker-compose.yml down
+	docker compose down
 
 logs: ## Docker loglarını göster
-	docker-compose -f infra/docker/docker-compose.yml logs -f
+	docker compose logs -f
 
 # ─── Backend ───
 backend-install: ## Backend bağımlılıklarını yükle
@@ -53,8 +53,8 @@ migrate: ## Veritabanı migrasyonlarını çalıştır
 migrate-create: ## Yeni migrasyon oluştur (NAME gerekli)
 	cd backend && poetry run alembic revision --autogenerate -m "$(NAME)"
 
-seed: ## Veritabanına test verisi yükle
-	cd backend && poetry run python scripts/seed_data.py
+seed: ## Veritabanına seed verisi yükle (BIST30 + endeksler)
+	cd backend && poetry run python scripts/seed_symbols.py
 
 # ─── Test ───
 test: backend-test frontend-test ## Tüm testleri çalıştır
