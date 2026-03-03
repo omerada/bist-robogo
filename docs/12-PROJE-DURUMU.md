@@ -1,32 +1,34 @@
 # bist-robogo — Proje Durumu
 
-> **Son Güncelleme:** Faz 1 Sprint 1.3 tamamlandı — 45/45 test geçiyor  
-> **Aktif Faz:** Faz 1 — MVP Temel Özellikler  
-> **Aktif Sprint:** Sprint 1.3 tamamlandı, Faz 2'ye geçiş hazır
+> **Son Güncelleme:** Faz 2 Sprint 2.1 tamamlandı — backend 70/70 test, frontend build OK  
+> **Aktif Faz:** Faz 2 — Genişletme  
+> **Aktif Sprint:** Sprint 2.2 — Backtest Motoru (sırada)
 
 ---
 
 ## Genel Durum Özeti
 
-| Faz | Ad                       | Durum         | İlerleme   |
-| --- | ------------------------ | ------------- | ---------- |
-| 0   | Altyapı Kurulumu         | ✅ Tamamlandı | 6/6 adım   |
-| 1   | MVP Temel Özellikler     | ✅ Tamamlandı | 3/3 sprint |
-| 2   | Genişletme               | ⏳ Bekliyor   | —          |
-| 3   | AI/ML Entegrasyonu       | ⏳ Bekliyor   | —          |
-| 4   | Ölçekleme ve Prodüksiyon | ⏳ Bekliyor   | —          |
+| Faz | Ad                       | Durum           | İlerleme   |
+| --- | ------------------------ | --------------- | ---------- |
+| 0   | Altyapı Kurulumu         | ✅ Tamamlandı   | 6/6 adım   |
+| 1   | MVP Temel Özellikler     | ✅ Tamamlandı   | 3/3 sprint |
+| 2   | Genişletme               | 🔄 Devam Ediyor | 1/3 sprint |
+| 3   | AI/ML Entegrasyonu       | ⏳ Bekliyor     | —          |
+| 4   | Ölçekleme ve Prodüksiyon | ⏳ Bekliyor     | —          |
 
 ---
 
-## Test Durumu — 45/45 ✅
+## Test Durumu — 70/70 ✅
 
-| Test Dosyası      | Test Sayısı | Durum     |
-| ----------------- | ----------- | --------- |
-| `test_auth.py`    | 10          | ✅        |
-| `test_health.py`  | 2           | ✅        |
-| `test_market.py`  | 13          | ✅        |
-| `test_trading.py` | 20          | ✅        |
-| **Toplam**        | **45**      | **5.55s** |
+| Test Dosyası         | Test Sayısı | Durum     |
+| -------------------- | ----------- | --------- |
+| `test_auth.py`       | 10          | ✅        |
+| `test_health.py`     | 2           | ✅        |
+| `test_market.py`     | 13          | ✅        |
+| `test_trading.py`    | 20          | ✅        |
+| `test_trends.py`     | 10          | ✅        |
+| `test_strategies.py` | 15          | ✅        |
+| **Toplam**           | **70**      | **7.54s** |
 
 ---
 
@@ -64,6 +66,9 @@
 | 15  | PaperBroker fallback simulation pricing (Redis yoksa hashlib-based)      | `brokers/paper_broker.py`                     |
 | 16  | Decimal/float tip uyumsuzluğu fix (SQLAlchemy Numeric)                   | `services/trading_service.py`                 |
 | 17  | İdempotent test_user fixture (commit sonrası duplicate önleme)           | `tests/conftest.py`                           |
+| 18  | Frontend `.dockerignore` oluşturuldu (821MB context → 7KB)               | `frontend/.dockerignore`                      |
+| 19  | Dockerfile multi-stage `target: dev` + `output: standalone`              | `frontend/Dockerfile`, `next.config.ts`       |
+| 20  | `docker-compose.yml`: `TEST_DATABASE_URL` + frontend volume kaldırma     | `docker-compose.yml`                          |
 
 ---
 
@@ -120,6 +125,27 @@
 
 ---
 
+## Faz 2 — Genişletme 🔄
+
+### Sprint 2.1 — Trend Analiz + Strateji ✅
+
+| #      | Görev                                      | Durum | Not                                                                      |
+| ------ | ------------------------------------------ | ----- | ------------------------------------------------------------------------ |
+| 2.1.1  | Trend indikatörleri (ADX, OBV, S/R)        | ✅    | `indicators/trend.py` — 9 fonksiyon                                      |
+| 2.1.2  | Strategy repository + Signal repository    | ✅    | `repositories/strategy_repository.py`                                    |
+| 2.1.3  | Trend analysis service                     | ✅    | `services/trend_analysis_service.py` — dip + breakout scoring            |
+| 2.1.4  | Strategy service (CRUD + activate)         | ✅    | `services/strategy_service.py` — 9 metod                                 |
+| 2.1.5  | Trend API (2 endpoint)                     | ✅    | `api/v1/trends.py` — GET trends, GET sectors                             |
+| 2.1.6  | Strategy API (8 endpoint)                  | ✅    | `api/v1/strategies.py` — CRUD + activate + signals + performance         |
+| 2.1.7  | MA Crossover strateji impl.                | ✅    | `strategies/ma_crossover.py` — Golden/Death Cross + ADX+RSI konfirmasyon |
+| 2.1.8  | RSI Reversal strateji impl.                | ✅    | `strategies/rsi_reversal.py` — Stochastic+Bollinger+Volume konfirmasyon  |
+| 2.1.9  | Trend analysis frontend (API+hooks+sayfa)  | ✅    | analysis.ts, use-trends.ts, dip-candidate-card, breakout-candidate-card  |
+| 2.1.10 | Strategy frontend (API+hooks+sayfa)        | ✅    | strategies.ts, use-strategies.ts, strategy-card, create-strategy-dialog  |
+| 2.1.11 | Trend + Strategy testleri                  | ✅    | `test_trends.py` (10), `test_strategies.py` (15)                         |
+| 2.1.12 | Docker frontend .dockerignore + dev target | ✅    | .dockerignore, Dockerfile target dev, next.config standalone             |
+
+---
+
 ## Doğrulanmış API Akışları
 
 | Akış                       | Durum | Detay                                               |
@@ -134,6 +160,9 @@
 | Create Sell Order          | ✅    | Pozisyon kontrol, realize PnL                       |
 | Cancel Order               | ✅    | Sadece bekleyen emirler                             |
 | Portfolio Update           | ✅    | Nakit, yatırım, toplam değer güncelleme             |
+| Trend Analysis             | ✅    | Dip/Breakout scoring, period/index/type filters     |
+| Strategy CRUD              | ✅    | Create, update, delete, activate, deactivate        |
+| Strategy Signals           | ✅    | Signal list, performance metrics                    |
 
 ---
 
@@ -145,7 +174,7 @@
 | Frontend (Next.js) | ✅    | 13 sayfa, 0 TypeScript hatası |
 | PostgreSQL 16      | ✅    | 20 tablo + TimescaleDB        |
 | Redis 7            | ✅    | Cache + Celery broker         |
-| pytest             | ✅    | 45/45, 5.55s, %58 coverage    |
+| pytest             | ✅    | 70/70, 7.54s, %58 coverage    |
 
 ---
 
@@ -157,10 +186,12 @@
 - **Şemalar (10):** common, auth, market, order, portfolio, strategy, backtest, risk, analysis
 - **API v1 (9):** auth, market, orders, portfolio, strategies, backtest, risk, trends, notifications
 - **Core (4):** security, redis_client, rate_limiter, websocket_manager
-- **Servisler (4):** auth_service, market_data_service, trading_service, portfolio_service
-- **Repositories (4):** user_repository, market_repository, order_repository, portfolio_repository
-- **Altyapı:** celery_app, market_tasks, brokers (3), indicators/momentum, strategies/base, websocket/market_stream
-- **Testler (4):** test_auth (10), test_health (2), test_market (13), test_trading (20)
+- **Servisler (6):** auth_service, market_data_service, trading_service, portfolio_service, trend_analysis_service, strategy_service
+- **Repositories (5):** user_repository, market_repository, order_repository, portfolio_repository, strategy_repository
+- **İndikatörler (2):** indicators/momentum, indicators/trend (ADX, OBV, S/R, MACD crossover)
+- **Stratejiler (3):** strategies/base, strategies/ma_crossover, strategies/rsi_reversal
+- **Altyapı:** celery_app, market_tasks, brokers (3), websocket/market_stream
+- **Testler (6):** test_auth (10), test_health (2), test_market (13), test_trading (20), test_trends (10), test_strategies (15)
 
 ### Frontend (~50+ src/ dosya)
 
@@ -169,9 +200,11 @@
 - **Market components (6):** symbol-table, symbol-card, quote-ticker, loading-skeleton, order-form
 - **Portfolio components (1):** position-card
 - **Bileşenler (7+):** stat-card, candlestick-chart, auth-guard, sidebar, header, theme-provider, query-provider
-- **Hooks (5):** use-websocket, use-market-data, use-portfolio, use-trading
+- **Trend components (2):** dip-candidate-card, breakout-candidate-card
+- **Strategy components (2):** strategy-card, create-strategy-dialog
+- **Hooks (7):** use-websocket, use-market-data, use-portfolio, use-trading, use-trends, use-strategies
 - **Stores (3):** auth-store, market-store, ui-store
-- **API lib (4):** client, market, orders, trading
+- **API lib (6):** client, market, orders, trading, analysis, strategies
 - **Types (4):** market, order, portfolio, strategy
 
 ---

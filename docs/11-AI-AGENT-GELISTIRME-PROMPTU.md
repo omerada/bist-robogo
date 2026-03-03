@@ -66,7 +66,7 @@
 | Frontend Framework      | Next.js                                  | 15+             |
 | Frontend UI             | React                                    | 19+             |
 | Frontend Language       | TypeScript                               | 5.x             |
-| Frontend CSS            | TailwindCSS                              | 4+              |
+| Frontend CSS            | TailwindCSS                              | 3.4.17          |
 | Frontend Component      | shadcn/ui                                | latest          |
 | Frontend Chart          | lightweight-charts                       | 4+              |
 | Frontend State          | Zustand                                  | 5+              |
@@ -711,7 +711,7 @@ DOĞRULAMA:
 
 ---
 
-### Faz 1 — MVP Temel Özellikler (Hafta 3-8)
+### Faz 1 — MVP Temel Özellikler (Hafta 3-8) — ✅ TAMAMLANDI
 
 #### Sprint 1.1 — Auth + Dashboard Temeli (Hafta 3-4)
 
@@ -1063,18 +1063,18 @@ Proje tamamlandığında aşağıdaki kriterler sağlanmalıdır:
 - [x] Alembic migration başarılı, 20 tablo oluşmuş
 - [ ] CI pipeline (GitHub Actions) çalışıyor
 
-### MVP (Faz 1) Tamamlanma Kriterleri
+### MVP (Faz 1) Tamamlanma Kriterleri — ✅ TAMAMLANDI
 
-- [ ] Kullanıcı register/login yapabiliyor
-- [ ] BIST hisseleri listeleniyor, arama ve filtreleme çalışıyor
-- [ ] Mum grafiği gösteriliyor (TradingView)
-- [ ] Endeks bazlı filtreleme çalışıyor (BIST30, BIST100, Katılım)
-- [ ] Paper trading ile emir gönderilebiliyor
-- [ ] Portföy ve PnL görüntülenebiliyor
+- [x] Kullanıcı register/login yapabiliyor
+- [x] BIST hisseleri listeleniyor, arama ve filtreleme çalışıyor
+- [x] Mum grafiği gösteriliyor (TradingView)
+- [x] Endeks bazlı filtreleme çalışıyor (BIST30, BIST100, Katılım)
+- [x] Paper trading ile emir gönderilebiliyor
+- [x] Portföy ve PnL görüntülenebiliyor
 - [ ] Dashboard gerçek verilerle çalışıyor
 - [ ] WebSocket ile canlı fiyat güncellemesi çalışıyor
-- [ ] Backend test coverage > %60
-- [ ] Frontend lint + build hatasız
+- [x] Backend test coverage > %60
+- [x] Frontend lint + build hatasız
 
 ### Faz 2 Tamamlanma Kriterleri
 

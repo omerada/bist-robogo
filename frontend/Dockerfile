@@ -7,6 +7,13 @@ WORKDIR /app
 COPY package.json pnpm-lock.yaml ./
 RUN pnpm install --frozen-lockfile
 
+# ── Dev (docker-compose ile kullanılır) ──
+FROM base AS dev
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+CMD ["pnpm", "dev"]
+
 # ── Builder ──
 FROM base AS builder
 WORKDIR /app

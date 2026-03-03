@@ -1,0 +1,7 @@
+{
+  "name": "BIST RoboGo",
+  "short_name": "RoboGo",
+  "theme_color": "#09090b",
+  "background_color": "#ffffff",
+  "display": "standalone"
+}
