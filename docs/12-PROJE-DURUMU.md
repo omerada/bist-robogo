@@ -1,24 +1,24 @@
 # bist-robogo — Proje Durumu
 
-> **Son Güncelleme:** Faz 3 Sprint 3.3 tamamlandı — backend 221/221 test, frontend build OK  
-> **Aktif Faz:** Faz 3 — AI Entegrasyonu (OpenRouter)  
-> **Aktif Sprint:** Sprint 3.3 tamamlandı — Faz 3 tamamlandı, Faz 4 sırada
+> **Son Güncelleme:** Sprint 4.1 tamamlandı — backend 258/258 test, frontend build OK  
+> **Aktif Faz:** Faz 4 — Ölçekleme ve Prodüksiyon  
+> **Aktif Sprint:** Sprint 4.1 ✅ — Broker Yönetimi + CollectAPI + Gerçek Zamanlı Veri
 
 ---
 
 ## Genel Durum Özeti
 
-| Faz | Ad                           | Durum         | İlerleme   |
-| --- | ---------------------------- | ------------- | ---------- |
-| 0   | Altyapı Kurulumu             | ✅ Tamamlandı | 6/6 adım   |
-| 1   | MVP Temel Özellikler         | ✅ Tamamlandı | 3/3 sprint |
-| 2   | Genişletme                   | ✅ Tamamlandı | 3/3 sprint |
-| 3   | AI Entegrasyonu (OpenRouter) | ✅ Tamamlandı | 3/3 sprint |
-| 4   | Ölçekleme ve Prodüksiyon     | ⏳ Bekliyor   | —          |
+| Faz | Ad                           | Durum           | İlerleme   |
+| --- | ---------------------------- | --------------- | ---------- |
+| 0   | Altyapı Kurulumu             | ✅ Tamamlandı   | 6/6 adım   |
+| 1   | MVP Temel Özellikler         | ✅ Tamamlandı   | 3/3 sprint |
+| 2   | Genişletme                   | ✅ Tamamlandı   | 3/3 sprint |
+| 3   | AI Entegrasyonu (OpenRouter) | ✅ Tamamlandı   | 3/3 sprint |
+| 4   | Ölçekleme ve Prodüksiyon     | 🔄 Devam Ediyor | 1/6 sprint |
 
 ---
 
-## Test Durumu — 221/221 ✅
+## Test Durumu — 258/258 ✅
 
 | Test Dosyası             | Test Sayısı | Durum      |
 | ------------------------ | ----------- | ---------- |
@@ -34,7 +34,8 @@
 | `test_ai.py`             | 34          | ✅         |
 | `test_ai_strategy.py`    | 32          | ✅         |
 | `test_ai_experiments.py` | 34          | ✅         |
-| **Toplam**               | **221**     | **17.20s** |
+| `test_brokers.py`        | 37          | ✅         |
+| **Toplam**               | **258**     | **20.48s** |
 
 ---
 
@@ -216,10 +217,15 @@
 | AI Sinyaller               | ✅    | Toplu sinyal üretimi, skor bazlı sıralama           |
 | AI Model Listesi           | ✅    | OpenRouter kullanılabilir modeller                  |
 | AI Ayarları                | ✅    | Model, temperature, max_tokens yapılandırma         |
+| Broker Bilgi (no auth)     | ✅    | 5 broker tanımı, kullanılabilirlik durumu           |
+| Broker CRUD                | ✅    | Create, list, get, update, delete bağlantılar       |
+| Broker Bağlantı Testi      | ✅    | Latency ölçümü, paper=auto-connect                  |
+| Broker Fiyat Sorgusu       | ✅    | Paper broker simülasyon fiyatı                      |
+| Broker Deaktivasyon        | ✅    | is_active=false → status=disconnected               |
 
 ---
 
-## Faz 3 — AI Entegrasyonu (OpenRouter) 🟡
+## Faz 3 — AI Entegrasyonu (OpenRouter) ✅
 
 ### Sprint 3.1 — OpenRouter Client + AI Servis + API ✅
 
@@ -272,34 +278,70 @@
 
 ---
 
+## Faz 4 — Ölçekleme ve Prodüksiyon 🔄
+
+### Sprint 4.1 — Broker Yönetimi + CollectAPI + Gerçek Zamanlı Veri ✅
+
+| #      | Görev                                               | Durum | Not                                                                    |
+| ------ | --------------------------------------------------- | ----- | ---------------------------------------------------------------------- |
+| 4.1.1  | Broker şemaları (2 enum, 8 schema, BROKER_REGISTRY) | ✅    | `schemas/broker.py` — BrokerType, BrokerStatus, 5 broker tanımı        |
+| 4.1.2  | Broker repository                                   | ✅    | `repositories/broker_repository.py` — 5 query metod                    |
+| 4.1.3  | Broker servisi (CRUD + test + quote)                | ✅    | `services/broker_service.py` — 8 metod, flush+refresh pattern          |
+| 4.1.4  | Broker API (8 endpoint)                             | ✅    | `api/v1/brokers.py` — info, connections CRUD, test, quote              |
+| 4.1.5  | Router güncelleme                                   | ✅    | `router.py` — 11. sub-router (prefix=/brokers)                         |
+| 4.1.6  | Broker model güncelleme                             | ✅    | `models/broker.py` — label, status sütunları + **repr**                |
+| 4.1.7  | CollectAPI client (BIST gerçek zamanlı veri)        | ✅    | `core/collectapi_client.py` — httpx, 6 metod, TR sayı formatı desteği  |
+| 4.1.8  | Config güncelleme (CollectAPI)                      | ✅    | `config.py` — COLLECTAPI_KEY, COLLECTAPI_CACHE_TTL                     |
+| 4.1.9  | Celery canlı veri görevleri                         | ✅    | `tasks/market_tasks.py` — fetch_live_prices (1dk), fetch_indices (5dk) |
+| 4.1.10 | Celery beat schedule güncelleme                     | ✅    | `tasks/celery_app.py` — 9 toplam entry (+ live-price, live-index)      |
+| 4.1.11 | Frontend broker types + API + hooks                 | ✅    | 7 interface, 8 API fn, 7 TanStack Query hook                           |
+| 4.1.12 | Frontend broker bileşenleri (3)                     | ✅    | status-badge, connection-card, add-broker-dialog                       |
+| 4.1.13 | Ayarlar sayfası Broker tabı                         | ✅    | `settings/page.tsx` — 5. tab, bağlantı grid + boş durum                |
+| 4.1.14 | Backend testleri (37 test)                          | ✅    | Şema (12), Model (3), CollectAPI (6), API (12), Task (4)               |
+
+#### Sprint 4.1 — Düzeltmeler
+
+| #   | Düzeltme                                                               | Etkilenen Dosya(lar)         |
+| --- | ---------------------------------------------------------------------- | ---------------------------- |
+| 25  | Duplicate `__repr__` kaldırıldı (ikinci basit repr birincisini eziyor) | `models/broker.py`           |
+| 26  | `decimal.InvalidOperation` except clause'a eklendi                     | `core/collectapi_client.py`  |
+| 27  | MissingGreenlet fix — update sonrası `db.refresh()` eklendi            | `services/broker_service.py` |
+| 28  | API testleri self-contained hale getirildi (test izolasyonu)           | `tests/test_brokers.py`      |
+
+---
+
 ## Build Durumu
 
 | Bileşen            | Durum | Detay                         |
 | ------------------ | ----- | ----------------------------- |
 | Backend (Docker)   | ✅    | FastAPI + Uvicorn, healthy    |
-| Frontend (Next.js) | ✅    | 17 sayfa, 0 TypeScript hatası |
+| Frontend (Next.js) | ✅    | 14 sayfa, 0 TypeScript hatası |
 | PostgreSQL 16      | ✅    | 20 tablo + TimescaleDB        |
 | Redis 7            | ✅    | Cache + Celery broker         |
-| pytest             | ✅    | 221/221, 17.20s               |
+| pytest             | ✅    | 258/258, 20.48s               |
 
 ---
 
 ## Mevcut Dosya Envanteri
 
-### Backend (~70+ kaynak dosya)
+### Backend (~86 kaynak dosya, 100 .py toplam)
 
+- **Root (7):** config, database, dependencies, exceptions, logging_config, main, middleware
 - **Modeller (12):** user, market, order, portfolio, strategy, backtest, risk, broker, notification, audit, base, ai
-- **Şemalar (11):** common, auth, market, order, portfolio, strategy, backtest, risk, notification, analysis, ai
-- **API v1 (10):** auth, market, orders, portfolio, strategies, backtest, risk, trends, notifications, ai
-- **Core (5):** security, redis_client, rate_limiter, websocket_manager, openrouter_client
-- **Servisler (11):** auth_service, market_data_service, trading_service, portfolio_service, trend_analysis_service, strategy_service, backtest_service, risk_service, notification_service, ai_service, ai_experiment_service
-- **Repositories (9):** user_repository, market_repository, order_repository, portfolio_repository, strategy_repository, backtest_repository, risk_repository, notification_repository, ai_repository
+- **Şemalar (12):** common, auth, market, order, portfolio, strategy, backtest, risk, notification, analysis, ai, broker
+- **API (13):** health, router + v1/: auth, market, orders, portfolio, strategies, backtest, risk, trends, notifications, ai, brokers
+- **Core (6):** security, redis_client, rate_limiter, websocket_manager, openrouter_client, collectapi_client
+- **Servisler (12):** auth_service, market_data_service, trading_service, portfolio_service, trend_analysis_service, strategy_service, backtest_service, risk_service, notification_service, ai_service, ai_experiment_service, broker_service
+- **Repositories (11):** base, user_repository, market_repository, order_repository, portfolio_repository, strategy_repository, backtest_repository, risk_repository, notification_repository, ai_repository, broker_repository
 - **İndikatörler (2):** indicators/momentum, indicators/trend (ADX, OBV, S/R, MACD crossover)
 - **Stratejiler (4):** strategies/base, strategies/ai_strategy, strategies/ma_crossover, strategies/rsi_reversal
-- **Altyapı:** celery_app, market_tasks, backtest_tasks, notification_tasks, ai_tasks, maintenance_tasks, brokers (3), websocket/market_stream
-- **Testler (12):** test_auth (10), test_health (2), test_market (13), test_trading (20), test_trends (10), test_strategies (15), test_backtest (17), test_risk (16), test_notifications (18), test_ai (34), test_ai_strategy (32), test_ai_experiments (34)
+- **Görevler (6):** celery_app, market_tasks, backtest_tasks, notification_tasks, ai_tasks, maintenance_tasks
+- **Brokers (3):** base, factory, paper_broker
+- **Utils (2):** constants, formatters
+- **WebSocket (1):** market_stream
+- **Testler (13):** test_auth (10), test_health (2), test_market (13), test_trading (20), test_trends (10), test_strategies (15), test_backtest (17), test_risk (16), test_notifications (18), test_ai (34), test_ai_strategy (32), test_ai_experiments (34), test_brokers (37)
 
-### Frontend (~50+ src/ dosya)
+### Frontend (~107 src/ dosya)
 
 - **Sayfalar (14):** root (redirect), login, register, dashboard, market, market/[symbol], trends, strategies, backtest, backtest/[id], portfolio, orders, settings, ai
 - **Dashboard \_components (6):** dashboard-stats, equity-curve, allocation-chart, recent-orders, recent-signals, risk-status
@@ -307,14 +349,21 @@
 - **Shared components (1):** loading-skeleton
 - **Portfolio components (1):** position-card
 - **AI components (6):** accuracy-badge, performance-chart, model-comparison-card, experiment-card, experiment-form, experiment-results
-- **Bileşenler (7+):** stat-card, candlestick-chart, auth-guard, sidebar, header, theme-provider, query-provider
+- **Layout components (3):** sidebar, header, notification-bell
+- **Auth components (1):** auth-guard
+- **Charts (2):** candlestick-chart, backtest-equity-curve
+- **Dashboard (1):** stat-card
+- **Providers (2):** query-provider, theme-provider
 - **Trend components (2):** dip-candidate-card, breakout-candidate-card
 - **Strategy components (2):** strategy-card, create-strategy-dialog
-- **Backtest components (1):** backtest-equity-curve
-- **Hooks (10):** use-market-data, use-portfolio, use-trading, use-trends, use-strategies, use-backtest, use-risk, use-notifications, use-ai, use-websocket
+- **UI (shadcn) (24):** alert-dialog, avatar, badge, button, card, checkbox, command, dialog, dropdown-menu, form, input, label, popover, progress, scroll-area, select, separator, sheet, skeleton, sonner, switch, table, tabs, tooltip
+- **Broker components (3):** broker-status-badge, broker-connection-card, add-broker-dialog
+- **Hooks (11):** use-market-data, use-portfolio, use-trading, use-trends, use-strategies, use-backtest, use-risk, use-notifications, use-ai, use-websocket, use-brokers
 - **Stores (3):** auth-store, market-store, ui-store
-- **API lib (11):** client, auth, market, orders, trading, analysis, strategies, backtest, risk, notifications, ai
-- **Types (7):** market, order, portfolio, strategy, backtest, risk, ai
+- **API lib (12):** client, auth, market, orders, trading, analysis, strategies, backtest, risk, notifications, ai, brokers
+- **Lib utils (2):** utils.ts, utils/formatters.ts
+- **Lib validators (1):** auth.ts
+- **Types (8):** market, order, portfolio, strategy, backtest, risk, ai, broker
 
 ---
 

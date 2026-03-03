@@ -11,6 +11,7 @@ import {
   Loader2,
   AlertTriangle,
   Sparkles,
+  Link2,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -30,6 +31,14 @@ import {
   useUpdateAISettings,
   useAIModels,
 } from "@/hooks/use-ai";
+import {
+  useBrokerConnections,
+  useTestBrokerConnection,
+  useUpdateBrokerConnection,
+  useDeleteBrokerConnection,
+} from "@/hooks/use-brokers";
+import { BrokerConnectionCard } from "@/components/broker/broker-connection-card";
+import { AddBrokerDialog } from "@/components/broker/add-broker-dialog";
 import type { RiskRule } from "@/types/risk";
 
 // ── Kural Türü İsim Eşleme ──
@@ -367,6 +376,67 @@ function AISettingsTab() {
   );
 }
 
+// ── Broker Yönetimi Tab Bileşeni ──
+
+function BrokerTab() {
+  const { data: connectionsData, isLoading } = useBrokerConnections();
+  const testMutation = useTestBrokerConnection();
+  const updateMutation = useUpdateBrokerConnection();
+  const deleteMutation = useDeleteBrokerConnection();
+
+  const connections = connectionsData?.items ?? [];
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-8">
+        <Loader2 className="h-6 w-6 animate-spin" />
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <div className="flex items-center justify-between">
+        <div>
+          <h3 className="text-lg font-semibold">Broker Bağlantıları</h3>
+          <p className="text-sm text-muted-foreground">
+            Paper trading veya gerçek broker bağlantılarınızı yönetin
+          </p>
+        </div>
+        <AddBrokerDialog />
+      </div>
+
+      {connections.length === 0 ? (
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center py-12">
+            <Link2 className="h-12 w-12 text-muted-foreground mb-4" />
+            <h3 className="text-lg font-semibold">Henüz bağlantı yok</h3>
+            <p className="text-sm text-muted-foreground mt-1">
+              Paper Trading veya gerçek broker bağlantısı ekleyerek başlayın
+            </p>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid gap-4 md:grid-cols-2">
+          {connections.map((conn) => (
+            <BrokerConnectionCard
+              key={conn.id}
+              connection={conn}
+              onTest={(id) => testMutation.mutate(id)}
+              onToggle={(id, active) =>
+                updateMutation.mutate({ id, data: { is_active: active } })
+              }
+              onDelete={(id) => deleteMutation.mutate(id)}
+              isTestLoading={testMutation.isPending}
+              isToggleLoading={updateMutation.isPending}
+            />
+          ))}
+        </div>
+      )}
+    </>
+  );
+}
+
 export default function SettingsPage() {
   const { data: rules, isLoading: rulesLoading } = useRiskRules();
   const { data: riskStatus } = useRiskStatus();
@@ -395,6 +465,10 @@ export default function SettingsPage() {
           <TabsTrigger value="ai" className="gap-2">
             <Sparkles className="h-4 w-4" />
             AI Ayarları
+          </TabsTrigger>
+          <TabsTrigger value="broker" className="gap-2">
+            <Link2 className="h-4 w-4" />
+            Broker
           </TabsTrigger>
         </TabsList>
 
@@ -620,6 +694,11 @@ export default function SettingsPage() {
         {/* ── AI Ayarları ── */}
         <TabsContent value="ai" className="space-y-4">
           <AISettingsTab />
+        </TabsContent>
+
+        {/* ── Broker Yönetimi ── */}
+        <TabsContent value="broker" className="space-y-4">
+          <BrokerTab />
         </TabsContent>
       </Tabs>
     </div>

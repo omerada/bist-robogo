@@ -74,4 +74,14 @@ celery_app.conf.beat_schedule = {
         "task": "app.tasks.ai_tasks.calculate_performance_metrics",
         "schedule": crontab(hour=4, minute=0, day_of_week=0),
     },
+    # Canlı fiyat güncelleme — piyasa saatlerinde her 1 dakika
+    "live-price-update": {
+        "task": "app.tasks.market_tasks.fetch_live_prices",
+        "schedule": crontab(minute="*/1", hour="7-15", day_of_week="1-5"),  # UTC 7-15 = TR 10-18
+    },
+    # BIST endeks verileri — piyasa saatlerinde her 5 dakika
+    "live-index-update": {
+        "task": "app.tasks.market_tasks.fetch_indices",
+        "schedule": crontab(minute="*/5", hour="7-15", day_of_week="1-5"),
+    },
 }

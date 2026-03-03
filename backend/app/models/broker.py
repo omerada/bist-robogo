@@ -24,10 +24,12 @@ class BrokerConnection(Base, UUIDMixin, TimestampMixin):
     encrypted_credentials: Mapped[bytes] = mapped_column(LargeBinary, nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     is_paper_trading: Mapped[bool] = mapped_column(Boolean, default=False)
+    label: Mapped[str] = mapped_column(String(100), default="", server_default="")
+    status: Mapped[str] = mapped_column(String(20), default="disconnected", server_default="disconnected")
     last_connected_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     # İlişkiler
     user: Mapped["User"] = relationship(back_populates="broker_connections")  # noqa: F821
 
     def __repr__(self) -> str:
-        return f"<BrokerConnection {self.broker_name}>"
+        return f"<BrokerConnection {self.broker_name} user={self.user_id} active={self.is_active}>"

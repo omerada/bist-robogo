@@ -88,6 +88,10 @@ class Settings(BaseSettings):
     OPENROUTER_TEMPERATURE: float = 0.3  # düşük sıcaklık → tutarlı analiz
     OPENROUTER_TIMEOUT: int = 60  # saniye
 
+    # ── CollectAPI (BIST gerçek zamanlı veri) ──
+    COLLECTAPI_KEY: str = ""
+    COLLECTAPI_CACHE_TTL: int = 60  # saniye — piyasa verisi cache süresi
+
     # ── Data ──
     DEFAULT_HISTORICAL_YEARS: int = 5
     MARKET_OPEN_HOUR: int = 10  # BIST açılış 10:00
