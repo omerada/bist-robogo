@@ -1065,28 +1065,38 @@ Aşağıdaki tablo, her dosyanın içeriğinin hangi dokümanda ve hangi bölüm
 | `backend/app/api/v1/market.py`                     | Doc 03  | §3.3       | ✅ Tam impl    |
 | `backend/app/api/v1/orders.py`                     | Doc 03  | §3.4       | ✅ Tam impl    |
 | `backend/app/api/v1/portfolio.py`                  | Doc 03  | §3.5       | ✅ Tam impl    |
-| `backend/app/api/v1/strategies.py`                 | Doc 02  | §2.5       | 🔲 Placeholder |
-| `backend/app/api/v1/backtest.py`                   | Doc 02  | §2.7       | 🔲 Placeholder |
+| `backend/app/api/v1/strategies.py`                 | Doc 02  | §2.5       | ✅ Tam impl    |
+| `backend/app/api/v1/backtest.py`                   | Doc 02  | §2.7       | ✅ Tam impl    |
 | `backend/app/api/v1/risk.py`                       | Doc 03  | §3.7       | 🔲 Placeholder |
-| `backend/app/api/v1/trends.py`                     | Doc 03  | §3.6       | 🔲 Placeholder |
+| `backend/app/api/v1/trends.py`                     | Doc 03  | §3.6       | ✅ Tam impl    |
 | `backend/app/api/v1/notifications.py`              | Doc 02  | §2.9       | 🔲 Placeholder |
 | `backend/app/services/auth_service.py`             | Doc 02  | §2.1       | ✅ Tam impl    |
 | `backend/app/services/market_data_service.py`      | Doc 02  | §2.2       | ✅ Tam impl    |
 | `backend/app/services/trading_service.py`          | Doc 02  | §2.3       | ✅ Tam impl    |
 | `backend/app/services/portfolio_service.py`        | Doc 02  | §2.8       | ✅ Tam impl    |
+| `backend/app/services/trend_analysis_service.py`   | Doc 02  | §2.4       | ✅ Tam impl    |
+| `backend/app/services/strategy_service.py`         | Doc 02  | §2.5       | ✅ Tam impl    |
+| `backend/app/services/backtest_service.py`         | Doc 02  | §2.7       | ✅ Tam impl    |
 | `backend/app/repositories/base.py`                 | Doc 07  | §12.2      | ✅ Mevcut      |
 | `backend/app/repositories/user_repository.py`      | Doc 07  | §12.2      | ✅ Tam impl    |
 | `backend/app/repositories/market_repository.py`    | Doc 07  | §12.2      | ✅ Tam impl    |
 | `backend/app/repositories/order_repository.py`     | Doc 07  | §12.2      | ✅ Tam impl    |
 | `backend/app/repositories/portfolio_repository.py` | Doc 07  | §12.2      | ✅ Tam impl    |
+| `backend/app/repositories/strategy_repository.py`  | Doc 07  | §12.2      | ✅ Tam impl    |
+| `backend/app/repositories/backtest_repository.py`  | Doc 07  | §12.2      | ✅ Tam impl    |
 | `backend/app/websocket/market_stream.py`           | Doc 07  | §19.2      | 🔲 Placeholder |
 | `backend/app/tasks/celery_app.py`                  | Doc 07  | §20.1      | ✅ Mevcut      |
 | `backend/app/tasks/market_tasks.py`                | Doc 07  | §20.2      | 🔲 Placeholder |
+| `backend/app/tasks/backtest_tasks.py`              | Doc 07  | §20.3      | ✅ Tam impl    |
 | `backend/app/brokers/base.py`                      | Doc 07  | §23.1      | ✅ Mevcut      |
 | `backend/app/brokers/paper_broker.py`              | Doc 07  | §23.2      | ✅ Tam impl    |
 | `backend/app/brokers/factory.py`                   | Doc 07  | §23.3      | ✅ Mevcut      |
 | `backend/app/indicators/momentum.py`               | Doc 07  | §24        | ✅ Tam impl    |
-| `backend/app/strategies/base.py`                   | Doc 02  | §2.5       | 🔲 Placeholder |
+| `backend/app/indicators/trend.py`                  | Doc 02  | §2.4       | ✅ Tam impl    |
+| `backend/app/strategies/base.py`                   | Doc 02  | §2.5       | ✅ Tam impl    |
+| `backend/app/strategies/ma_crossover.py`           | Doc 02  | §2.5       | ✅ Tam impl    |
+| `backend/app/strategies/rsi_reversal.py`           | Doc 02  | §2.5       | ✅ Tam impl    |
+| `backend/app/strategies/__init__.py`               | Doc 02  | §2.5       | ✅ Tam impl    |
 | `backend/app/utils/constants.py`                   | Doc 07  | §25.1      | ✅ Mevcut      |
 | `backend/app/utils/formatters.py`                  | Doc 07  | §25.2      | ✅ Mevcut      |
 | `backend/scripts/seed_symbols.py`                  | Doc 07  | §24 (seed) | ✅ Tam impl    |
@@ -1095,6 +1105,9 @@ Aşağıdaki tablo, her dosyanın içeriğinin hangi dokümanda ve hangi bölüm
 | `backend/tests/test_health.py`                     | Doc 07  | §25 (test) | ✅ Tam impl    |
 | `backend/tests/test_market.py`                     | Doc 07  | §25 (test) | ✅ Tam impl    |
 | `backend/tests/test_trading.py`                    | Doc 07  | §25 (test) | ✅ Tam impl    |
+| `backend/tests/test_trends.py`                     | Doc 07  | §25 (test) | ✅ Tam impl    |
+| `backend/tests/test_strategies.py`                 | Doc 07  | §25 (test) | ✅ Tam impl    |
+| `backend/tests/test_backtest.py`                   | Doc 07  | §25 (test) | ✅ Tam impl    |
 
 ### Frontend Dosyaları
 
@@ -1105,6 +1118,7 @@ Aşağıdaki tablo, her dosyanın içeriğinin hangi dokümanda ve hangi bölüm
 | `frontend/tailwind.config.ts`                                             | Doc 08  | §2.2  | ✅ Mevcut      |
 | `frontend/src/app/globals.css`                                            | Doc 08  | §2.3  | ✅ Mevcut      |
 | `frontend/src/app/layout.tsx`                                             | Doc 08  | §7.1  | ✅ Mevcut      |
+| `frontend/src/app/page.tsx`                                               | Doc 10  | §root | ✅ Tam impl    |
 | `frontend/src/app/(auth)/layout.tsx`                                      | —       | —     | ✅ Mevcut      |
 | `frontend/src/app/(auth)/login/page.tsx`                                  | Doc 09  | §14.1 | ✅ Tam impl    |
 | `frontend/src/app/(auth)/register/page.tsx`                               | Doc 09  | §14.1 | ✅ Tam impl    |
@@ -1118,9 +1132,10 @@ Aşağıdaki tablo, her dosyanın içeriğinin hangi dokümanda ve hangi bölüm
 | `frontend/src/app/(dashboard)/dashboard/_components/risk-status.tsx`      | —       | —     | ✅ Mevcut      |
 | `frontend/src/app/(dashboard)/market/page.tsx`                            | Doc 04  | §2.3  | ✅ Tam impl    |
 | `frontend/src/app/(dashboard)/market/[symbol]/page.tsx`                   | Doc 04  | §2.3  | ✅ Tam impl    |
-| `frontend/src/app/(dashboard)/trends/page.tsx`                            | Doc 04  | §2.4  | 🔲 Placeholder |
-| `frontend/src/app/(dashboard)/strategies/page.tsx`                        | Doc 04  | §2.5  | 🔲 Placeholder |
-| `frontend/src/app/(dashboard)/backtest/page.tsx`                          | Doc 04  | §2.6  | 🔲 Placeholder |
+| `frontend/src/app/(dashboard)/trends/page.tsx`                            | Doc 04  | §2.4  | ✅ Tam impl    |
+| `frontend/src/app/(dashboard)/strategies/page.tsx`                        | Doc 04  | §2.5  | ✅ Tam impl    |
+| `frontend/src/app/(dashboard)/backtest/page.tsx`                          | Doc 04  | §2.6  | ✅ Tam impl    |
+| `frontend/src/app/(dashboard)/backtest/[id]/page.tsx`                     | Doc 04  | §2.6  | ✅ Tam impl    |
 | `frontend/src/app/(dashboard)/portfolio/page.tsx`                         | Doc 04  | §2.7  | ✅ Tam impl    |
 | `frontend/src/app/(dashboard)/orders/page.tsx`                            | —       | —     | ✅ Tam impl    |
 | `frontend/src/app/(dashboard)/settings/page.tsx`                          | Doc 04  | §2.8  | 🔲 Placeholder |
@@ -1131,10 +1146,14 @@ Aşağıdaki tablo, her dosyanın içeriğinin hangi dokümanda ve hangi bölüm
 | `frontend/src/lib/api/market.ts`                                          | Doc 08  | §3.2  | ✅ Tam impl    |
 | `frontend/src/lib/api/orders.ts`                                          | Doc 08  | §3.3  | ✅ Tam impl    |
 | `frontend/src/lib/api/trading.ts`                                         | Doc 08  | §3.3  | ✅ Tam impl    |
+| `frontend/src/lib/api/analysis.ts`                                        | Doc 08  | §3.4  | ✅ Tam impl    |
+| `frontend/src/lib/api/strategies.ts`                                      | Doc 08  | §3.5  | ✅ Tam impl    |
+| `frontend/src/lib/api/backtest.ts`                                        | Doc 08  | §3.6  | ✅ Tam impl    |
 | `frontend/src/types/market.ts`                                            | Doc 08  | §4.1  | ✅ Mevcut      |
 | `frontend/src/types/order.ts`                                             | Doc 08  | §4.2  | ✅ Mevcut      |
 | `frontend/src/types/portfolio.ts`                                         | Doc 08  | §4.3  | ✅ Mevcut      |
 | `frontend/src/types/strategy.ts`                                          | Doc 08  | §4.4  | ✅ Mevcut      |
+| `frontend/src/types/backtest.ts`                                          | Doc 08  | §4.5  | ✅ Tam impl    |
 | `frontend/src/stores/auth-store.ts`                                       | Doc 08  | §5.1  | ✅ Mevcut      |
 | `frontend/src/stores/market-store.ts`                                     | Doc 08  | §5.2  | ✅ Mevcut      |
 | `frontend/src/stores/ui-store.ts`                                         | Doc 08  | §5.3  | ✅ Mevcut      |
@@ -1142,6 +1161,9 @@ Aşağıdaki tablo, her dosyanın içeriğinin hangi dokümanda ve hangi bölüm
 | `frontend/src/hooks/use-market-data.ts`                                   | Doc 08  | §6.2  | ✅ Mevcut      |
 | `frontend/src/hooks/use-portfolio.ts`                                     | Doc 08  | §6.3  | ✅ Mevcut      |
 | `frontend/src/hooks/use-trading.ts`                                       | Doc 08  | §6.3  | ✅ Tam impl    |
+| `frontend/src/hooks/use-trends.ts`                                        | Doc 08  | §6.4  | ✅ Tam impl    |
+| `frontend/src/hooks/use-strategies.ts`                                    | Doc 08  | §6.5  | ✅ Tam impl    |
+| `frontend/src/hooks/use-backtest.ts`                                      | Doc 08  | §6.6  | ✅ Tam impl    |
 | `frontend/src/components/providers/theme-provider.tsx`                    | Doc 08  | §7.2  | ✅ Mevcut      |
 | `frontend/src/components/providers/query-provider.tsx`                    | Doc 08  | §7.3  | ✅ Mevcut      |
 | `frontend/src/components/auth/auth-guard.tsx`                             | Doc 08  | §11.1 | ✅ Mevcut      |
@@ -1155,6 +1177,11 @@ Aşağıdaki tablo, her dosyanın içeriğinin hangi dokümanda ve hangi bölüm
 | `frontend/src/components/market/order-form.tsx`                           | Doc 04  | §2.3  | ✅ Tam impl    |
 | `frontend/src/components/portfolio/position-card.tsx`                     | Doc 09  | §8.4  | ✅ Tam impl    |
 | `frontend/src/components/shared/loading-skeleton.tsx`                     | Doc 09  | §7.3  | ✅ Tam impl    |
+| `frontend/src/components/trends/dip-candidate-card.tsx`                   | Doc 09  | §8.5  | ✅ Tam impl    |
+| `frontend/src/components/trends/breakout-candidate-card.tsx`              | Doc 09  | §8.6  | ✅ Tam impl    |
+| `frontend/src/components/strategies/strategy-card.tsx`                    | Doc 09  | §8.7  | ✅ Tam impl    |
+| `frontend/src/components/strategies/create-strategy-dialog.tsx`           | Doc 09  | §8.8  | ✅ Tam impl    |
+| `frontend/src/components/charts/backtest-equity-curve.tsx`                | Doc 09  | §9.1  | ✅ Tam impl    |
 
 ---
 

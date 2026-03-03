@@ -1,8 +1,8 @@
 # bist-robogo — Proje Durumu
 
-> **Son Güncelleme:** Faz 2 Sprint 2.1 tamamlandı — backend 70/70 test, frontend build OK  
+> **Son Güncelleme:** Faz 2 Sprint 2.2 tamamlandı — backend 87/87 test, frontend build OK  
 > **Aktif Faz:** Faz 2 — Genişletme  
-> **Aktif Sprint:** Sprint 2.2 — Backtest Motoru (sırada)
+> **Aktif Sprint:** Sprint 2.3 — Broker + Bildirimler (sırada)
 
 ---
 
@@ -12,13 +12,13 @@
 | --- | ------------------------ | --------------- | ---------- |
 | 0   | Altyapı Kurulumu         | ✅ Tamamlandı   | 6/6 adım   |
 | 1   | MVP Temel Özellikler     | ✅ Tamamlandı   | 3/3 sprint |
-| 2   | Genişletme               | 🔄 Devam Ediyor | 1/3 sprint |
+| 2   | Genişletme               | 🔄 Devam Ediyor | 2/3 sprint |
 | 3   | AI/ML Entegrasyonu       | ⏳ Bekliyor     | —          |
 | 4   | Ölçekleme ve Prodüksiyon | ⏳ Bekliyor     | —          |
 
 ---
 
-## Test Durumu — 70/70 ✅
+## Test Durumu — 87/87 ✅
 
 | Test Dosyası         | Test Sayısı | Durum     |
 | -------------------- | ----------- | --------- |
@@ -28,7 +28,8 @@
 | `test_trading.py`    | 20          | ✅        |
 | `test_trends.py`     | 10          | ✅        |
 | `test_strategies.py` | 15          | ✅        |
-| **Toplam**           | **70**      | **7.54s** |
+| `test_backtest.py`   | 17          | ✅        |
+| **Toplam**           | **87**      | **9.66s** |
 
 ---
 
@@ -47,28 +48,31 @@
 
 ### İmplementasyon Sırasında Uygulanan Düzeltmeler
 
-| #   | Düzeltme                                                                 | Etkilenen Dosya(lar)                          |
-| --- | ------------------------------------------------------------------------ | --------------------------------------------- |
-| 1   | `passlib` → doğrudan `bcrypt` modülü (passlib + bcrypt 4.2+ uyumsuzluğu) | `core/security.py`                            |
-| 2   | `CORS_ORIGINS` JSON format + `field_validator`                           | `config.py`                                   |
-| 3   | `ACCESS_TOKEN_EXPIRE_MINUTES` → `JWT_ACCESS_TOKEN_EXPIRE_MINUTES`        | `services/auth_service.py`                    |
-| 4   | `docker-compose.yml`: `version: "3.9"` kaldırıldı                        | `docker-compose.yml`                          |
-| 5   | `backend_venv:/app/.venv` volume eklendi                                 | `docker-compose.yml`                          |
-| 6   | `backend/.dockerignore` oluşturuldu                                      | `backend/.dockerignore`                       |
-| 7   | `api/v1/analysis.py` → `api/v1/trends.py` olarak adlandırıldı            | `api/v1/trends.py`, `api/router.py`           |
-| 8   | TailwindCSS v4 → v3.4.17 downgrade (shadcn/ui uyumluluğu)                | `frontend/package.json`, `tailwind.config.ts` |
-| 9   | `autoprefixer` + `tailwindcss-animate` eklendi                           | `frontend/postcss.config.mjs`                 |
-| 10  | Next.js 15 async params fix (Promise params)                             | Tüm `[slug]` sayfalar                         |
-| 11  | `BaseHTTPMiddleware` → pure ASGI middleware                              | `middleware.py`                               |
-| 12  | pytest event loop scope fix (`loop_scope="session"`)                     | `conftest.py`, tüm test dosyaları             |
-| 13  | `APIResponse.meta` tip genişletme (`PaginationMeta \| dict \| None`)     | `schemas/common.py`                           |
-| 14  | OHLCVRepository try/except (hypertable yoksa graceful degrade)           | `repositories/market_repository.py`           |
-| 15  | PaperBroker fallback simulation pricing (Redis yoksa hashlib-based)      | `brokers/paper_broker.py`                     |
-| 16  | Decimal/float tip uyumsuzluğu fix (SQLAlchemy Numeric)                   | `services/trading_service.py`                 |
-| 17  | İdempotent test_user fixture (commit sonrası duplicate önleme)           | `tests/conftest.py`                           |
-| 18  | Frontend `.dockerignore` oluşturuldu (821MB context → 7KB)               | `frontend/.dockerignore`                      |
-| 19  | Dockerfile multi-stage `target: dev` + `output: standalone`              | `frontend/Dockerfile`, `next.config.ts`       |
-| 20  | `docker-compose.yml`: `TEST_DATABASE_URL` + frontend volume kaldırma     | `docker-compose.yml`                          |
+| #   | Düzeltme                                                                        | Etkilenen Dosya(lar)                          |
+| --- | ------------------------------------------------------------------------------- | --------------------------------------------- |
+| 1   | `passlib` → doğrudan `bcrypt` modülü (passlib + bcrypt 4.2+ uyumsuzluğu)        | `core/security.py`                            |
+| 2   | `CORS_ORIGINS` JSON format + `field_validator`                                  | `config.py`                                   |
+| 3   | `ACCESS_TOKEN_EXPIRE_MINUTES` → `JWT_ACCESS_TOKEN_EXPIRE_MINUTES`               | `services/auth_service.py`                    |
+| 4   | `docker-compose.yml`: `version: "3.9"` kaldırıldı                               | `docker-compose.yml`                          |
+| 5   | `backend_venv:/app/.venv` volume eklendi                                        | `docker-compose.yml`                          |
+| 6   | `backend/.dockerignore` oluşturuldu                                             | `backend/.dockerignore`                       |
+| 7   | `api/v1/analysis.py` → `api/v1/trends.py` olarak adlandırıldı                   | `api/v1/trends.py`, `api/router.py`           |
+| 8   | TailwindCSS v4 → v3.4.17 downgrade (shadcn/ui uyumluluğu)                       | `frontend/package.json`, `tailwind.config.ts` |
+| 9   | `autoprefixer` + `tailwindcss-animate` eklendi                                  | `frontend/postcss.config.mjs`                 |
+| 10  | Next.js 15 async params fix (Promise params)                                    | Tüm `[slug]` sayfalar                         |
+| 11  | `BaseHTTPMiddleware` → pure ASGI middleware                                     | `middleware.py`                               |
+| 12  | pytest event loop scope fix (`loop_scope="session"`)                            | `conftest.py`, tüm test dosyaları             |
+| 13  | `APIResponse.meta` tip genişletme (`PaginationMeta \| dict \| None`)            | `schemas/common.py`                           |
+| 14  | OHLCVRepository try/except (hypertable yoksa graceful degrade)                  | `repositories/market_repository.py`           |
+| 15  | PaperBroker fallback simulation pricing (Redis yoksa hashlib-based)             | `brokers/paper_broker.py`                     |
+| 16  | Decimal/float tip uyumsuzluğu fix (SQLAlchemy Numeric)                          | `services/trading_service.py`                 |
+| 17  | İdempotent test_user fixture (commit sonrası duplicate önleme)                  | `tests/conftest.py`                           |
+| 18  | Frontend `.dockerignore` oluşturuldu (821MB context → 7KB)                      | `frontend/.dockerignore`                      |
+| 19  | Dockerfile multi-stage `target: dev` + `output: standalone`                     | `frontend/Dockerfile`, `next.config.ts`       |
+| 20  | `docker-compose.yml`: `TEST_DATABASE_URL` + frontend volume kaldırma            | `docker-compose.yml`                          |
+| 21  | Root URL 404 fix — `app/page.tsx` redirect("/dashboard")                        | `frontend/src/app/page.tsx`                   |
+| 22  | MissingGreenlet fix — ORM lazy-load yerine raw SQL UPDATE                       | `repositories/backtest_repository.py`         |
+| 23  | Test izolasyonu — `test_list_strategies_empty` → `test_list_strategies_initial` | `tests/test_strategies.py`                    |
 
 ---
 
@@ -144,6 +148,19 @@
 | 2.1.11 | Trend + Strategy testleri                  | ✅    | `test_trends.py` (10), `test_strategies.py` (15)                         |
 | 2.1.12 | Docker frontend .dockerignore + dev target | ✅    | .dockerignore, Dockerfile target dev, next.config standalone             |
 
+### Sprint 2.2 — Backtest Motoru ✅
+
+| #     | Görev                                             | Durum | Not                                                                      |
+| ----- | ------------------------------------------------- | ----- | ------------------------------------------------------------------------ |
+| 2.2.1 | Backtest repository (Run + Trade)                 | ✅    | `repositories/backtest_repository.py` — raw SQL update (MissingGreenlet) |
+| 2.2.2 | Backtest schemas (Request, Result, Detail, Trade) | ✅    | `schemas/backtest.py` — 5 schema                                         |
+| 2.2.3 | Backtest service (simülasyon motoru)              | ✅    | `services/backtest_service.py` — 12 metrik, equity curve                 |
+| 2.2.4 | Backtest API (7 endpoint)                         | ✅    | POST run, GET list/detail/trades/equity-curve, DELETE                    |
+| 2.2.5 | Celery backtest task                              | ✅    | `tasks/backtest_tasks.py` — async yürütme                                |
+| 2.2.6 | Frontend backtest sayfası (form+list+stats)       | ✅    | `backtest/page.tsx` — react-hook-form+zod, stat-cards, filter            |
+| 2.2.7 | Frontend backtest detay sayfası                   | ✅    | `backtest/[id]/page.tsx` — 8 metrik kart, equity curve, trade tablo      |
+| 2.2.8 | Backtest testleri                                 | ✅    | `test_backtest.py` — 17 test                                             |
+
 ---
 
 ## Doğrulanmış API Akışları
@@ -163,6 +180,9 @@
 | Trend Analysis             | ✅    | Dip/Breakout scoring, period/index/type filters     |
 | Strategy CRUD              | ✅    | Create, update, delete, activate, deactivate        |
 | Strategy Signals           | ✅    | Signal list, performance metrics                    |
+| Backtest Run               | ✅    | Create + simülasyon, 12 metrik, equity curve        |
+| Backtest Detail            | ✅    | Trade listesi, parametreler, equity grafik          |
+| Backtest Management        | ✅    | List, filter, delete, pagination                    |
 
 ---
 
@@ -171,10 +191,10 @@
 | Bileşen            | Durum | Detay                         |
 | ------------------ | ----- | ----------------------------- |
 | Backend (Docker)   | ✅    | FastAPI + Uvicorn, healthy    |
-| Frontend (Next.js) | ✅    | 13 sayfa, 0 TypeScript hatası |
+| Frontend (Next.js) | ✅    | 16 sayfa, 0 TypeScript hatası |
 | PostgreSQL 16      | ✅    | 20 tablo + TimescaleDB        |
 | Redis 7            | ✅    | Cache + Celery broker         |
-| pytest             | ✅    | 70/70, 7.54s, %58 coverage    |
+| pytest             | ✅    | 87/87, 9.66s, %58 coverage    |
 
 ---
 
@@ -186,26 +206,27 @@
 - **Şemalar (10):** common, auth, market, order, portfolio, strategy, backtest, risk, analysis
 - **API v1 (9):** auth, market, orders, portfolio, strategies, backtest, risk, trends, notifications
 - **Core (4):** security, redis_client, rate_limiter, websocket_manager
-- **Servisler (6):** auth_service, market_data_service, trading_service, portfolio_service, trend_analysis_service, strategy_service
-- **Repositories (5):** user_repository, market_repository, order_repository, portfolio_repository, strategy_repository
+- **Servisler (7):** auth_service, market_data_service, trading_service, portfolio_service, trend_analysis_service, strategy_service, backtest_service
+- **Repositories (6):** user_repository, market_repository, order_repository, portfolio_repository, strategy_repository, backtest_repository
 - **İndikatörler (2):** indicators/momentum, indicators/trend (ADX, OBV, S/R, MACD crossover)
 - **Stratejiler (3):** strategies/base, strategies/ma_crossover, strategies/rsi_reversal
-- **Altyapı:** celery_app, market_tasks, brokers (3), websocket/market_stream
-- **Testler (6):** test_auth (10), test_health (2), test_market (13), test_trading (20), test_trends (10), test_strategies (15)
+- **Altyapı:** celery_app, market_tasks, backtest_tasks, brokers (3), websocket/market_stream
+- **Testler (7):** test_auth (10), test_health (2), test_market (13), test_trading (20), test_trends (10), test_strategies (15), test_backtest (17)
 
 ### Frontend (~50+ src/ dosya)
 
-- **Sayfalar (11):** login, register, dashboard, market, market/[symbol], trends, strategies, backtest, portfolio, orders, settings
+- **Sayfalar (14):** root (redirect), login, register, dashboard, market, market/[symbol], trends, strategies, backtest, backtest/[id], portfolio, orders, settings
 - **Dashboard \_components (6):** dashboard-stats, equity-curve, allocation-chart, recent-orders, recent-signals, risk-status
 - **Market components (6):** symbol-table, symbol-card, quote-ticker, loading-skeleton, order-form
 - **Portfolio components (1):** position-card
 - **Bileşenler (7+):** stat-card, candlestick-chart, auth-guard, sidebar, header, theme-provider, query-provider
 - **Trend components (2):** dip-candidate-card, breakout-candidate-card
 - **Strategy components (2):** strategy-card, create-strategy-dialog
-- **Hooks (7):** use-websocket, use-market-data, use-portfolio, use-trading, use-trends, use-strategies
+- **Backtest components (1):** backtest-equity-curve
+- **Hooks (8):** use-websocket, use-market-data, use-portfolio, use-trading, use-trends, use-strategies, use-backtest
 - **Stores (3):** auth-store, market-store, ui-store
-- **API lib (6):** client, market, orders, trading, analysis, strategies
-- **Types (4):** market, order, portfolio, strategy
+- **API lib (7):** client, market, orders, trading, analysis, strategies, backtest
+- **Types (5):** market, order, portfolio, strategy, backtest
 
 ---
 
