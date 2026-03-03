@@ -198,7 +198,9 @@ export function OrderForm({ symbol, onSuccess }: OrderFormProps) {
 
           {/* Success display */}
           {createOrder.isSuccess && (
-            <p className="text-sm text-green-600">Emir başarıyla oluşturuldu!</p>
+            <p className="text-sm text-green-600">
+              Emir başarıyla oluşturuldu!
+            </p>
           )}
 
           {/* Submit */}

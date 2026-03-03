@@ -62,12 +62,16 @@ export function PositionCard({ position }: PositionCardProps) {
           </div>
           <div className="flex justify-between">
             <span className="text-muted-foreground">Ort. Giriş</span>
-            <span className="font-medium">{formatCurrency(position.avg_entry_price)}</span>
+            <span className="font-medium">
+              {formatCurrency(position.avg_entry_price)}
+            </span>
           </div>
           <div className="flex justify-between">
             <span className="text-muted-foreground">Güncel</span>
             <span className="font-medium">
-              {position.current_price ? formatCurrency(position.current_price) : "—"}
+              {position.current_price
+                ? formatCurrency(position.current_price)
+                : "—"}
             </span>
           </div>
           <div className="flex justify-between">

@@ -82,10 +82,7 @@ export default function MarketPage() {
       {isLoading ? (
         <MarketPageSkeleton />
       ) : (
-        <SymbolTable
-          symbols={data?.symbols ?? []}
-          isLoading={isLoading}
-        />
+        <SymbolTable symbols={data?.symbols ?? []} isLoading={isLoading} />
       )}
     </div>
   );

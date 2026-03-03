@@ -42,7 +42,10 @@ export function SymbolCard({ quote }: SymbolCardProps) {
           <div className="flex items-end justify-between">
             <div>
               <div className="text-lg font-bold tabular-nums">
-                ₺{quote.price.toLocaleString("tr-TR", { minimumFractionDigits: 2 })}
+                ₺
+                {quote.price.toLocaleString("tr-TR", {
+                  minimumFractionDigits: 2,
+                })}
               </div>
               <div className="text-xs text-muted-foreground truncate max-w-[120px]">
                 {quote.name}

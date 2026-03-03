@@ -137,7 +137,9 @@ export default function PortfolioPage() {
             label="Toplam K/Z %"
             value={`${(summary.total_pnl_pct ?? 0) >= 0 ? "+" : ""}${(summary.total_pnl_pct ?? 0).toFixed(2)}%`}
             Icon={TrendingUp}
-            variant={(summary.total_pnl_pct ?? 0) >= 0 ? "positive" : "negative"}
+            variant={
+              (summary.total_pnl_pct ?? 0) >= 0 ? "positive" : "negative"
+            }
           />
         </div>
       )}

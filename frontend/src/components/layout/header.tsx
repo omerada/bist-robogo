@@ -99,7 +99,10 @@ export function Header() {
             <DropdownMenuItem asChild>
               <a href="/settings">Ayarlar</a>
             </DropdownMenuItem>
-            <DropdownMenuItem className="text-destructive" onClick={handleLogout}>
+            <DropdownMenuItem
+              className="text-destructive"
+              onClick={handleLogout}
+            >
               Çıkış Yap
             </DropdownMenuItem>
           </DropdownMenuContent>

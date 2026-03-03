@@ -72,7 +72,10 @@ export function SymbolTable({ symbols, isLoading }: SymbolTableProps) {
         </TableHeader>
         <TableBody>
           {symbols.map((symbol) => (
-            <TableRow key={symbol.id} className="cursor-pointer hover:bg-muted/50">
+            <TableRow
+              key={symbol.id}
+              className="cursor-pointer hover:bg-muted/50"
+            >
               <TableCell className="font-bold">
                 <Link
                   href={`/market/${symbol.ticker}`}
@@ -89,11 +92,17 @@ export function SymbolTable({ symbols, isLoading }: SymbolTableProps) {
               </TableCell>
               <TableCell className="text-right">
                 {symbol.is_active ? (
-                  <Badge variant="outline" className="text-green-500 border-green-500/30">
+                  <Badge
+                    variant="outline"
+                    className="text-green-500 border-green-500/30"
+                  >
                     Aktif
                   </Badge>
                 ) : (
-                  <Badge variant="outline" className="text-red-500 border-red-500/30">
+                  <Badge
+                    variant="outline"
+                    className="text-red-500 border-red-500/30"
+                  >
                     Pasif
                   </Badge>
                 )}

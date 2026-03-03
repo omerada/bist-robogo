@@ -61,7 +61,10 @@ function statusIcon(status: OrderStatus) {
 }
 
 function statusBadge(status: OrderStatus) {
-  const variantMap: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
+  const variantMap: Record<
+    string,
+    "default" | "secondary" | "destructive" | "outline"
+  > = {
     filled: "default",
     cancelled: "secondary",
     rejected: "destructive",
@@ -118,9 +121,7 @@ export default function OrdersPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Emirler</h1>
-          <p className="text-muted-foreground">
-            Emir geçmişi ve aktif emirler
-          </p>
+          <p className="text-muted-foreground">Emir geçmişi ve aktif emirler</p>
         </div>
       </div>
 
@@ -211,9 +212,7 @@ export default function OrdersPage() {
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() =>
-                                cancelOrder.mutate(order.id)
-                              }
+                              onClick={() => cancelOrder.mutate(order.id)}
                               disabled={cancelOrder.isPending}
                             >
                               {cancelOrder.isPending ? (

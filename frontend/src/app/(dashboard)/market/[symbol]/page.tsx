@@ -51,11 +51,7 @@ export default function SymbolDetailPage() {
       {/* Üst bar */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => router.back()}
-          >
+          <Button variant="ghost" size="icon" onClick={() => router.back()}>
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div>
@@ -111,16 +107,41 @@ export default function SymbolDetailPage() {
       {/* Detay kartları */}
       {displayQuote && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <DetailCard label="Açılış" value={`₺${displayQuote.open.toLocaleString("tr-TR", { minimumFractionDigits: 2 })}`} />
-          <DetailCard label="Yüksek" value={`₺${displayQuote.high.toLocaleString("tr-TR", { minimumFractionDigits: 2 })}`} valueClassName="text-green-500" />
-          <DetailCard label="Düşük" value={`₺${displayQuote.low.toLocaleString("tr-TR", { minimumFractionDigits: 2 })}`} valueClassName="text-red-500" />
-          <DetailCard label="Önceki Kapanış" value={`₺${displayQuote.close_prev.toLocaleString("tr-TR", { minimumFractionDigits: 2 })}`} />
-          <DetailCard label="Hacim" value={displayQuote.volume.toLocaleString("tr-TR")} />
-          <DetailCard label="Alış" value={`₺${displayQuote.bid.toLocaleString("tr-TR", { minimumFractionDigits: 2 })}`} />
-          <DetailCard label="Satış" value={`₺${displayQuote.ask.toLocaleString("tr-TR", { minimumFractionDigits: 2 })}`} />
+          <DetailCard
+            label="Açılış"
+            value={`₺${displayQuote.open.toLocaleString("tr-TR", { minimumFractionDigits: 2 })}`}
+          />
+          <DetailCard
+            label="Yüksek"
+            value={`₺${displayQuote.high.toLocaleString("tr-TR", { minimumFractionDigits: 2 })}`}
+            valueClassName="text-green-500"
+          />
+          <DetailCard
+            label="Düşük"
+            value={`₺${displayQuote.low.toLocaleString("tr-TR", { minimumFractionDigits: 2 })}`}
+            valueClassName="text-red-500"
+          />
+          <DetailCard
+            label="Önceki Kapanış"
+            value={`₺${displayQuote.close_prev.toLocaleString("tr-TR", { minimumFractionDigits: 2 })}`}
+          />
+          <DetailCard
+            label="Hacim"
+            value={displayQuote.volume.toLocaleString("tr-TR")}
+          />
+          <DetailCard
+            label="Alış"
+            value={`₺${displayQuote.bid.toLocaleString("tr-TR", { minimumFractionDigits: 2 })}`}
+          />
+          <DetailCard
+            label="Satış"
+            value={`₺${displayQuote.ask.toLocaleString("tr-TR", { minimumFractionDigits: 2 })}`}
+          />
           <DetailCard
             label="Son Güncelleme"
-            value={new Date(displayQuote.updated_at).toLocaleTimeString("tr-TR")}
+            value={new Date(displayQuote.updated_at).toLocaleTimeString(
+              "tr-TR",
+            )}
           />
         </div>
       )}
@@ -141,7 +162,9 @@ function DetailCard({
     <Card>
       <CardContent className="p-4">
         <div className="text-xs text-muted-foreground mb-1">{label}</div>
-        <div className={cn("text-sm font-semibold tabular-nums", valueClassName)}>
+        <div
+          className={cn("text-sm font-semibold tabular-nums", valueClassName)}
+        >
           {value}
         </div>
       </CardContent>

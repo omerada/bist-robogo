@@ -39,14 +39,14 @@
 
 ### İmplementasyon Sırasında Keşfedilen Ek Düzeltmeler
 
-| #   | Sorun                                                                  | Uygulanan Çözüm                                                                                   |
-| --- | ---------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| 10  | **passlib + bcrypt 4.2+ uyumsuzluğu**                                  | ✅ `passlib` yerine doğrudan `bcrypt` modülü kullanıldı (`security.py`'de `bcrypt.hashpw` / `bcrypt.checkpw`)  |
-| 11  | **`CORS_ORIGINS` string parse hatası**                                  | ✅ JSON format `["http://localhost:3000"]` + `field_validator` ile parse (`config.py`)              |
-| 12  | **`ACCESS_TOKEN_EXPIRE_MINUTES` env var adı**                           | ✅ `JWT_ACCESS_TOKEN_EXPIRE_MINUTES` olarak değiştirildi (`auth_service.py`'de 2 yerde)              |
-| 13  | **backend venv Docker volume gereksinimi**                              | ✅ `backend_venv:/app/.venv` volume eklendi (backend + celery-worker + celery-beat)                   |
-| 14  | **`.dockerignore` eksikliği**                                           | ✅ `backend/.dockerignore` oluşturuldu                                                               |
-| 15  | **`api/v1/analysis.py` adlandırması**                                  | ✅ `api/v1/trends.py` olarak adlandırıldı (Doc 10 Sprint 2.1 ile tutarlılık)                          |
+| #   | Sorun                                         | Uygulanan Çözüm                                                                                               |
+| --- | --------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| 10  | **passlib + bcrypt 4.2+ uyumsuzluğu**         | ✅ `passlib` yerine doğrudan `bcrypt` modülü kullanıldı (`security.py`'de `bcrypt.hashpw` / `bcrypt.checkpw`) |
+| 11  | **`CORS_ORIGINS` string parse hatası**        | ✅ JSON format `["http://localhost:3000"]` + `field_validator` ile parse (`config.py`)                        |
+| 12  | **`ACCESS_TOKEN_EXPIRE_MINUTES` env var adı** | ✅ `JWT_ACCESS_TOKEN_EXPIRE_MINUTES` olarak değiştirildi (`auth_service.py`'de 2 yerde)                       |
+| 13  | **backend venv Docker volume gereksinimi**    | ✅ `backend_venv:/app/.venv` volume eklendi (backend + celery-worker + celery-beat)                           |
+| 14  | **`.dockerignore` eksikliği**                 | ✅ `backend/.dockerignore` oluşturuldu                                                                        |
+| 15  | **`api/v1/analysis.py` adlandırması**         | ✅ `api/v1/trends.py` olarak adlandırıldı (Doc 10 Sprint 2.1 ile tutarlılık)                                  |
 
 ---
 
@@ -402,53 +402,53 @@ bist-robogo/
 
 ### Backend Dosya → Doküman Eşlemesi
 
-| Dosya Yolu                               | Kaynak Doküman | Bölüm                    | Notlar                                   |
-| ---------------------------------------- | -------------- | ------------------------ | ---------------------------------------- |
-| `backend/app/config.py`                  | Doc 07         | §2 — Ortam Değişkenleri  | Pydantic Settings class, `.env` okuma    |
-| `backend/app/database.py`                | Doc 07         | §3 — Veritabanı Bağlantı | async engine, session factory            |
-| `backend/app/models/base.py`             | Doc 07         | §4.1 — ORM Model Temeli  | TimestampMixin, UUIDMixin                |
-| `backend/app/models/user.py`             | Doc 07         | §4.2 — User Model        | Örnek model, diğerleri bunu takip etmeli |
-| `backend/app/models/*.py` (diğer)        | Doc 03         | §2 — SQL Tablo Tanımları | Her tablo tanımını SQLAlchemy'ye çevir   |
-| `backend/app/main.py`                    | Doc 07         | §5 — FastAPI App Factory | `create_app()`, lifespan, middleware     |
-| `backend/app/middleware.py`              | Doc 07         | §6 — Middleware          | Request logging, rate limiting           |
-| `backend/app/exceptions.py`              | Doc 07         | §7 — Exception Handling  | Custom exceptions + global handler       |
-| `backend/app/core/security.py`           | Doc 07         | §8 — Güvenlik            | JWT encode/decode, password hash         |
-| `backend/app/dependencies.py`            | Doc 07         | §9 — Dependencies        | `get_current_user`, `require_role`       |
-| `backend/app/api/router.py`              | Doc 07         | §10.1 — API Router       | Ana v1 router, prefix yapısı             |
-| `backend/app/api/health.py`              | Doc 07         | §10.2 — Health Check     | DB, Redis, Kafka kontrol                 |
-| `backend/app/api/v1/auth.py`             | Doc 07         | §10.3 — Auth Router      | Register, login, refresh, me, logout     |
-| `backend/app/api/v1/market.py`           | Doc 02         | §2.2 + Doc 03 §3.3       | Endpoint listesi + response JSON         |
-| `backend/app/api/v1/orders.py`           | Doc 02         | §2.3 + Doc 03 §3.4       | Emir CRUD + yaşam döngüsü                |
-| `backend/app/api/v1/portfolio.py`        | Doc 02         | §2.8 + Doc 03 §3.5       | Pozisyon, PnL, allocation                |
-| `backend/app/api/v1/strategies.py`       | Doc 02         | §2.5                     | Strateji CRUD + aktivasyon               |
-| `backend/app/api/v1/backtest.py`         | Doc 02         | §2.7                     | Backtest çalıştır, sonuç sorgula         |
-| `backend/app/api/v1/risk.py`             | Doc 02         | §2.4 + Doc 03 §3.7       | Risk kuralları, durum, uyarılar          |
-| `backend/app/api/v1/trends.py`         | Doc 03         | §3.6                     | Trend analiz, dip/kırılım (İMPL: analysis.py → trends.py) |
-| `backend/app/schemas/common.py`          | Doc 07         | §11.1                    | APIResponse, PaginationMeta              |
-| `backend/app/schemas/auth.py`            | Doc 07         | §11.2                    | Register, Login, Token şemaları          |
-| `backend/app/schemas/*.py` (diğer)       | Doc 03         | §4 — Pydantic Modelleri  | Tüm request/response şemaları            |
-| `backend/app/services/*.py`              | Doc 02         | §2.1–§2.10               | Her servisin iş mantığı                  |
-| `backend/app/repositories/base.py`       | Doc 07         | §12.2                    | Generic CRUD repository                  |
-| `backend/app/core/redis_client.py`       | Doc 07         | §13                      | RedisManager singleton                   |
-| `backend/app/core/rate_limiter.py`       | Doc 07         | §14                      | Redis tabanlı rate limiter               |
-| `backend/app/core/websocket_manager.py`  | Doc 07         | §15.1                    | Channel-based WS yönetimi                |
-| `backend/app/websocket/market_stream.py` | Doc 07         | §15.2                    | WS endpoint handler                      |
-| `backend/app/tasks/celery_app.py`        | Doc 07         | §16.1                    | Celery config, beat schedule             |
-| `backend/app/tasks/market_tasks.py`      | Doc 07         | §16.2                    | EOD data fetch task                      |
-| `backend/app/brokers/base.py`            | Doc 07         | §17.1                    | AbstractBroker interface                 |
-| `backend/app/brokers/paper_broker.py`    | Doc 07         | §17.2                    | Simülasyon broker                        |
-| `backend/app/brokers/factory.py`         | Doc 07         | §17.3                    | Broker factory                           |
-| `backend/app/indicators/momentum.py`     | Doc 07         | §18                      | RSI, MACD, Stochastic                    |
-| `backend/app/logging_config.py`          | Doc 07         | §19                      | structlog setup                          |
-| `backend/alembic.ini`                    | Doc 07         | §20.1                    | Alembic yapılandırma                     |
-| `backend/alembic/env.py`                 | Doc 07         | §20.2                    | Migration env                            |
-| `backend/pyproject.toml`                 | Doc 07         | §21                      | Poetry bağımlılıklar                     |
-| `backend/Dockerfile`                     | Doc 10         | §2.1                     | Multi-stage build                        |
-| `backend/scripts/seed_symbols.py`        | Doc 07         | §23                      | BIST30 seed data                         |
-| `backend/tests/conftest.py`              | Doc 07         | §24                      | Test fixture'ları                        |
-| `backend/app/utils/constants.py`         | Doc 07         | §25.1                    | Sabitler                                 |
-| `backend/app/utils/formatters.py`        | Doc 07         | §25.2                    | Formatlama                               |
-| `backend/app/strategies/base.py`         | Doc 02         | §2.5                     | BaseStrategy abstract class              |
+| Dosya Yolu                               | Kaynak Doküman | Bölüm                    | Notlar                                                    |
+| ---------------------------------------- | -------------- | ------------------------ | --------------------------------------------------------- |
+| `backend/app/config.py`                  | Doc 07         | §2 — Ortam Değişkenleri  | Pydantic Settings class, `.env` okuma                     |
+| `backend/app/database.py`                | Doc 07         | §3 — Veritabanı Bağlantı | async engine, session factory                             |
+| `backend/app/models/base.py`             | Doc 07         | §4.1 — ORM Model Temeli  | TimestampMixin, UUIDMixin                                 |
+| `backend/app/models/user.py`             | Doc 07         | §4.2 — User Model        | Örnek model, diğerleri bunu takip etmeli                  |
+| `backend/app/models/*.py` (diğer)        | Doc 03         | §2 — SQL Tablo Tanımları | Her tablo tanımını SQLAlchemy'ye çevir                    |
+| `backend/app/main.py`                    | Doc 07         | §5 — FastAPI App Factory | `create_app()`, lifespan, middleware                      |
+| `backend/app/middleware.py`              | Doc 07         | §6 — Middleware          | Request logging, rate limiting                            |
+| `backend/app/exceptions.py`              | Doc 07         | §7 — Exception Handling  | Custom exceptions + global handler                        |
+| `backend/app/core/security.py`           | Doc 07         | §8 — Güvenlik            | JWT encode/decode, password hash                          |
+| `backend/app/dependencies.py`            | Doc 07         | §9 — Dependencies        | `get_current_user`, `require_role`                        |
+| `backend/app/api/router.py`              | Doc 07         | §10.1 — API Router       | Ana v1 router, prefix yapısı                              |
+| `backend/app/api/health.py`              | Doc 07         | §10.2 — Health Check     | DB, Redis, Kafka kontrol                                  |
+| `backend/app/api/v1/auth.py`             | Doc 07         | §10.3 — Auth Router      | Register, login, refresh, me, logout                      |
+| `backend/app/api/v1/market.py`           | Doc 02         | §2.2 + Doc 03 §3.3       | Endpoint listesi + response JSON                          |
+| `backend/app/api/v1/orders.py`           | Doc 02         | §2.3 + Doc 03 §3.4       | Emir CRUD + yaşam döngüsü                                 |
+| `backend/app/api/v1/portfolio.py`        | Doc 02         | §2.8 + Doc 03 §3.5       | Pozisyon, PnL, allocation                                 |
+| `backend/app/api/v1/strategies.py`       | Doc 02         | §2.5                     | Strateji CRUD + aktivasyon                                |
+| `backend/app/api/v1/backtest.py`         | Doc 02         | §2.7                     | Backtest çalıştır, sonuç sorgula                          |
+| `backend/app/api/v1/risk.py`             | Doc 02         | §2.4 + Doc 03 §3.7       | Risk kuralları, durum, uyarılar                           |
+| `backend/app/api/v1/trends.py`           | Doc 03         | §3.6                     | Trend analiz, dip/kırılım (İMPL: analysis.py → trends.py) |
+| `backend/app/schemas/common.py`          | Doc 07         | §11.1                    | APIResponse, PaginationMeta                               |
+| `backend/app/schemas/auth.py`            | Doc 07         | §11.2                    | Register, Login, Token şemaları                           |
+| `backend/app/schemas/*.py` (diğer)       | Doc 03         | §4 — Pydantic Modelleri  | Tüm request/response şemaları                             |
+| `backend/app/services/*.py`              | Doc 02         | §2.1–§2.10               | Her servisin iş mantığı                                   |
+| `backend/app/repositories/base.py`       | Doc 07         | §12.2                    | Generic CRUD repository                                   |
+| `backend/app/core/redis_client.py`       | Doc 07         | §13                      | RedisManager singleton                                    |
+| `backend/app/core/rate_limiter.py`       | Doc 07         | §14                      | Redis tabanlı rate limiter                                |
+| `backend/app/core/websocket_manager.py`  | Doc 07         | §15.1                    | Channel-based WS yönetimi                                 |
+| `backend/app/websocket/market_stream.py` | Doc 07         | §15.2                    | WS endpoint handler                                       |
+| `backend/app/tasks/celery_app.py`        | Doc 07         | §16.1                    | Celery config, beat schedule                              |
+| `backend/app/tasks/market_tasks.py`      | Doc 07         | §16.2                    | EOD data fetch task                                       |
+| `backend/app/brokers/base.py`            | Doc 07         | §17.1                    | AbstractBroker interface                                  |
+| `backend/app/brokers/paper_broker.py`    | Doc 07         | §17.2                    | Simülasyon broker                                         |
+| `backend/app/brokers/factory.py`         | Doc 07         | §17.3                    | Broker factory                                            |
+| `backend/app/indicators/momentum.py`     | Doc 07         | §18                      | RSI, MACD, Stochastic                                     |
+| `backend/app/logging_config.py`          | Doc 07         | §19                      | structlog setup                                           |
+| `backend/alembic.ini`                    | Doc 07         | §20.1                    | Alembic yapılandırma                                      |
+| `backend/alembic/env.py`                 | Doc 07         | §20.2                    | Migration env                                             |
+| `backend/pyproject.toml`                 | Doc 07         | §21                      | Poetry bağımlılıklar                                      |
+| `backend/Dockerfile`                     | Doc 10         | §2.1                     | Multi-stage build                                         |
+| `backend/scripts/seed_symbols.py`        | Doc 07         | §23                      | BIST30 seed data                                          |
+| `backend/tests/conftest.py`              | Doc 07         | §24                      | Test fixture'ları                                         |
+| `backend/app/utils/constants.py`         | Doc 07         | §25.1                    | Sabitler                                                  |
+| `backend/app/utils/formatters.py`        | Doc 07         | §25.2                    | Formatlama                                                |
+| `backend/app/strategies/base.py`         | Doc 02         | §2.5                     | BaseStrategy abstract class                               |
 
 ### Ek Referanslar — Sprint Görevlerinde Kullanılacak
 
@@ -518,6 +518,7 @@ bist-robogo/
 ### Faz 0 — Altyapı Kurulumu (Hafta 1-2) — ✅ TAMAMLANDI
 
 > **Durum:** Tüm 6 adım başarıyla tamamlanmıştır.
+>
 > - Docker: 6 servis (postgres, redis, backend, celery-worker, celery-beat, frontend — ilk 5'i healthy)
 > - Backend: 50+ dosya, 33 API endpoint, 20 DB tablosu, auth flow tam çalışır
 > - Frontend: 38+ dosya, placeholder sayfalar ve temel bileşenler mevcut
