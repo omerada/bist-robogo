@@ -10,6 +10,7 @@ import {
   ToggleRight,
   Loader2,
   AlertTriangle,
+  Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -24,6 +25,11 @@ import {
   useUpdateRiskRule,
   useRiskStatus,
 } from "@/hooks/use-risk";
+import {
+  useAISettings,
+  useUpdateAISettings,
+  useAIModels,
+} from "@/hooks/use-ai";
 import type { RiskRule } from "@/types/risk";
 
 // ── Kural Türü İsim Eşleme ──
@@ -191,6 +197,176 @@ function RuleCard({ rule }: { rule: RiskRule }) {
   );
 }
 
+// ── AI Ayarları Tab Bileşeni ──
+
+function AISettingsTab() {
+  const { data: settings, isLoading } = useAISettings();
+  const { data: modelsData } = useAIModels();
+  const updateMutation = useUpdateAISettings();
+  const [model, setModel] = useState("");
+  const [temperature, setTemperature] = useState("");
+  const [maxTokens, setMaxTokens] = useState("");
+
+  // İlk yükleme
+  useState(() => {
+    if (settings) {
+      setModel(settings.model);
+      setTemperature(String(settings.temperature));
+      setMaxTokens(String(settings.max_tokens));
+    }
+  });
+
+  const handleSave = () => {
+    const payload: Record<string, unknown> = {};
+    if (model && model !== settings?.model) payload.model = model;
+    if (temperature && Number(temperature) !== settings?.temperature)
+      payload.temperature = Number(temperature);
+    if (maxTokens && Number(maxTokens) !== settings?.max_tokens)
+      payload.max_tokens = Number(maxTokens);
+
+    if (Object.keys(payload).length === 0) {
+      toast.info("Değişiklik yok");
+      return;
+    }
+
+    updateMutation.mutate(
+      payload as { model?: string; temperature?: number; max_tokens?: number },
+      {
+        onSuccess: () => toast.success("AI ayarları güncellendi"),
+        onError: () => toast.error("Güncelleme başarısız"),
+      },
+    );
+  };
+
+  if (isLoading) {
+    return (
+      <Card>
+        <CardContent className="p-6 space-y-3">
+          <div className="h-4 w-32 bg-muted animate-pulse rounded" />
+          <div className="h-10 w-full bg-muted animate-pulse rounded" />
+          <div className="h-10 w-full bg-muted animate-pulse rounded" />
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <>
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base flex items-center gap-2">
+            <Sparkles className="h-4 w-4" />
+            OpenRouter Yapılandırması
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="font-medium text-sm">API Bağlantı Durumu</p>
+              <p className="text-xs text-muted-foreground">
+                {settings?.base_url}
+              </p>
+            </div>
+            <Badge
+              className={
+                settings?.api_key_set
+                  ? "bg-green-500/10 text-green-500"
+                  : "bg-red-500/10 text-red-500"
+              }
+            >
+              {settings?.api_key_set ? "API Key Ayarlı" : "API Key Eksik"}
+            </Badge>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Model</Label>
+            <Input
+              value={model || settings?.model || ""}
+              onChange={(e) => setModel(e.target.value)}
+              placeholder="google/gemini-2.5-flash"
+            />
+            <p className="text-xs text-muted-foreground">
+              OpenRouter model ID (ör: google/gemini-2.5-flash,
+              anthropic/claude-sonnet-4)
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Sıcaklık (Temperature)</Label>
+              <Input
+                type="number"
+                step="0.1"
+                min="0"
+                max="2"
+                value={temperature || String(settings?.temperature ?? 0.3)}
+                onChange={(e) => setTemperature(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Maks Token</Label>
+              <Input
+                type="number"
+                step="100"
+                min="100"
+                max="16384"
+                value={maxTokens || String(settings?.max_tokens ?? 4096)}
+                onChange={(e) => setMaxTokens(e.target.value)}
+              />
+            </div>
+          </div>
+
+          <Button
+            onClick={handleSave}
+            disabled={updateMutation.isPending}
+            className="w-full"
+          >
+            {updateMutation.isPending ? (
+              <Loader2 className="h-4 w-4 animate-spin mr-2" />
+            ) : (
+              <Save className="h-4 w-4 mr-2" />
+            )}
+            Kaydet
+          </Button>
+        </CardContent>
+      </Card>
+
+      {modelsData && modelsData.models.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">
+              Kullanılabilir Modeller ({modelsData.models.length})
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2 max-h-60 overflow-y-auto">
+              {modelsData.models.slice(0, 20).map((m) => (
+                <div
+                  key={m.id}
+                  className="flex items-center justify-between text-sm border-b pb-2 last:border-0 cursor-pointer hover:bg-muted/50 rounded p-1"
+                  onClick={() => setModel(m.id)}
+                >
+                  <div>
+                    <p className="font-medium">{m.name}</p>
+                    <p className="text-xs text-muted-foreground font-mono">
+                      {m.id}
+                    </p>
+                  </div>
+                  {m.context_length && (
+                    <Badge variant="outline" className="text-xs">
+                      {(m.context_length / 1000).toFixed(0)}K ctx
+                    </Badge>
+                  )}
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </>
+  );
+}
+
 export default function SettingsPage() {
   const { data: rules, isLoading: rulesLoading } = useRiskRules();
   const { data: riskStatus } = useRiskStatus();
@@ -215,6 +391,10 @@ export default function SettingsPage() {
           <TabsTrigger value="profile" className="gap-2">
             <User className="h-4 w-4" />
             Profil
+          </TabsTrigger>
+          <TabsTrigger value="ai" className="gap-2">
+            <Sparkles className="h-4 w-4" />
+            AI Ayarları
           </TabsTrigger>
         </TabsList>
 
@@ -435,6 +615,11 @@ export default function SettingsPage() {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* ── AI Ayarları ── */}
+        <TabsContent value="ai" className="space-y-4">
+          <AISettingsTab />
         </TabsContent>
       </Tabs>
     </div>

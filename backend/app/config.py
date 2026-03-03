@@ -80,6 +80,14 @@ class Settings(BaseSettings):
     SENTRY_DSN: str = ""
     LOG_LEVEL: str = "INFO"
 
+    # ── OpenRouter AI ──
+    OPENROUTER_API_KEY: SecretStr = SecretStr("")
+    OPENROUTER_BASE_URL: str = "https://openrouter.ai/api/v1"
+    OPENROUTER_DEFAULT_MODEL: str = "google/gemini-2.5-flash"  # varsayılan model
+    OPENROUTER_MAX_TOKENS: int = 4096
+    OPENROUTER_TEMPERATURE: float = 0.3  # düşük sıcaklık → tutarlı analiz
+    OPENROUTER_TIMEOUT: int = 60  # saniye
+
     # ── MLflow ──
     MLFLOW_TRACKING_URI: str = "http://localhost:5000"
 

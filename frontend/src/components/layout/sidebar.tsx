@@ -12,6 +12,7 @@ import {
   ClipboardList,
   Settings,
   ChevronLeft,
+  Sparkles,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useUIStore } from "@/stores/ui-store";
@@ -31,6 +32,7 @@ const navItems = [
   { href: "/backtest", label: "Backtest", icon: FlaskConical },
   { href: "/portfolio", label: "Portföy", icon: Briefcase },
   { href: "/orders", label: "Emirler", icon: ClipboardList },
+  { href: "/ai", label: "AI Analiz", icon: Sparkles },
   { href: "/settings", label: "Ayarlar", icon: Settings },
 ];
 

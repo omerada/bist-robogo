@@ -1,24 +1,24 @@
 # bist-robogo — Proje Durumu
 
-> **Son Güncelleme:** Faz 2 Sprint 2.3 tamamlandı — backend 121/121 test, frontend build OK  
-> **Aktif Faz:** Faz 2 — Genişletme  
-> **Aktif Sprint:** Faz 2 tamamlandı — Faz 3 AI/ML Entegrasyonu sırada
+> **Son Güncelleme:** Faz 3 Sprint 3.1 tamamlandı — backend 155/155 test, frontend build OK  
+> **Aktif Faz:** Faz 3 — AI Entegrasyonu (OpenRouter)  
+> **Aktif Sprint:** Sprint 3.1 tamamlandı — Sprint 3.2 AI Strateji sırada
 
 ---
 
 ## Genel Durum Özeti
 
-| Faz | Ad                       | Durum         | İlerleme   |
-| --- | ------------------------ | ------------- | ---------- |
-| 0   | Altyapı Kurulumu         | ✅ Tamamlandı | 6/6 adım   |
-| 1   | MVP Temel Özellikler     | ✅ Tamamlandı | 3/3 sprint |
-| 2   | Genişletme               | ✅ Tamamlandı | 3/3 sprint |
-| 3   | AI/ML Entegrasyonu       | ⏳ Bekliyor   | —          |
-| 4   | Ölçekleme ve Prodüksiyon | ⏳ Bekliyor   | —          |
+| Faz | Ad                           | Durum           | İlerleme   |
+| --- | ---------------------------- | --------------- | ---------- |
+| 0   | Altyapı Kurulumu             | ✅ Tamamlandı   | 6/6 adım   |
+| 1   | MVP Temel Özellikler         | ✅ Tamamlandı   | 3/3 sprint |
+| 2   | Genişletme                   | ✅ Tamamlandı   | 3/3 sprint |
+| 3   | AI Entegrasyonu (OpenRouter) | 🟡 Devam Ediyor | 1/3 sprint |
+| 4   | Ölçekleme ve Prodüksiyon     | ⏳ Bekliyor     | —          |
 
 ---
 
-## Test Durumu — 121/121 ✅
+## Test Durumu — 155/155 ✅
 
 | Test Dosyası            | Test Sayısı | Durum      |
 | ----------------------- | ----------- | ---------- |
@@ -31,7 +31,8 @@
 | `test_backtest.py`      | 17          | ✅         |
 | `test_notifications.py` | 18          | ✅         |
 | `test_risk.py`          | 16          | ✅         |
-| **Toplam**              | **121**     | **12.23s** |
+| `test_ai.py`            | 34          | ✅         |
+| **Toplam**              | **155**     | **14.79s** |
 
 ---
 
@@ -208,6 +209,45 @@
 | Risk Events                | ✅    | Olay listesi, sayfalama, tip filtresi               |
 | Notification CRUD          | ✅    | List, create, delete, read/unread filtre            |
 | Notification Mark Read     | ✅    | Tek/tümü okundu, unread count                       |
+| AI Analiz (OpenRouter)     | ✅    | Sembol analizi, LLM + gösterge tabanlı              |
+| AI Sohbet                  | ✅    | Bağlamsal finans asistanı, mesaj geçmişi            |
+| AI Sinyaller               | ✅    | Toplu sinyal üretimi, skor bazlı sıralama           |
+| AI Model Listesi           | ✅    | OpenRouter kullanılabilir modeller                  |
+| AI Ayarları                | ✅    | Model, temperature, max_tokens yapılandırma         |
+
+---
+
+## Faz 3 — AI Entegrasyonu (OpenRouter) 🟡
+
+### Sprint 3.1 — OpenRouter Client + AI Servis + API ✅
+
+| #      | Görev                             | Durum | Not                                                         |
+| ------ | --------------------------------- | ----- | ----------------------------------------------------------- |
+| 3.1.1  | Config: OpenRouter ayarları       | ✅    | `OPENROUTER_API_KEY`, `BASE_URL`, `DEFAULT_MODEL` vb.       |
+| 3.1.2  | OpenRouter async client           | ✅    | `core/openrouter_client.py` — httpx, chat/json/models       |
+| 3.1.3  | AI Pydantic şemaları              | ✅    | `schemas/ai.py` — 13 model (analiz, chat, sinyal, ayar)     |
+| 3.1.4  | AI servisi                        | ✅    | `services/ai_service.py` — analyze, chat, signals, fallback |
+| 3.1.5  | AI API endpoint’leri (6 endpoint) | ✅    | POST analyze, POST chat, GET signals/models/settings, PUT   |
+| 3.1.6  | Router güncelleme                 | ✅    | `router.py` — 10. sub-router (prefix=/ai)                   |
+| 3.1.7  | AI Celery görevleri               | ✅    | `tasks/ai_tasks.py` — toplu analiz + sinyal üretimi         |
+| 3.1.8  | Frontend: AI types + API client   | ✅    | `types/ai.ts` + `lib/api/ai.ts`                             |
+| 3.1.9  | Frontend: AI hooks                | ✅    | `hooks/use-ai.ts` — 7 TanStack Query hook                   |
+| 3.1.10 | Frontend: AI sayfa (3 tab)        | ✅    | `/ai` — Analiz + Sohbet + Sinyaller                         |
+| 3.1.11 | Frontend: Ayarlar AI tabı         | ✅    | settings — 4. tab (model, temperature, max_tokens)          |
+| 3.1.12 | Frontend: Sidebar güncelleme      | ✅    | AI Analiz nav item (Sparkles ikonu)                         |
+| 3.1.13 | Backend testleri (34 test)        | ✅    | Şema (10), Client (3), Servis (7), API (14)                 |
+
+### Sprint 3.2 — AI Strateji + Sinyal Entegrasyonu (Sırada)
+
+- LLM tabanlı strateji sinyal üretimi
+- Mevcut strateji motoruyla entegrasyon
+- Zamanlanmış sinyal görevleri
+
+### Sprint 3.3 — AI Dashboard + A/B Test (Sırada)
+
+- AI performans metrikleri
+- A/B test altyapısı
+- Model karşılaştırma
 
 ---
 
@@ -216,10 +256,10 @@
 | Bileşen            | Durum | Detay                         |
 | ------------------ | ----- | ----------------------------- |
 | Backend (Docker)   | ✅    | FastAPI + Uvicorn, healthy    |
-| Frontend (Next.js) | ✅    | 16 sayfa, 0 TypeScript hatası |
+| Frontend (Next.js) | ✅    | 17 sayfa, 0 TypeScript hatası |
 | PostgreSQL 16      | ✅    | 20 tablo + TimescaleDB        |
 | Redis 7            | ✅    | Cache + Celery broker         |
-| pytest             | ✅    | 121/121, 12.23s, %58 coverage |
+| pytest             | ✅    | 155/155, 14.79s, %58 coverage |
 
 ---
 
@@ -229,18 +269,18 @@
 
 - **Modeller (11):** user, market, order, portfolio, strategy, backtest, risk, broker, notification, audit, base
 - **Şemalar (11):** common, auth, market, order, portfolio, strategy, backtest, risk, notification, analysis
-- **API v1 (9):** auth, market, orders, portfolio, strategies, backtest, risk, trends, notifications
-- **Core (4):** security, redis_client, rate_limiter, websocket_manager
-- **Servisler (9):** auth_service, market_data_service, trading_service, portfolio_service, trend_analysis_service, strategy_service, backtest_service, risk_service, notification_service
+- **API v1 (10):** auth, market, orders, portfolio, strategies, backtest, risk, trends, notifications, ai
+- **Core (5):** security, redis_client, rate_limiter, websocket_manager, openrouter_client
+- **Servisler (10):** auth_service, market_data_service, trading_service, portfolio_service, trend_analysis_service, strategy_service, backtest_service, risk_service, notification_service, ai_service
 - **Repositories (8):** user_repository, market_repository, order_repository, portfolio_repository, strategy_repository, backtest_repository, risk_repository, notification_repository
 - **İndikatörler (2):** indicators/momentum, indicators/trend (ADX, OBV, S/R, MACD crossover)
 - **Stratejiler (3):** strategies/base, strategies/ma_crossover, strategies/rsi_reversal
-- **Altyapı:** celery_app, market_tasks, backtest_tasks, notification_tasks, brokers (3), websocket/market_stream
-- **Testler (9):** test_auth (10), test_health (2), test_market (13), test_trading (20), test_trends (10), test_strategies (15), test_backtest (17), test_risk (16), test_notifications (18)
+- **Altyapı:** celery_app, market_tasks, backtest_tasks, notification_tasks, ai_tasks, brokers (3), websocket/market_stream
+- **Testler (10):** test_auth (10), test_health (2), test_market (13), test_trading (20), test_trends (10), test_strategies (15), test_backtest (17), test_risk (16), test_notifications (18), test_ai (34)
 
 ### Frontend (~50+ src/ dosya)
 
-- **Sayfalar (14):** root (redirect), login, register, dashboard, market, market/[symbol], trends, strategies, backtest, backtest/[id], portfolio, orders, settings
+- **Sayfalar (15):** root (redirect), login, register, dashboard, market, market/[symbol], trends, strategies, backtest, backtest/[id], portfolio, orders, settings, ai
 - **Dashboard \_components (6):** dashboard-stats, equity-curve, allocation-chart, recent-orders, recent-signals, risk-status
 - **Market components (6):** symbol-table, symbol-card, quote-ticker, loading-skeleton, order-form
 - **Portfolio components (1):** position-card
@@ -248,10 +288,10 @@
 - **Trend components (2):** dip-candidate-card, breakout-candidate-card
 - **Strategy components (2):** strategy-card, create-strategy-dialog
 - **Backtest components (1):** backtest-equity-curve
-- **Hooks (10):** use-websocket, use-market-data, use-portfolio, use-trading, use-trends, use-strategies, use-backtest, use-risk, use-notifications
+- **Hooks (11):** use-websocket, use-market-data, use-portfolio, use-trading, use-trends, use-strategies, use-backtest, use-risk, use-notifications, use-ai
 - **Stores (3):** auth-store, market-store, ui-store
-- **API lib (9):** client, market, orders, trading, analysis, strategies, backtest, risk, notifications
-- **Types (6):** market, order, portfolio, strategy, backtest, risk
+- **API lib (10):** client, market, orders, trading, analysis, strategies, backtest, risk, notifications, ai
+- **Types (7):** market, order, portfolio, strategy, backtest, risk, ai
 
 ---
 

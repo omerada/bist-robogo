@@ -908,18 +908,17 @@ curl http://localhost:8000/api/v1/portfolio/summary \
 
 ---
 
-### Faz 3: AI/ML Entegrasyonu (Hafta 15-22)
+### Faz 3: AI Entegrasyonu — OpenRouter LLM (Hafta 15-22)
 
-| Sprint | Görev                                                                   |
-| ------ | ----------------------------------------------------------------------- |
-| 3.1    | Feature engineering pipeline (TA-Lib, pandas-ta ile 50+ teknik özellik) |
-| 3.2    | XGBoost / LightGBM model eğitimi (yön tahmini)                          |
-| 3.3    | Optuna ile hiperparametre optimizasyonu                                 |
-| 3.4    | MLflow model versiyonlama                                               |
-| 3.5    | ONNX Runtime ile model serving                                          |
-| 3.6    | AI strateji: ML tabanlı sinyal üretimi                                  |
-| 3.7    | Model performans dashboard'u                                            |
-| 3.8    | A/B test altyapısı (eski strateji vs. ML strateji)                      |
+> **Değişiklik:** Orijinal planda lokal ML modelleri (XGBoost/LightGBM/MLflow/ONNX) planlanmıştı.
+> OpenRouter LLM API gateway kullanılarak daha pratik bir AI entegrasyonu yapılmıştır.
+> Mevcut teknik indikatörler (indicators/) LLM'e prompt context olarak beslenir.
+
+| Sprint | Görev                                                                       |
+| ------ | --------------------------------------------------------------------------- |
+| 3.1    | OpenRouter client + AI servisi + API endpoint'leri (analyze, chat, signals) |
+| 3.2    | AI strateji: LLM tabanlı sinyal üretimi + strateji entegrasyonu             |
+| 3.3    | AI dashboard sayfası, chat arayüzü, ayarlar sekmesi                         |
 
 ---
 
