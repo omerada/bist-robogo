@@ -918,7 +918,7 @@ curl http://localhost:8000/api/v1/portfolio/summary \
 | ------ | --------------------------------------------------------------------------- |
 | 3.1    | OpenRouter client + AI servisi + API endpoint'leri (analyze, chat, signals) |
 | 3.2    | AI strateji: LLM tabanlı sinyal üretimi + strateji entegrasyonu             |
-| 3.3    | AI dashboard sayfası, chat arayüzü, ayarlar sekmesi                         |
+| 3.3    | AI performans metrikleri, A/B test altyapısı, model karşılaştırma           |
 
 ---
 

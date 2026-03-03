@@ -29,6 +29,7 @@ interface StrategyCardProps {
 const STRATEGY_TYPE_LABELS: Record<string, string> = {
   ma_crossover: "MA Çapraz",
   rsi_reversal: "RSI Dönüş",
+  ai_trend: "AI Trend",
 };
 
 function formatDate(dateStr: string) {

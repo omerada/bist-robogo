@@ -121,6 +121,7 @@ export default function StrategiesPage() {
             <SelectItem value="all">Tüm Tipler</SelectItem>
             <SelectItem value="ma_crossover">MA Çapraz</SelectItem>
             <SelectItem value="rsi_reversal">RSI Dönüş</SelectItem>
+            <SelectItem value="ai_trend">AI Trend</SelectItem>
           </SelectContent>
         </Select>
 

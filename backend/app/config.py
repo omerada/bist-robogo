@@ -88,14 +88,6 @@ class Settings(BaseSettings):
     OPENROUTER_TEMPERATURE: float = 0.3  # düşük sıcaklık → tutarlı analiz
     OPENROUTER_TIMEOUT: int = 60  # saniye
 
-    # ── MLflow ──
-    MLFLOW_TRACKING_URI: str = "http://localhost:5000"
-
-    # ── MinIO / S3 ──
-    MINIO_ENDPOINT: str = "localhost:9000"
-    MINIO_ACCESS_KEY: str = "minioadmin"
-    MINIO_SECRET_KEY: SecretStr = SecretStr("minioadmin")
-
     # ── Data ──
     DEFAULT_HISTORICAL_YEARS: int = 5
     MARKET_OPEN_HOUR: int = 10  # BIST açılış 10:00

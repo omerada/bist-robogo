@@ -336,52 +336,68 @@ GET    /api/v1/strategies/{id}/performance      # Strateji performansı
 
 ---
 
-### 2.6 AI/ML Service (Yapay Zeka Servisi)
+### 2.6 AI Service — OpenRouter LLM Entegrasyonu
 
-**Sorumluluk:** Makine öğrenmesi modellerinin eğitimi, servisi ve tahmin üretimi.
+**Sorumluluk:** OpenRouter LLM API gateway üzerinden teknik analiz, sohbet ve sinyal üretimi.
 
-**Model Pipeline:**
+> **Not:** Orijinal planda lokal ML modelleri (XGBoost/LightGBM/MLflow/ONNX) planlanmıştı.
+> Pratik geliştirme hızı ve bakım kolaylığı için OpenRouter LLM API gateway tercih edilmiştir.
+> Mevcut teknik indikatörler (indicators/) LLM'e prompt context olarak beslenir.
+
+**AI Pipeline:**
 
 ```
 ┌───────────┐    ┌───────────┐    ┌───────────┐    ┌───────────┐
-│  Feature  │───▶│  Model    │───▶│  Model    │───▶│  Model    │
-│ Engineering│    │ Training  │    │ Evaluation│    │ Serving   │
+│  OHLCV +  │───▶│ Teknik    │───▶│ OpenRouter│───▶│ Yapısal   │
+│  Market   │    │ Gösterge  │    │ LLM API   │    │ JSON Yanıt│
+│  Data     │    │ Hesaplama │    │ (Chat/JSON)│    │ Parse     │
 └───────────┘    └───────────┘    └───────────┘    └───────────┘
       │                │               │               │
  ┌────▼────┐     ┌─────▼────┐   ┌─────▼────┐    ┌────▼─────┐
- │TA-Lib   │     │ Optuna   │   │ Walk-Fwd │    │ ONNX     │
- │ Pandas  │     │ MLflow   │   │ Metrics  │    │ Runtime  │
- │ Custom  │     │ PyTorch  │   │ Reports  │    │ FastAPI  │
+ │SymbolRepo│     │ RSI,MACD │   │ Gemini   │    │ Pydantic │
+ │ OHLCVRepo│     │ ADX,BB   │   │ GPT-4o   │    │ Schema   │
+ │ Pandas   │     │ OBV,S/R  │   │ Claude   │    │ Fallback │
  └─────────┘     └──────────┘   └──────────┘    └──────────┘
 ```
 
-**Feature Engineering:**
+**Gösterge Context (LLM'e Beslenen):**
 
-| Feature Grubu | Örnekler                                               |
-| ------------- | ------------------------------------------------------ |
-| Fiyat tabanlı | Returns, log returns, volatility, ATR                  |
-| Momentum      | RSI, MACD, Stochastic, CCI, Williams %R                |
-| Trend         | SMA, EMA, ADX, Parabolic SAR, Ichimoku                 |
-| Hacim         | OBV, VWAP, Volume SMA, Money Flow Index                |
-| Volatilite    | Bollinger Bands, Keltner Channel, ATR                  |
-| Custom        | Sektör momentum, endeks korelasyonu, relative strength |
+| Gösterge Grubu | Metrikler                            |
+| -------------- | ------------------------------------ |
+| Momentum       | RSI, MACD, Stochastic K/D            |
+| Trend          | SMA(20/50), EMA(12), ADX, OBV trend  |
+| Volatilite     | Bollinger Bands (upper/middle/lower) |
+| Destek/Direnç  | Support level, Resistance level      |
+| Hacim          | Volume ratio                         |
 
-**Model Türleri:**
+**Servis Özellikleri:**
 
-1. **Trend Classifier** — XGBoost/LightGBM ile kısa vadeli trend tahmini (up/down/flat)
-2. **Dip Detector** — Random Forest + teknik göstergeler ile dip olasılığı
-3. **Price Predictor** — LSTM/Transformer ile fiyat hareket tahmini
-4. **Volatility Estimator** — GARCH + ML ile volatilite tahmini
-5. **Regime Detector** — Hidden Markov Model ile piyasa rejim tespiti
+1. **Sembol Analizi** — Teknik göstergeler + LLM → BUY/SELL/HOLD önerisi
+2. **Sohbet Asistanı** — Bağlamsal finans soru-cevap (sembol context opsiyonel)
+3. **Toplu Sinyal Üretimi** — BIST-30 sembollerinde AI taraması
+4. **AI Strateji** — BaseStrategy implementasyonu, LLM tabanlı sinyal üretimi
+5. **Fallback Mekanizması** — API hatalarında gösterge bazlı basit analiz
+
+**Yapılandırma:**
+
+| Parametre                  | Varsayılan                     |
+| -------------------------- | ------------------------------ |
+| `OPENROUTER_API_KEY`       | (env)                          |
+| `OPENROUTER_BASE_URL`      | `https://openrouter.ai/api/v1` |
+| `OPENROUTER_DEFAULT_MODEL` | `google/gemini-2.5-flash`      |
+| `OPENROUTER_MAX_TOKENS`    | 4096                           |
+| `OPENROUTER_TEMPERATURE`   | 0.3                            |
+| `OPENROUTER_TIMEOUT`       | 60s                            |
 
 **API Endpoints:**
 
 ```
-POST   /api/v1/ml/predict/{model_name}           # Tahmin al
-GET    /api/v1/ml/models                          # Model listesi
-POST   /api/v1/ml/models/{model_name}/retrain     # Modeli yeniden eğit
-GET    /api/v1/ml/models/{model_name}/metrics      # Model metrikleri
-GET    /api/v1/ml/features/{symbol}               # Feature set
+POST   /api/v1/ai/analyze              # Sembol AI analizi
+POST   /api/v1/ai/chat                 # AI sohbet asistanı
+GET    /api/v1/ai/signals               # Toplu AI sinyalleri
+GET    /api/v1/ai/models                # Kullanılabilir LLM modelleri
+GET    /api/v1/ai/settings              # AI ayarları
+PUT    /api/v1/ai/settings              # AI ayarları güncelle
 ```
 
 ---

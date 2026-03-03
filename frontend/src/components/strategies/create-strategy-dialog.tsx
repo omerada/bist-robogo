@@ -42,6 +42,11 @@ const STRATEGY_TYPES = [
     label: "RSI Dönüş (Mean Reversion)",
     description: "Aşırı alım/satım bölgelerinde dönüş sinyali",
   },
+  {
+    value: "ai_trend",
+    label: "AI Trend Analizi (LLM)",
+    description: "OpenRouter LLM ile teknik gösterge bazlı AI sinyali",
+  },
 ];
 
 const INDEX_OPTIONS = [

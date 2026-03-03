@@ -33,7 +33,7 @@ celery_app.autodiscover_tasks([
     "app.tasks.strategy_tasks",
     "app.tasks.backtest_tasks",
     "app.tasks.notification_tasks",
-    "app.tasks.ml_tasks",
+    "app.tasks.ai_tasks",
     "app.tasks.maintenance_tasks",
 ])
 
@@ -54,10 +54,11 @@ celery_app.conf.beat_schedule = {
         "task": "app.tasks.notification_tasks.send_daily_risk_report",
         "schedule": crontab(hour=18, minute=45, day_of_week="1-5"),
     },
-    # Haftalık model yeniden eğitim — Pazar 02:00
-    "weekly-model-retrain": {
-        "task": "app.tasks.ml_tasks.retrain_all_models",
-        "schedule": crontab(hour=2, minute=0, day_of_week=0),
+    # Günlük AI sinyal taraması — BIST kapanış sonrası 19:00
+    "daily-ai-signals": {
+        "task": "app.tasks.ai_tasks.run_ai_signals_batch",
+        "schedule": crontab(hour=19, minute=0, day_of_week="1-5"),
+        "kwargs": {"limit": 30},
     },
     # Haftalık endeks bileşen güncelleme — Pazartesi 08:00
     "weekly-index-update": {
