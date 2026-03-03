@@ -1,6 +1,6 @@
 /**
- * AI Analiz sayfası — sembol analizi, sohbet, sinyaller.
- * Doc 10 §Faz 3 Sprint 3.1 — AI Dashboard
+ * AI Analiz sayfası — sembol analizi, sohbet, sinyaller, performans, A/B test.
+ * Doc 10 §Faz 3 Sprint 3.1 + 3.3 — AI Dashboard
  */
 "use client";
 
@@ -18,6 +18,8 @@ import {
   Zap,
   Search,
   AlertTriangle,
+  BarChart3,
+  FlaskConical,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -25,7 +27,19 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useAIAnalysis, useAIChat, useAISignals } from "@/hooks/use-ai";
+import {
+  useAIAnalysis,
+  useAIChat,
+  useAISignals,
+  useAIPerformance,
+  useExperiments,
+  useRunExperiment,
+  useDeleteExperiment,
+} from "@/hooks/use-ai";
+import { PerformanceChart } from "@/components/ai/performance-chart";
+import { AccuracyBadge } from "@/components/ai/accuracy-badge";
+import { ExperimentCard } from "@/components/ai/experiment-card";
+import { ExperimentForm } from "@/components/ai/experiment-form";
 import type {
   AIAnalysisResponse,
   AIChatMessage,
@@ -507,6 +521,162 @@ function SignalsTab() {
   );
 }
 
+// ── Performans Tab ──
+
+function PerformanceTab() {
+  const { data, isLoading, isError } = useAIPerformance({ days: 30 });
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        <Skeleton className="h-[300px] w-full" />
+        <div className="grid grid-cols-3 gap-4">
+          <Skeleton className="h-24" />
+          <Skeleton className="h-24" />
+          <Skeleton className="h-24" />
+        </div>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <Card className="border-destructive">
+        <CardContent className="p-4 flex items-center gap-3">
+          <AlertTriangle className="h-5 w-5 text-destructive" />
+          <p className="text-sm text-destructive">
+            Performans verileri yüklenemedi.
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (!data || data.models.length === 0) {
+    return (
+      <Card>
+        <CardContent className="p-8 text-center text-muted-foreground">
+          <BarChart3 className="h-8 w-8 mx-auto mb-2 opacity-50" />
+          <p>Henüz performans verisi yok.</p>
+          <p className="text-xs mt-1">
+            AI analiz kullandıkça performans metrikleri burada görünecek.
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      {/* Özet Kartlar */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <Card>
+          <CardContent className="p-4 text-center">
+            <p className="text-xs text-muted-foreground">Toplam Analiz</p>
+            <p className="text-2xl font-bold">{data.total_analyses}</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4 text-center">
+            <p className="text-xs text-muted-foreground">Genel Doğruluk</p>
+            <AccuracyBadge rate={data.overall_accuracy} />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4 text-center">
+            <p className="text-xs text-muted-foreground">Model Sayısı</p>
+            <p className="text-2xl font-bold">{data.models.length}</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Grafik */}
+      <PerformanceChart models={data.models} />
+
+      {/* Model Detayları */}
+      <div className="space-y-3">
+        {data.models.map((model) => (
+          <Card key={model.model_id}>
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="font-semibold text-sm">
+                    {model.model_id.split("/").pop()}
+                  </h4>
+                  <p className="text-xs text-muted-foreground font-mono">
+                    {model.model_id}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <AccuracyBadge
+                    rate={model.accuracy.accuracy_rate}
+                    label="Doğruluk"
+                  />
+                  <Badge variant="outline" className="text-xs">
+                    {model.total_analyses} analiz
+                  </Badge>
+                  <Badge variant="outline" className="text-xs">
+                    {model.avg_latency_ms.toFixed(0)}ms
+                  </Badge>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ── A/B Test Tab ──
+
+function ABTestTab() {
+  const { data, isLoading, refetch } = useExperiments();
+  const runMutation = useRunExperiment();
+  const deleteMutation = useDeleteExperiment();
+
+  return (
+    <div className="space-y-4">
+      {/* Form */}
+      <ExperimentForm onCreated={() => refetch()} />
+
+      {/* Deney Listesi */}
+      <div className="space-y-3">
+        <h3 className="font-semibold text-sm text-muted-foreground">
+          Deneyler
+        </h3>
+
+        {isLoading && (
+          <div className="space-y-3">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <Skeleton key={i} className="h-20 w-full" />
+            ))}
+          </div>
+        )}
+
+        {data && data.experiments.length === 0 && (
+          <Card>
+            <CardContent className="p-8 text-center text-muted-foreground">
+              <FlaskConical className="h-8 w-8 mx-auto mb-2 opacity-50" />
+              <p>Henüz deney oluşturulmadı.</p>
+            </CardContent>
+          </Card>
+        )}
+
+        {data?.experiments.map((exp) => (
+          <ExperimentCard
+            key={exp.id}
+            experiment={exp}
+            onRun={(id) => runMutation.mutate(id)}
+            onDelete={(id) => deleteMutation.mutate(id)}
+            isRunning={runMutation.isPending}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ── Ana Sayfa ──
 
 export default function AIPage() {
@@ -520,25 +690,34 @@ export default function AIPage() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight">AI Analiz</h1>
           <p className="text-muted-foreground text-sm">
-            Yapay zeka destekli piyasa analizi, sohbet ve sinyaller
+            Yapay zeka destekli piyasa analizi, sohbet, sinyaller, performans ve
+            A/B test
           </p>
         </div>
       </div>
 
       {/* Tabs */}
       <Tabs defaultValue="analysis" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="analysis" className="flex items-center gap-2">
             <Brain className="h-4 w-4" />
-            Analiz
+            <span className="hidden sm:inline">Analiz</span>
           </TabsTrigger>
           <TabsTrigger value="chat" className="flex items-center gap-2">
             <MessageSquare className="h-4 w-4" />
-            Sohbet
+            <span className="hidden sm:inline">Sohbet</span>
           </TabsTrigger>
           <TabsTrigger value="signals" className="flex items-center gap-2">
             <Zap className="h-4 w-4" />
-            Sinyaller
+            <span className="hidden sm:inline">Sinyaller</span>
+          </TabsTrigger>
+          <TabsTrigger value="performance" className="flex items-center gap-2">
+            <BarChart3 className="h-4 w-4" />
+            <span className="hidden sm:inline">Performans</span>
+          </TabsTrigger>
+          <TabsTrigger value="abtest" className="flex items-center gap-2">
+            <FlaskConical className="h-4 w-4" />
+            <span className="hidden sm:inline">A/B Test</span>
           </TabsTrigger>
         </TabsList>
 
@@ -552,6 +731,14 @@ export default function AIPage() {
 
         <TabsContent value="signals" className="mt-4">
           <SignalsTab />
+        </TabsContent>
+
+        <TabsContent value="performance" className="mt-4">
+          <PerformanceTab />
+        </TabsContent>
+
+        <TabsContent value="abtest" className="mt-4">
+          <ABTestTab />
         </TabsContent>
       </Tabs>
     </div>

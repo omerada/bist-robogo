@@ -30,7 +30,6 @@ celery_app.conf.update(
 # ── Otomatik task keşfi ──
 celery_app.autodiscover_tasks([
     "app.tasks.market_tasks",
-    "app.tasks.strategy_tasks",
     "app.tasks.backtest_tasks",
     "app.tasks.notification_tasks",
     "app.tasks.ai_tasks",
@@ -69,5 +68,10 @@ celery_app.conf.beat_schedule = {
     "weekly-db-maintenance": {
         "task": "app.tasks.maintenance_tasks.database_maintenance",
         "schedule": crontab(hour=3, minute=0, day_of_week=0),
+    },
+    # AI performans metrikleri hesaplama — Pazar 04:00
+    "weekly-ai-performance": {
+        "task": "app.tasks.ai_tasks.calculate_performance_metrics",
+        "schedule": crontab(hour=4, minute=0, day_of_week=0),
     },
 }

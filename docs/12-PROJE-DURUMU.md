@@ -1,39 +1,40 @@
 # bist-robogo — Proje Durumu
 
-> **Son Güncelleme:** Faz 3 Sprint 3.2 tamamlandı — backend 187/187 test, frontend build OK  
+> **Son Güncelleme:** Faz 3 Sprint 3.3 tamamlandı — backend 221/221 test, frontend build OK  
 > **Aktif Faz:** Faz 3 — AI Entegrasyonu (OpenRouter)  
-> **Aktif Sprint:** Sprint 3.2 tamamlandı — Sprint 3.3 AI Dashboard + A/B Test sırada
+> **Aktif Sprint:** Sprint 3.3 tamamlandı — Faz 3 tamamlandı, Faz 4 sırada
 
 ---
 
 ## Genel Durum Özeti
 
-| Faz | Ad                           | Durum           | İlerleme   |
-| --- | ---------------------------- | --------------- | ---------- |
-| 0   | Altyapı Kurulumu             | ✅ Tamamlandı   | 6/6 adım   |
-| 1   | MVP Temel Özellikler         | ✅ Tamamlandı   | 3/3 sprint |
-| 2   | Genişletme                   | ✅ Tamamlandı   | 3/3 sprint |
-| 3   | AI Entegrasyonu (OpenRouter) | 🟡 Devam Ediyor | 2/3 sprint |
-| 4   | Ölçekleme ve Prodüksiyon     | ⏳ Bekliyor     | —          |
+| Faz | Ad                           | Durum         | İlerleme   |
+| --- | ---------------------------- | ------------- | ---------- |
+| 0   | Altyapı Kurulumu             | ✅ Tamamlandı | 6/6 adım   |
+| 1   | MVP Temel Özellikler         | ✅ Tamamlandı | 3/3 sprint |
+| 2   | Genişletme                   | ✅ Tamamlandı | 3/3 sprint |
+| 3   | AI Entegrasyonu (OpenRouter) | ✅ Tamamlandı | 3/3 sprint |
+| 4   | Ölçekleme ve Prodüksiyon     | ⏳ Bekliyor   | —          |
 
 ---
 
-## Test Durumu — 187/187 ✅
+## Test Durumu — 221/221 ✅
 
-| Test Dosyası            | Test Sayısı | Durum      |
-| ----------------------- | ----------- | ---------- |
-| `test_auth.py`          | 10          | ✅         |
-| `test_health.py`        | 2           | ✅         |
-| `test_market.py`        | 13          | ✅         |
-| `test_trading.py`       | 20          | ✅         |
-| `test_trends.py`        | 10          | ✅         |
-| `test_strategies.py`    | 15          | ✅         |
-| `test_backtest.py`      | 17          | ✅         |
-| `test_notifications.py` | 18          | ✅         |
-| `test_risk.py`          | 16          | ✅         |
-| `test_ai.py`            | 34          | ✅         |
-| `test_ai_strategy.py`   | 32          | ✅         |
-| **Toplam**              | **187**     | **13.88s** |
+| Test Dosyası             | Test Sayısı | Durum      |
+| ------------------------ | ----------- | ---------- |
+| `test_auth.py`           | 10          | ✅         |
+| `test_health.py`         | 2           | ✅         |
+| `test_market.py`         | 13          | ✅         |
+| `test_trading.py`        | 20          | ✅         |
+| `test_trends.py`         | 10          | ✅         |
+| `test_strategies.py`     | 15          | ✅         |
+| `test_backtest.py`       | 17          | ✅         |
+| `test_notifications.py`  | 18          | ✅         |
+| `test_risk.py`           | 16          | ✅         |
+| `test_ai.py`             | 34          | ✅         |
+| `test_ai_strategy.py`    | 32          | ✅         |
+| `test_ai_experiments.py` | 34          | ✅         |
+| **Toplam**               | **221**     | **17.20s** |
 
 ---
 
@@ -251,11 +252,23 @@
 | 3.2.7 | Doküman tutarlılık düzeltmeleri  | ✅    | Doc 02 §2.6, Doc 10 Sprint 3.3, Doc 12 envanter sayacıları                             |
 | 3.2.8 | Backend testleri (32 test)       | ✅    | Strateji (8), Analyze (6), Fallback (3), Registry (3), Gösterge (5), Task (2), API (5) |
 
-### Sprint 3.3 — AI Dashboard + A/B Test (Sırada)
+### Sprint 3.3 — AI Dashboard + A/B Test ✅
 
-- AI performans metrikleri
-- A/B test altyapısı
-- Model karşılaştırma
+| #      | Görev                              | Durum | Not                                                                |
+| ------ | ---------------------------------- | ----- | ------------------------------------------------------------------ |
+| 3.3.1  | AI DB modelleri (3 tablo)          | ✅    | `models/ai.py` — AIExperiment, AIExperimentResult, AIAnalysisLog   |
+| 3.3.2  | AI şemaları genişletme (+12)       | ✅    | `schemas/ai.py` — experiment, performance, comparison şemaları     |
+| 3.3.3  | AI repository                      | ✅    | `repositories/ai_repository.py` — 3 repo (experiment, result, log) |
+| 3.3.4  | AI experiment servisi              | ✅    | `services/ai_experiment_service.py` — CRUD, run, performance       |
+| 3.3.5  | AI servisi loglama                 | ✅    | `services/ai_service.py` — analyze_symbol performans logu          |
+| 3.3.6  | AI API endpoint'leri (+7)          | ✅    | experiments CRUD + run, performance, compare                       |
+| 3.3.7  | Celery görevleri (+2)              | ✅    | run_ab_experiment, calculate_performance_metrics                   |
+| 3.3.8  | Celery beat schedule (+1)          | ✅    | weekly-ai-performance (Pazar 04:00)                                |
+| 3.3.9  | Frontend types/api/hooks genişleme | ✅    | +10 interface, +7 API fn, +7 hook                                  |
+| 3.3.10 | Frontend AI bileşenleri (6 yeni)   | ✅    | accuracy-badge, performance-chart, model-comparison-card, vb.      |
+| 3.3.11 | Frontend AI sayfa (3→5 tab)        | ✅    | + Performans tab + A/B Test tab                                    |
+| 3.3.12 | Backend testleri (34 test)         | ✅    | Şema (16), Model (6), Experiment API (7), Performance API (5)      |
+| 3.3.13 | maintenance_tasks oluşturma        | ✅    | `tasks/maintenance_tasks.py` — portfolio snapshot + DB bakım       |
 
 ---
 
@@ -267,7 +280,7 @@
 | Frontend (Next.js) | ✅    | 17 sayfa, 0 TypeScript hatası |
 | PostgreSQL 16      | ✅    | 20 tablo + TimescaleDB        |
 | Redis 7            | ✅    | Cache + Celery broker         |
-| pytest             | ✅    | 187/187, 13.88s, %46 coverage |
+| pytest             | ✅    | 221/221, 17.20s               |
 
 ---
 
@@ -275,23 +288,25 @@
 
 ### Backend (~70+ kaynak dosya)
 
-- **Modeller (11):** user, market, order, portfolio, strategy, backtest, risk, broker, notification, audit, base
-- **Şemalar (12):** common, auth, market, order, portfolio, strategy, backtest, risk, notification, analysis, ai
+- **Modeller (12):** user, market, order, portfolio, strategy, backtest, risk, broker, notification, audit, base, ai
+- **Şemalar (11):** common, auth, market, order, portfolio, strategy, backtest, risk, notification, analysis, ai
 - **API v1 (10):** auth, market, orders, portfolio, strategies, backtest, risk, trends, notifications, ai
 - **Core (5):** security, redis_client, rate_limiter, websocket_manager, openrouter_client
-- **Servisler (10):** auth_service, market_data_service, trading_service, portfolio_service, trend_analysis_service, strategy_service, backtest_service, risk_service, notification_service, ai_service
-- **Repositories (8):** user_repository, market_repository, order_repository, portfolio_repository, strategy_repository, backtest_repository, risk_repository, notification_repository
+- **Servisler (11):** auth_service, market_data_service, trading_service, portfolio_service, trend_analysis_service, strategy_service, backtest_service, risk_service, notification_service, ai_service, ai_experiment_service
+- **Repositories (9):** user_repository, market_repository, order_repository, portfolio_repository, strategy_repository, backtest_repository, risk_repository, notification_repository, ai_repository
 - **İndikatörler (2):** indicators/momentum, indicators/trend (ADX, OBV, S/R, MACD crossover)
 - **Stratejiler (4):** strategies/base, strategies/ai_strategy, strategies/ma_crossover, strategies/rsi_reversal
-- **Altyapı:** celery_app, market_tasks, backtest_tasks, notification_tasks, ai_tasks, brokers (3), websocket/market_stream
-- **Testler (11):** test_auth (10), test_health (2), test_market (13), test_trading (20), test_trends (10), test_strategies (15), test_backtest (17), test_risk (16), test_notifications (18), test_ai (34), test_ai_strategy (32)
+- **Altyapı:** celery_app, market_tasks, backtest_tasks, notification_tasks, ai_tasks, maintenance_tasks, brokers (3), websocket/market_stream
+- **Testler (12):** test_auth (10), test_health (2), test_market (13), test_trading (20), test_trends (10), test_strategies (15), test_backtest (17), test_risk (16), test_notifications (18), test_ai (34), test_ai_strategy (32), test_ai_experiments (34)
 
 ### Frontend (~50+ src/ dosya)
 
-- **Sayfalar (15):** root (redirect), login, register, dashboard, market, market/[symbol], trends, strategies, backtest, backtest/[id], portfolio, orders, settings, ai
+- **Sayfalar (14):** root (redirect), login, register, dashboard, market, market/[symbol], trends, strategies, backtest, backtest/[id], portfolio, orders, settings, ai
 - **Dashboard \_components (6):** dashboard-stats, equity-curve, allocation-chart, recent-orders, recent-signals, risk-status
-- **Market components (6):** symbol-table, symbol-card, quote-ticker, loading-skeleton, order-form
+- **Market components (4):** symbol-table, symbol-card, quote-ticker, order-form
+- **Shared components (1):** loading-skeleton
 - **Portfolio components (1):** position-card
+- **AI components (6):** accuracy-badge, performance-chart, model-comparison-card, experiment-card, experiment-form, experiment-results
 - **Bileşenler (7+):** stat-card, candlestick-chart, auth-guard, sidebar, header, theme-provider, query-provider
 - **Trend components (2):** dip-candidate-card, breakout-candidate-card
 - **Strategy components (2):** strategy-card, create-strategy-dialog

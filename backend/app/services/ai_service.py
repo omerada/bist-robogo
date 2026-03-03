@@ -1,8 +1,9 @@
-# Source: Doc 10 §Faz 3 Sprint 3.1 — AI iş mantığı katmanı
+# Source: Doc 10 §Faz 3 Sprint 3.1 + 3.3 — AI iş mantığı katmanı
 """AI servisi — OpenRouter LLM ile teknik analiz, sohbet, sinyal üretimi."""
 
 import json
 import logging
+import time
 from datetime import datetime
 
 import pandas as pd
@@ -10,6 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.openrouter_client import OpenRouterClient, OpenRouterError
 from app.indicators.trend import compute_full_indicators
+from app.repositories.ai_repository import AIAnalysisLogRepository
 from app.repositories.market_repository import OHLCVRepository, SymbolRepository
 from app.schemas.ai import (
     AIAnalysisResponse,
@@ -88,6 +90,7 @@ class AIService:
         self.client = client or OpenRouterClient()
         self.symbol_repo = SymbolRepository(db)
         self.ohlcv_repo = OHLCVRepository(db)
+        self.log_repo = AIAnalysisLogRepository(db)
 
     # ── Sembol Analizi ──
 
@@ -96,6 +99,7 @@ class AIService:
         symbol: str,
         period: str = "daily",
         include_indicators: bool = True,
+        user_id=None,
     ) -> AIAnalysisResponse:
         """Bir sembolün teknik verilerini toplayıp AI'dan analiz ister.
 
@@ -103,7 +107,10 @@ class AIService:
         2. Teknik göstergeleri hesapla
         3. LLM'e gönder
         4. Yapılandırılmış yanıt dön
+        5. Performans logla
         """
+        start = time.monotonic()
+
         # 1. Gösterge verisi topla
         indicators_data = {}
         if include_indicators:
@@ -127,13 +134,36 @@ class AIService:
             # Fallback: Gösterge bazlı basit analiz
             result = self._fallback_analysis(symbol, indicators_data)
 
+        latency_ms = int((time.monotonic() - start) * 1000)
+
         # 5. Yanıtı şemaya dönüştür
         indicators_summary = AIIndicatorSummary(**indicators_data) if indicators_data else None
 
+        action = AISignalAction(result.get("action", "hold"))
+        confidence = AIConfidence(result.get("confidence", "low"))
+
+        # 6. Performans logla (fire-and-forget, hata durumunda devam et)
+        try:
+            score = float(result.get("score", 0.5))
+            await self.log_repo.log_analysis(
+                symbol=symbol,
+                model_id=self.client.model,
+                action=action.value,
+                confidence=confidence.value,
+                score=score,
+                latency_ms=latency_ms,
+                token_usage=result.get("usage", {}),
+                user_id=user_id,
+                metadata={"period": period, "include_indicators": include_indicators},
+            )
+            await self.db.commit()
+        except Exception as exc:
+            logger.warning("Analiz log kaydı başarısız: %s", exc)
+
         return AIAnalysisResponse(
             symbol=symbol,
-            action=AISignalAction(result.get("action", "hold")),
-            confidence=AIConfidence(result.get("confidence", "low")),
+            action=action,
+            confidence=confidence,
             summary=result.get("summary", "Analiz yapılamadı"),
             reasoning=result.get("reasoning", ""),
             key_factors=result.get("key_factors", []),

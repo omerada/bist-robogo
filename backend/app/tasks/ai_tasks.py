@@ -1,5 +1,5 @@
-# Source: Doc 10 §Faz 3 Sprint 3.1+3.2 — AI Celery görevleri
-"""AI analiz, sinyal üretim ve strateji çalıştırma Celery görevleri."""
+# Source: Doc 10 §Faz 3 Sprint 3.1+3.2+3.3 — AI Celery görevleri
+"""AI analiz, sinyal üretim, strateji çalıştırma, deney ve performans Celery görevleri."""
 
 import asyncio
 import logging
@@ -224,4 +224,126 @@ def run_ai_strategy_batch(self, symbols: list[str] | None = None, limit: int = 3
 
     except Exception as exc:
         logger.error("ai_strategy_batch_failed", error=str(exc))
+        raise self.retry(exc=exc)
+
+
+@celery_app.task(bind=True, max_retries=2, default_retry_delay=120)
+def run_ab_experiment(self, experiment_id: str, user_id: str):
+    """A/B test deneyini asenkron çalıştır.
+
+    API'den tetiklenen deneyi arka planda işler.
+    """
+    try:
+        from uuid import UUID as _UUID
+
+        async def _run():
+            from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+
+            from app.config import get_settings
+            from app.services.ai_experiment_service import AIExperimentService
+
+            settings = get_settings()
+            engine = create_async_engine(settings.DATABASE_URL, echo=False)
+            async with AsyncSession(engine) as db:
+                service = AIExperimentService(db)
+                result = await service.run_experiment(
+                    _UUID(experiment_id), _UUID(user_id)
+                )
+                return result.model_dump() if result else None
+
+        loop = asyncio.new_event_loop()
+        try:
+            result = loop.run_until_complete(_run())
+        finally:
+            loop.close()
+
+        logger.info(
+            "ab_experiment_completed",
+            experiment_id=experiment_id,
+            status=result.get("status") if result else "not_found",
+        )
+        return result
+
+    except Exception as exc:
+        logger.error(
+            "ab_experiment_failed", experiment_id=experiment_id, error=str(exc)
+        )
+        raise self.retry(exc=exc)
+
+
+@celery_app.task(bind=True, max_retries=1, default_retry_delay=300)
+def calculate_performance_metrics(self):
+    """Haftalık AI performans metrikleri hesaplama.
+
+    ai_analysis_logs tablosundaki kayıtları tarar,
+    gerçek fiyat hareketleri ile karşılaştırır ve is_correct alanını günceller.
+    """
+    try:
+
+        async def _calculate():
+            from sqlalchemy import text, update
+            from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+
+            from app.config import get_settings
+            from app.models.ai import AIAnalysisLog
+
+            settings = get_settings()
+            engine = create_async_engine(settings.DATABASE_URL, echo=False)
+            async with AsyncSession(engine) as db:
+                # 1. Henüz değerlendirilmemiş logları bul
+                #    Son 7 gün içindeki, is_correct=NULL olanlar
+                result = await db.execute(
+                    text("""
+                        UPDATE ai_analysis_logs AS cal
+                        SET
+                            actual_price_change = sub.price_change,
+                            is_correct = CASE
+                                WHEN cal.action = 'buy' AND sub.price_change > 0 THEN TRUE
+                                WHEN cal.action = 'sell' AND sub.price_change < 0 THEN TRUE
+                                WHEN cal.action = 'hold' AND ABS(sub.price_change) < 2.0 THEN TRUE
+                                ELSE FALSE
+                            END
+                        FROM (
+                            SELECT
+                                cal2.id AS log_id,
+                                COALESCE(
+                                    ((latest.close - first.close) / NULLIF(first.close, 0)) * 100,
+                                    0
+                                ) AS price_change
+                            FROM ai_analysis_logs cal2
+                            JOIN symbols s ON s.ticker = cal2.symbol
+                            LEFT JOIN LATERAL (
+                                SELECT close FROM ohlcv_data
+                                WHERE symbol_id = s.id AND time >= cal2.created_at
+                                ORDER BY time ASC LIMIT 1
+                            ) first ON TRUE
+                            LEFT JOIN LATERAL (
+                                SELECT close FROM ohlcv_data
+                                WHERE symbol_id = s.id AND time >= cal2.created_at + INTERVAL '3 days'
+                                ORDER BY time ASC LIMIT 1
+                            ) latest ON TRUE
+                            WHERE cal2.is_correct IS NULL
+                                AND cal2.created_at < NOW() - INTERVAL '3 days'
+                        ) sub
+                        WHERE cal.id = sub.log_id
+                    """)
+                )
+                updated = result.rowcount
+                await db.commit()
+
+                logger.info(
+                    "performance_metrics_calculated", updated_logs=updated
+                )
+                return {"updated_logs": updated}
+
+        loop = asyncio.new_event_loop()
+        try:
+            result = loop.run_until_complete(_calculate())
+        finally:
+            loop.close()
+
+        return result
+
+    except Exception as exc:
+        logger.error("performance_metrics_failed", error=str(exc))
         raise self.retry(exc=exc)

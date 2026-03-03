@@ -1,6 +1,7 @@
 # Source: Doc 07 §4.3 — ORM model re-export
 """ORM model re-export. Alembic ve uygulama bu dosyayı import eder."""
 
+from app.models.ai import AIAnalysisLog, AIExperiment, AIExperimentResult
 from app.models.audit import AuditLog
 from app.models.backtest import BacktestRun, BacktestTrade
 from app.models.base import TimestampMixin, UUIDMixin
@@ -35,4 +36,7 @@ __all__ = [
     "BacktestTrade",
     "Notification",
     "AuditLog",
+    "AIExperiment",
+    "AIExperimentResult",
+    "AIAnalysisLog",
 ]
