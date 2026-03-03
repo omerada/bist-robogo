@@ -13,16 +13,18 @@ interface PositionCardProps {
   position: Position;
 }
 
-function formatCurrency(v: number) {
+function formatCurrency(v: number | string) {
   return new Intl.NumberFormat("tr-TR", {
     style: "currency",
     currency: "TRY",
     minimumFractionDigits: 2,
-  }).format(v);
+  }).format(Number(v) || 0);
 }
 
 export function PositionCard({ position }: PositionCardProps) {
-  const isProfit = position.unrealized_pnl >= 0;
+  const unrealizedPnl = Number(position.unrealized_pnl) || 0;
+  const unrealizedPnlPct = Number(position.unrealized_pnl_pct) || 0;
+  const isProfit = unrealizedPnl >= 0;
 
   return (
     <Card>
@@ -49,8 +51,8 @@ export function PositionCard({ position }: PositionCardProps) {
           ) : (
             <TrendingDown className="h-4 w-4" />
           )}
-          {position.unrealized_pnl_pct >= 0 ? "+" : ""}
-          {position.unrealized_pnl_pct.toFixed(2)}%
+          {unrealizedPnlPct >= 0 ? "+" : ""}
+          {unrealizedPnlPct.toFixed(2)}%
         </div>
       </CardHeader>
 

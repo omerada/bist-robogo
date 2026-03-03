@@ -24,12 +24,12 @@ import { usePortfolioSummary, usePositions } from "@/hooks/use-trading";
 import { PositionCard } from "@/components/portfolio/position-card";
 import { cn } from "@/lib/utils";
 
-function formatCurrency(v: number) {
+function formatCurrency(v: number | string) {
   return new Intl.NumberFormat("tr-TR", {
     style: "currency",
     currency: "TRY",
     minimumFractionDigits: 2,
-  }).format(v);
+  }).format(Number(v) || 0);
 }
 
 function SummaryCard({
@@ -112,9 +112,11 @@ export default function PortfolioPage() {
           />
           <SummaryCard
             label="Toplam K/Z"
-            value={`${summary.total_pnl >= 0 ? "+" : ""}${formatCurrency(summary.total_pnl)}`}
-            Icon={summary.total_pnl >= 0 ? ArrowUpRight : ArrowDownRight}
-            variant={summary.total_pnl >= 0 ? "positive" : "negative"}
+            value={`${Number(summary.total_pnl) >= 0 ? "+" : ""}${formatCurrency(summary.total_pnl)}`}
+            Icon={
+              Number(summary.total_pnl) >= 0 ? ArrowUpRight : ArrowDownRight
+            }
+            variant={Number(summary.total_pnl) >= 0 ? "positive" : "negative"}
           />
         </div>
       ) : null}
@@ -124,9 +126,9 @@ export default function PortfolioPage() {
         <div className="grid gap-4 md:grid-cols-3">
           <SummaryCard
             label="Günlük K/Z"
-            value={`${summary.daily_pnl >= 0 ? "+" : ""}${formatCurrency(summary.daily_pnl)} (${(summary.daily_pnl_pct ?? 0) >= 0 ? "+" : ""}${(summary.daily_pnl_pct ?? 0).toFixed(2)}%)`}
+            value={`${Number(summary.daily_pnl) >= 0 ? "+" : ""}${formatCurrency(summary.daily_pnl)} (${Number(summary.daily_pnl_pct ?? 0) >= 0 ? "+" : ""}${Number(summary.daily_pnl_pct ?? 0).toFixed(2)}%)`}
             Icon={TrendingUp}
-            variant={summary.daily_pnl >= 0 ? "positive" : "negative"}
+            variant={Number(summary.daily_pnl) >= 0 ? "positive" : "negative"}
           />
           <SummaryCard
             label="Açık Pozisyon"
@@ -135,10 +137,10 @@ export default function PortfolioPage() {
           />
           <SummaryCard
             label="Toplam K/Z %"
-            value={`${(summary.total_pnl_pct ?? 0) >= 0 ? "+" : ""}${(summary.total_pnl_pct ?? 0).toFixed(2)}%`}
+            value={`${Number(summary.total_pnl_pct ?? 0) >= 0 ? "+" : ""}${Number(summary.total_pnl_pct ?? 0).toFixed(2)}%`}
             Icon={TrendingUp}
             variant={
-              (summary.total_pnl_pct ?? 0) >= 0 ? "positive" : "negative"
+              Number(summary.total_pnl_pct ?? 0) >= 0 ? "positive" : "negative"
             }
           />
         </div>

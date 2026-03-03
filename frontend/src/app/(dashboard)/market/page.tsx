@@ -1,13 +1,16 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Search } from "lucide-react";
+import { Search, Radio } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
 import { SymbolTable } from "@/components/market/symbol-table";
 import { MarketPageSkeleton } from "@/components/shared/loading-skeleton";
 import { useSymbols, useIndices } from "@/hooks/use-market-data";
+import { useLivePrices } from "@/hooks/use-dashboard";
 import { useMarketStore } from "@/stores/market-store";
+import type { LivePriceData } from "@/lib/api/dashboard";
 
 const DEFAULT_INDICES = [
   { code: "ALL", name: "Tümü" },
@@ -28,6 +31,17 @@ export default function MarketPage() {
     per_page: 100,
   });
 
+  // Canlı fiyat verisi (Redis cache'ten)
+  const { data: livePricesList } = useLivePrices();
+  const livePricesMap = useMemo(() => {
+    if (!livePricesList) return {};
+    const map: Record<string, LivePriceData> = {};
+    for (const lp of livePricesList) {
+      map[lp.symbol] = lp;
+    }
+    return map;
+  }, [livePricesList]);
+
   const indices = useMemo(() => {
     if (!indicesData) return DEFAULT_INDICES;
     return [
@@ -46,11 +60,22 @@ export default function MarketPage() {
             BIST sembol listesi ve fiyat bilgileri
           </p>
         </div>
-        {data && (
-          <span className="text-sm text-muted-foreground">
-            {data.meta.total} sembol
-          </span>
-        )}
+        <div className="flex items-center gap-2">
+          {livePricesList && livePricesList.length > 0 && (
+            <Badge
+              variant="outline"
+              className="gap-1 text-emerald-600 border-emerald-500/30"
+            >
+              <Radio className="h-3 w-3 animate-pulse" />
+              Canlı
+            </Badge>
+          )}
+          {data && (
+            <span className="text-sm text-muted-foreground">
+              {data.meta.total} sembol
+            </span>
+          )}
+        </div>
       </div>
 
       {/* Endeks filtreleri */}
@@ -82,7 +107,11 @@ export default function MarketPage() {
       {isLoading ? (
         <MarketPageSkeleton />
       ) : (
-        <SymbolTable symbols={data?.symbols ?? []} isLoading={isLoading} />
+        <SymbolTable
+          symbols={data?.symbols ?? []}
+          isLoading={isLoading}
+          livePrices={livePricesMap}
+        />
       )}
     </div>
   );

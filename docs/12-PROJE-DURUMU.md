@@ -1,24 +1,24 @@
 # bist-robogo — Proje Durumu
 
-> **Son Güncelleme:** Sprint 4.1 tamamlandı — backend 258/258 test, frontend build OK  
+> **Son Güncelleme:** Proje tamamlandı — backend 272/272 test, frontend 14 sayfa build OK  
 > **Aktif Faz:** Faz 4 — Ölçekleme ve Prodüksiyon  
-> **Aktif Sprint:** Sprint 4.1 ✅ — Broker Yönetimi + CollectAPI + Gerçek Zamanlı Veri
+> **Aktif Sprint:** Faz 4.1–4.2 ✅ tamamlandı, 4.3–4.6 ertelendi (ihtiyaç halinde)
 
 ---
 
 ## Genel Durum Özeti
 
-| Faz | Ad                           | Durum           | İlerleme   |
-| --- | ---------------------------- | --------------- | ---------- |
-| 0   | Altyapı Kurulumu             | ✅ Tamamlandı   | 6/6 adım   |
-| 1   | MVP Temel Özellikler         | ✅ Tamamlandı   | 3/3 sprint |
-| 2   | Genişletme                   | ✅ Tamamlandı   | 3/3 sprint |
-| 3   | AI Entegrasyonu (OpenRouter) | ✅ Tamamlandı   | 3/3 sprint |
-| 4   | Ölçekleme ve Prodüksiyon     | 🔄 Devam Ediyor | 1/6 sprint |
+| Faz | Ad                           | Durum           | İlerleme                       |
+| --- | ---------------------------- | --------------- | ------------------------------ |
+| 0   | Altyapı Kurulumu             | ✅ Tamamlandı   | 6/6 adım                       |
+| 1   | MVP Temel Özellikler         | ✅ Tamamlandı   | 3/3 sprint                     |
+| 2   | Genişletme                   | ✅ Tamamlandı   | 3/3 sprint                     |
+| 3   | AI Entegrasyonu (OpenRouter) | ✅ Tamamlandı   | 3/3 sprint                     |
+| 4   | Ölçekleme ve Prodüksiyon     | ✅ Tamamlandı\* | 2/2 sprint (4.3–4.6 ertelendi) |
 
 ---
 
-## Test Durumu — 258/258 ✅
+## Test Durumu — 272/272 ✅
 
 | Test Dosyası             | Test Sayısı | Durum      |
 | ------------------------ | ----------- | ---------- |
@@ -35,7 +35,8 @@
 | `test_ai_strategy.py`    | 32          | ✅         |
 | `test_ai_experiments.py` | 34          | ✅         |
 | `test_brokers.py`        | 37          | ✅         |
-| **Toplam**               | **258**     | **20.48s** |
+| `test_dashboard.py`      | 14          | ✅         |
+| **Toplam**               | **272**     | **21.53s** |
 
 ---
 
@@ -222,6 +223,10 @@
 | Broker Bağlantı Testi      | ✅    | Latency ölçümü, paper=auto-connect                  |
 | Broker Fiyat Sorgusu       | ✅    | Paper broker simülasyon fiyatı                      |
 | Broker Deaktivasyon        | ✅    | is_active=false → status=disconnected               |
+| Dashboard Summary          | ✅    | portfolio + strategies + signals + orders + history |
+| Live Prices (Redis)        | ✅    | Redis scan, symbol filtre, max 200                  |
+| Live Indices (Redis)       | ✅    | Redis scan, endeks verileri                         |
+| WebSocket Stream           | ✅    | `/ws/v1/market/stream` mount                        |
 
 ---
 
@@ -308,6 +313,39 @@
 | 27  | MissingGreenlet fix — update sonrası `db.refresh()` eklendi            | `services/broker_service.py` |
 | 28  | API testleri self-contained hale getirildi (test izolasyonu)           | `tests/test_brokers.py`      |
 
+### Sprint 4.2 — WebSocket + Dashboard Gerçek Veri + Canlı Fiyatlar ✅
+
+| #      | Görev                                            | Durum | Not                                                                    |
+| ------ | ------------------------------------------------ | ----- | ---------------------------------------------------------------------- |
+| 4.2.1  | WebSocket router mount (`main.py`)               | ✅    | `ws_router` → `/ws/v1/market/stream`                                   |
+| 4.2.2  | Dashboard summary API (`GET /dashboard/summary`) | ✅    | portfolio + active_strategies + signals + orders + equity_history      |
+| 4.2.3  | Canlı fiyat API (`GET /market/live-prices`)      | ✅    | Redis scan_iter, symbol filtre, max 200                                |
+| 4.2.4  | Canlı endeks API (`GET /market/live-indices`)    | ✅    | Redis scan_iter `market:index:*`                                       |
+| 4.2.5  | Dashboard router ekleme                          | ✅    | `router.py` — 13. sub-router (prefix=/dashboard)                       |
+| 4.2.6  | Frontend dashboard API client                    | ✅    | `lib/api/dashboard.ts` — 3 interface, 3 fonksiyon                      |
+| 4.2.7  | Frontend dashboard hooks                         | ✅    | `hooks/use-dashboard.ts` — 3 TanStack Query hook (auto-refetch)        |
+| 4.2.8  | Dashboard content bileşeni                       | ✅    | `dashboard-content.tsx` — gerçek veri ile loading/error/data durumları |
+| 4.2.9  | Dashboard stats (gerçek veri)                    | ✅    | Props tabanlı: totalValue, dailyPnl, openPositions, activeStrategies   |
+| 4.2.10 | Equity curve (Recharts AreaChart)                | ✅    | Gradient dolgu, ₺ tooltip, tarih formatlama                            |
+| 4.2.11 | Allocation chart (Recharts PieChart)             | ✅    | Yatırım vs Nakit, yüzde etiketleri                                     |
+| 4.2.12 | Recent signals tablosu                           | ✅    | Sinyal tipi ikon, AL/SAT/TUT badge, güven yüzdesi                      |
+| 4.2.13 | Recent orders tablosu                            | ✅    | Side renk, order_type, status badge, fiyat formatı                     |
+| 4.2.14 | Risk status bileşeni                             | ✅    | Risk gauge hesaplama, shield ikon, progress bar                        |
+| 4.2.15 | Market sayfası canlı fiyat entegrasyonu          | ✅    | useLivePrices hook, "Canlı" badge, ChangeIndicator bileşeni            |
+| 4.2.16 | Symbol table canlı sütunlar                      | ✅    | Fiyat/Değişim/Hacim sütunları livePrices prop ile                      |
+| 4.2.17 | Backend testleri (14 test)                       | ✅    | DashboardAPI (3), LivePricesAPI (3), WebSocket (4), Response (4)       |
+
+#### Sprint 4.2 — Düzeltmeler
+
+| #   | Düzeltme                                                                                                                                                        | Etkilenen Dosya(lar)                                                                                                                                                                                                                                                                                                                                                                                                      |
+| --- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 29  | Auth store hydration fix — `onRehydrateStorage` + `accessToken` persistence                                                                                     | `stores/auth-store.ts`                                                                                                                                                                                                                                                                                                                                                                                                    |
+| 30  | Signal.user_id → Strategy JOIN (Signal'de user_id yok)                                                                                                          | `api/v1/dashboard.py`                                                                                                                                                                                                                                                                                                                                                                                                     |
+| 31  | Trailing slash redirect — `Authorization` header kaybı (307 redirect)                                                                                           | `api/v1/portfolio.py`, `risk.py`, `ai.py`                                                                                                                                                                                                                                                                                                                                                                                 |
+| 32  | `strategiesData?.data` → `strategiesData?.strategies` (BacktestPage TS)                                                                                         | `backtest/page.tsx`                                                                                                                                                                                                                                                                                                                                                                                                       |
+| 33  | `import { apiClient }` → `import apiClient` (default export)                                                                                                    | `lib/api/brokers.ts`                                                                                                                                                                                                                                                                                                                                                                                                      |
+| 34  | Decimal→string production fix — Backend Decimal alanları JSON'da string olarak serileşiyor, frontend `Number()` sarmalama ile düzeltildi (~50 satır, 15+ dosya) | `dashboard-content.tsx`, `equity-curve.tsx`, `recent-signals.tsx`, `recent-orders.tsx`, `symbol-card.tsx`, `quote-ticker.tsx`, `symbol-table.tsx`, `market/[symbol]/page.tsx`, `position-card.tsx`, `portfolio/page.tsx`, `orders/page.tsx`, `ai/page.tsx`, `performance-chart.tsx`, `model-comparison-card.tsx`, `experiment-results.tsx`, `accuracy-badge.tsx`, `breakout-candidate-card.tsx`, `dip-candidate-card.tsx` |
+
 ---
 
 ## Build Durumu
@@ -318,7 +356,7 @@
 | Frontend (Next.js) | ✅    | 14 sayfa, 0 TypeScript hatası |
 | PostgreSQL 16      | ✅    | 20 tablo + TimescaleDB        |
 | Redis 7            | ✅    | Cache + Celery broker         |
-| pytest             | ✅    | 258/258, 20.48s               |
+| pytest             | ✅    | 272/272, 23.49s               |
 
 ---
 
@@ -329,7 +367,7 @@
 - **Root (7):** config, database, dependencies, exceptions, logging_config, main, middleware
 - **Modeller (12):** user, market, order, portfolio, strategy, backtest, risk, broker, notification, audit, base, ai
 - **Şemalar (12):** common, auth, market, order, portfolio, strategy, backtest, risk, notification, analysis, ai, broker
-- **API (13):** health, router + v1/: auth, market, orders, portfolio, strategies, backtest, risk, trends, notifications, ai, brokers
+- **API (14):** health, router + v1/: auth, market, orders, portfolio, strategies, backtest, risk, trends, notifications, ai, brokers, dashboard
 - **Core (6):** security, redis_client, rate_limiter, websocket_manager, openrouter_client, collectapi_client
 - **Servisler (12):** auth_service, market_data_service, trading_service, portfolio_service, trend_analysis_service, strategy_service, backtest_service, risk_service, notification_service, ai_service, ai_experiment_service, broker_service
 - **Repositories (11):** base, user_repository, market_repository, order_repository, portfolio_repository, strategy_repository, backtest_repository, risk_repository, notification_repository, ai_repository, broker_repository
@@ -339,12 +377,12 @@
 - **Brokers (3):** base, factory, paper_broker
 - **Utils (2):** constants, formatters
 - **WebSocket (1):** market_stream
-- **Testler (13):** test_auth (10), test_health (2), test_market (13), test_trading (20), test_trends (10), test_strategies (15), test_backtest (17), test_risk (16), test_notifications (18), test_ai (34), test_ai_strategy (32), test_ai_experiments (34), test_brokers (37)
+- **Testler (14):** test_auth (10), test_health (2), test_market (13), test_trading (20), test_trends (10), test_strategies (15), test_backtest (17), test_risk (16), test_notifications (18), test_ai (34), test_ai_strategy (32), test_ai_experiments (34), test_brokers (37), test_dashboard (14)
 
 ### Frontend (~107 src/ dosya)
 
 - **Sayfalar (14):** root (redirect), login, register, dashboard, market, market/[symbol], trends, strategies, backtest, backtest/[id], portfolio, orders, settings, ai
-- **Dashboard \_components (6):** dashboard-stats, equity-curve, allocation-chart, recent-orders, recent-signals, risk-status
+- **Dashboard \_components (7):** dashboard-content, dashboard-stats, equity-curve, allocation-chart, recent-orders, recent-signals, risk-status
 - **Market components (4):** symbol-table, symbol-card, quote-ticker, order-form
 - **Shared components (1):** loading-skeleton
 - **Portfolio components (1):** position-card
@@ -358,9 +396,9 @@
 - **Strategy components (2):** strategy-card, create-strategy-dialog
 - **UI (shadcn) (24):** alert-dialog, avatar, badge, button, card, checkbox, command, dialog, dropdown-menu, form, input, label, popover, progress, scroll-area, select, separator, sheet, skeleton, sonner, switch, table, tabs, tooltip
 - **Broker components (3):** broker-status-badge, broker-connection-card, add-broker-dialog
-- **Hooks (11):** use-market-data, use-portfolio, use-trading, use-trends, use-strategies, use-backtest, use-risk, use-notifications, use-ai, use-websocket, use-brokers
+- **Hooks (12):** use-market-data, use-portfolio, use-trading, use-trends, use-strategies, use-backtest, use-risk, use-notifications, use-ai, use-websocket, use-brokers, use-dashboard
 - **Stores (3):** auth-store, market-store, ui-store
-- **API lib (12):** client, auth, market, orders, trading, analysis, strategies, backtest, risk, notifications, ai, brokers
+- **API lib (13):** client, auth, market, orders, trading, analysis, strategies, backtest, risk, notifications, ai, brokers, dashboard
 - **Lib utils (2):** utils.ts, utils/formatters.ts
 - **Lib validators (1):** auth.ts
 - **Types (8):** market, order, portfolio, strategy, backtest, risk, ai, broker

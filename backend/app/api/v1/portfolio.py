@@ -18,6 +18,7 @@ def get_portfolio_service(db: AsyncSession = Depends(get_db)) -> PortfolioServic
 
 
 @router.get("/summary", response_model=APIResponse)
+@router.get("/summary/", response_model=APIResponse, include_in_schema=False)
 async def get_portfolio_summary(
     user: User = Depends(get_current_user),
     service: PortfolioService = Depends(get_portfolio_service),
@@ -28,6 +29,7 @@ async def get_portfolio_summary(
 
 
 @router.get("/positions", response_model=APIResponse)
+@router.get("/positions/", response_model=APIResponse, include_in_schema=False)
 async def list_positions(
     user: User = Depends(get_current_user),
     service: PortfolioService = Depends(get_portfolio_service),
@@ -38,6 +40,7 @@ async def list_positions(
 
 
 @router.get("/history", response_model=APIResponse)
+@router.get("/history/", response_model=APIResponse, include_in_schema=False)
 async def get_portfolio_history(
     limit: int = Query(30, ge=1, le=365),
     user: User = Depends(get_current_user),

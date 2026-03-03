@@ -19,6 +19,7 @@ router = APIRouter()
 
 
 @router.get("/status")
+@router.get("/status/", include_in_schema=False)
 async def get_risk_status(
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
@@ -30,6 +31,7 @@ async def get_risk_status(
 
 
 @router.get("/rules")
+@router.get("/rules/", include_in_schema=False)
 async def list_risk_rules(
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
@@ -61,6 +63,7 @@ async def update_risk_rule(
 
 
 @router.get("/events")
+@router.get("/events/", include_in_schema=False)
 async def list_risk_events(
     event_type: str | None = None,
     page: int = 1,

@@ -34,9 +34,9 @@ export function PerformanceChart({ models }: PerformanceChartProps) {
 
   const chartData = models.map((m) => ({
     model: m.model_id.split("/").pop() || m.model_id,
-    "Doğruluk (%)": +(m.accuracy.accuracy_rate * 100).toFixed(1),
-    "Ort. Skor": +(m.avg_score * 100).toFixed(1),
-    "Ort. Gecikme (ms)": +m.avg_latency_ms.toFixed(0),
+    "Doğruluk (%)": +(Number(m.accuracy.accuracy_rate) * 100).toFixed(1),
+    "Ort. Skor": +(Number(m.avg_score) * 100).toFixed(1),
+    "Ort. Gecikme (ms)": +Number(m.avg_latency_ms).toFixed(0),
   }));
 
   return (

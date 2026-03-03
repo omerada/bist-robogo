@@ -207,7 +207,7 @@ function AnalysisTab() {
                 <div className="bg-muted/50 rounded-lg p-3 text-center">
                   <p className="text-xs text-muted-foreground">Hedef Fiyat</p>
                   <p className="text-lg font-bold text-green-600">
-                    ₺{result.target_price.toFixed(2)}
+                    ₺{Number(result.target_price).toFixed(2)}
                   </p>
                 </div>
               )}
@@ -215,7 +215,7 @@ function AnalysisTab() {
                 <div className="bg-muted/50 rounded-lg p-3 text-center">
                   <p className="text-xs text-muted-foreground">Zarar Durdur</p>
                   <p className="text-lg font-bold text-red-600">
-                    ₺{result.stop_loss.toFixed(2)}
+                    ₺{Number(result.stop_loss).toFixed(2)}
                   </p>
                 </div>
               )}
@@ -500,7 +500,7 @@ function SignalsTab() {
                 </div>
                 <div className="text-right">
                   <div className="text-sm font-mono">
-                    Skor: {(signal.score * 100).toFixed(0)}%
+                    Skor: {(Number(signal.score) * 100).toFixed(0)}%
                   </div>
                 </div>
               </div>
@@ -616,7 +616,7 @@ function PerformanceTab() {
                     {model.total_analyses} analiz
                   </Badge>
                   <Badge variant="outline" className="text-xs">
-                    {model.avg_latency_ms.toFixed(0)}ms
+                    {Number(model.avg_latency_ms).toFixed(0)}ms
                   </Badge>
                 </div>
               </div>

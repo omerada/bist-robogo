@@ -66,6 +66,7 @@ async def ai_chat(
 
 
 @router.get("/signals")
+@router.get("/signals/", include_in_schema=False)
 async def get_ai_signals(
     limit: int = 10,
     user: User = Depends(get_current_user),
@@ -81,6 +82,7 @@ async def get_ai_signals(
 
 
 @router.get("/models")
+@router.get("/models/", include_in_schema=False)
 async def list_models(
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
@@ -92,6 +94,7 @@ async def list_models(
 
 
 @router.get("/settings")
+@router.get("/settings/", include_in_schema=False)
 async def get_ai_settings(
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
@@ -150,6 +153,7 @@ async def create_experiment(
 
 
 @router.get("/experiments")
+@router.get("/experiments/", include_in_schema=False)
 async def list_experiments(
     status: str | None = Query(default=None, description="Filtre: pending/running/completed/failed"),
     skip: int = Query(default=0, ge=0),
@@ -216,6 +220,7 @@ async def delete_experiment(
 
 
 @router.get("/performance")
+@router.get("/performance/", include_in_schema=False)
 async def get_performance(
     model_id: str | None = Query(default=None),
     symbol: str | None = Query(default=None),

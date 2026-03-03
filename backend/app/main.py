@@ -14,6 +14,7 @@ from app.database import engine
 from app.exceptions import register_exception_handlers
 from app.logging_config import setup_logging
 from app.middleware import RateLimitMiddleware, RequestLoggingMiddleware
+from app.websocket.market_stream import router as ws_router
 
 settings = get_settings()
 
@@ -75,6 +76,9 @@ def create_app() -> FastAPI:
     # ── Router'lar ──
     app.include_router(health_router, tags=["health"])
     app.include_router(api_router, prefix=settings.API_V1_PREFIX)
+
+    # ── WebSocket ──
+    app.include_router(ws_router)
 
     return app
 

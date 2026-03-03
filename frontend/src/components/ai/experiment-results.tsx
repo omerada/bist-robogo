@@ -84,7 +84,7 @@ export function ExperimentResults({ experiment }: ExperimentResultsProps) {
                         <div className="flex items-center justify-center gap-1">
                           {actionIcon(model_a.action)}
                           <span className="font-mono text-xs">
-                            {(model_a.score * 100).toFixed(0)}%
+                            {(Number(model_a.score) * 100).toFixed(0)}%
                           </span>
                           <Badge variant="outline" className="text-xs ml-1">
                             {model_a.latency_ms}ms
@@ -99,7 +99,7 @@ export function ExperimentResults({ experiment }: ExperimentResultsProps) {
                         <div className="flex items-center justify-center gap-1">
                           {actionIcon(model_b.action)}
                           <span className="font-mono text-xs">
-                            {(model_b.score * 100).toFixed(0)}%
+                            {(Number(model_b.score) * 100).toFixed(0)}%
                           </span>
                           <Badge variant="outline" className="text-xs ml-1">
                             {model_b.latency_ms}ms

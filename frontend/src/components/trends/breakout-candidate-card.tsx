@@ -14,12 +14,12 @@ interface BreakoutCandidateCardProps {
   candidate: BreakoutCandidate;
 }
 
-function formatCurrency(v: number) {
+function formatCurrency(v: number | string) {
   return new Intl.NumberFormat("tr-TR", {
     style: "currency",
     currency: "TRY",
     minimumFractionDigits: 2,
-  }).format(v);
+  }).format(Number(v) || 0);
 }
 
 function scoreColor(score: number): string {
@@ -41,7 +41,9 @@ export function BreakoutCandidateCard({
 }: BreakoutCandidateCardProps) {
   const potentialGain =
     candidate.target_price && candidate.price
-      ? ((candidate.target_price - candidate.price) / candidate.price) * 100
+      ? ((Number(candidate.target_price) - Number(candidate.price)) /
+          Number(candidate.price)) *
+        100
       : null;
 
   return (

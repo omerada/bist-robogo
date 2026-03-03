@@ -84,9 +84,9 @@ export default function SymbolDetailPage() {
       {/* Fiyat bilgisi */}
       {displayQuote && (
         <QuoteTicker
-          price={displayQuote.price}
-          change={displayQuote.change}
-          changePct={displayQuote.change_pct}
+          price={Number(displayQuote.price) || 0}
+          change={Number(displayQuote.change) || 0}
+          changePct={Number(displayQuote.change_pct) || 0}
         />
       )}
 
@@ -109,33 +109,33 @@ export default function SymbolDetailPage() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <DetailCard
             label="Açılış"
-            value={`₺${displayQuote.open.toLocaleString("tr-TR", { minimumFractionDigits: 2 })}`}
+            value={`₺${Number(displayQuote.open).toLocaleString("tr-TR", { minimumFractionDigits: 2 })}`}
           />
           <DetailCard
             label="Yüksek"
-            value={`₺${displayQuote.high.toLocaleString("tr-TR", { minimumFractionDigits: 2 })}`}
+            value={`₺${Number(displayQuote.high).toLocaleString("tr-TR", { minimumFractionDigits: 2 })}`}
             valueClassName="text-green-500"
           />
           <DetailCard
             label="Düşük"
-            value={`₺${displayQuote.low.toLocaleString("tr-TR", { minimumFractionDigits: 2 })}`}
+            value={`₺${Number(displayQuote.low).toLocaleString("tr-TR", { minimumFractionDigits: 2 })}`}
             valueClassName="text-red-500"
           />
           <DetailCard
             label="Önceki Kapanış"
-            value={`₺${displayQuote.close_prev.toLocaleString("tr-TR", { minimumFractionDigits: 2 })}`}
+            value={`₺${Number(displayQuote.close_prev).toLocaleString("tr-TR", { minimumFractionDigits: 2 })}`}
           />
           <DetailCard
             label="Hacim"
-            value={displayQuote.volume.toLocaleString("tr-TR")}
+            value={Number(displayQuote.volume).toLocaleString("tr-TR")}
           />
           <DetailCard
             label="Alış"
-            value={`₺${displayQuote.bid.toLocaleString("tr-TR", { minimumFractionDigits: 2 })}`}
+            value={`₺${Number(displayQuote.bid).toLocaleString("tr-TR", { minimumFractionDigits: 2 })}`}
           />
           <DetailCard
             label="Satış"
-            value={`₺${displayQuote.ask.toLocaleString("tr-TR", { minimumFractionDigits: 2 })}`}
+            value={`₺${Number(displayQuote.ask).toLocaleString("tr-TR", { minimumFractionDigits: 2 })}`}
           />
           <DetailCard
             label="Son Güncelleme"

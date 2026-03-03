@@ -11,11 +11,12 @@ interface AccuracyBadgeProps {
 }
 
 export function AccuracyBadge({ rate, label }: AccuracyBadgeProps) {
-  const pct = (rate * 100).toFixed(1);
+  const numRate = Number(rate) || 0;
+  const pct = (numRate * 100).toFixed(1);
   const color =
-    rate >= 0.7
+    numRate >= 0.7
       ? "bg-green-600 hover:bg-green-700 text-white"
-      : rate >= 0.5
+      : numRate >= 0.5
         ? "bg-amber-500 hover:bg-amber-600 text-white"
         : "bg-red-600 hover:bg-red-700 text-white";
 

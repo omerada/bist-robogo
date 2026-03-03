@@ -71,12 +71,12 @@ export function ModelComparisonCard({ comparison }: ModelComparisonCardProps) {
               />
               <ModelStat
                 label="Ort. Gecikme"
-                value={`${model_a.avg_latency_ms.toFixed(0)}ms`}
+                value={`${Number(model_a.avg_latency_ms).toFixed(0)}ms`}
                 icon={Clock}
               />
               <ModelStat
                 label="Ort. Skor"
-                value={`${(model_a.avg_score * 100).toFixed(1)}%`}
+                value={`${(Number(model_a.avg_score) * 100).toFixed(1)}%`}
                 icon={BarChart3}
               />
             </div>
@@ -109,12 +109,12 @@ export function ModelComparisonCard({ comparison }: ModelComparisonCardProps) {
               />
               <ModelStat
                 label="Ort. Gecikme"
-                value={`${model_b.avg_latency_ms.toFixed(0)}ms`}
+                value={`${Number(model_b.avg_latency_ms).toFixed(0)}ms`}
                 icon={Clock}
               />
               <ModelStat
                 label="Ort. Skor"
-                value={`${(model_b.avg_score * 100).toFixed(1)}%`}
+                value={`${(Number(model_b.avg_score) * 100).toFixed(1)}%`}
                 icon={BarChart3}
               />
             </div>

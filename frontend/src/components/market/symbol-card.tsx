@@ -15,8 +15,11 @@ interface SymbolCardProps {
 }
 
 export function SymbolCard({ quote }: SymbolCardProps) {
-  const isUp = quote.change > 0;
-  const isDown = quote.change < 0;
+  const change = Number(quote.change) || 0;
+  const changePct = Number(quote.change_pct) || 0;
+  const price = Number(quote.price) || 0;
+  const isUp = change > 0;
+  const isDown = change < 0;
 
   return (
     <Link href={`/market/${quote.symbol}`}>
@@ -35,15 +38,15 @@ export function SymbolCard({ quote }: SymbolCardProps) {
               {isUp && <ArrowUpRight className="h-3 w-3 mr-0.5" />}
               {isDown && <ArrowDownRight className="h-3 w-3 mr-0.5" />}
               {!isUp && !isDown && <Minus className="h-3 w-3 mr-0.5" />}
-              {quote.change_pct >= 0 ? "+" : ""}
-              {quote.change_pct.toFixed(2)}%
+              {changePct >= 0 ? "+" : ""}
+              {changePct.toFixed(2)}%
             </span>
           </div>
           <div className="flex items-end justify-between">
             <div>
               <div className="text-lg font-bold tabular-nums">
                 ₺
-                {quote.price.toLocaleString("tr-TR", {
+                {price.toLocaleString("tr-TR", {
                   minimumFractionDigits: 2,
                 })}
               </div>

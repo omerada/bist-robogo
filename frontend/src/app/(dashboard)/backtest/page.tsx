@@ -117,7 +117,7 @@ export default function BacktestPage() {
 
   const backtests = backtestData?.data ?? [];
   const stats = computeStats(backtests);
-  const strategies = strategiesData?.data ?? [];
+  const strategies = strategiesData?.strategies ?? [];
 
   return (
     <div className="space-y-6 animate-fade-in">

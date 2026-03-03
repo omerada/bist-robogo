@@ -1,5 +1,9 @@
 /**
  * Auth store — kullanıcı oturumu yönetimi.
+ *
+ * persist middleware ile localStorage'a kaydedilir.
+ * Hydration tamamlandığında isLoading → false yapılır,
+ * böylece AuthGuard skeleton'da takılı kalmaz.
  */
 
 import { create } from "zustand";
@@ -15,6 +19,7 @@ interface User {
 
 interface AuthState {
   user: User | null;
+  accessToken: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
 
@@ -28,17 +33,28 @@ export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
       user: null,
+      accessToken: null,
       isAuthenticated: false,
       isLoading: true,
 
       setUser: (user, token) => {
         setAccessToken(token);
-        set({ user, isAuthenticated: true, isLoading: false });
+        set({
+          user,
+          accessToken: token,
+          isAuthenticated: true,
+          isLoading: false,
+        });
       },
 
       logout: () => {
         setAccessToken(null);
-        set({ user: null, isAuthenticated: false, isLoading: false });
+        set({
+          user: null,
+          accessToken: null,
+          isAuthenticated: false,
+          isLoading: false,
+        });
       },
 
       setLoading: (loading) => set({ isLoading: loading }),
@@ -47,8 +63,18 @@ export const useAuthStore = create<AuthState>()(
       name: "auth-storage",
       partialize: (state) => ({
         user: state.user,
+        accessToken: state.accessToken,
         isAuthenticated: state.isAuthenticated,
       }),
+      onRehydrateStorage: () => (state) => {
+        // Hydration tamamlandığında token'ı axios'a yükle ve loading'i kapat
+        if (state) {
+          if (state.accessToken) {
+            setAccessToken(state.accessToken);
+          }
+          state.setLoading(false);
+        }
+      },
     },
   ),
 );

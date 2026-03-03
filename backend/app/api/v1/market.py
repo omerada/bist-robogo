@@ -1,11 +1,13 @@
 # Source: Doc 02 §2.2 + Doc 03 §3.3 — Market data endpoints
 """Piyasa verisi endpoint'leri."""
 
+import json
 from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.redis_client import redis_manager
 from app.database import get_db
 from app.schemas.common import APIResponse, PaginationMeta
 from app.schemas.market import (
@@ -120,3 +122,67 @@ async def list_sectors(
     """Benzersiz sektör listesi."""
     sectors = await service.get_sectors()
     return APIResponse(success=True, data=sectors)
+
+
+@router.get("/live-prices", response_model=APIResponse)
+async def get_live_prices(
+    symbols: str | None = Query(None, description="Virgülle ayrılmış semboller: THYAO,GARAN,AKBNK"),
+    service: MarketDataService = Depends(get_market_service),
+):
+    """Redis cache'ten canlı fiyatları toplu döner.
+
+    Sembol belirtilmezse tüm cache'teki fiyatları döner (max 200).
+    """
+    result: list[dict] = []
+
+    if symbols:
+        ticker_list = [s.strip().upper() for s in symbols.split(",") if s.strip()]
+    else:
+        # Tüm cache'teki quote key'lerini tara
+        ticker_list = []
+        if redis_manager.client:
+            keys = []
+            async for key in redis_manager.client.scan_iter("market:quote:*", count=200):
+                keys.append(key)
+                if len(keys) >= 200:
+                    break
+            ticker_list = [k.replace("market:quote:", "") for k in keys]
+
+    for ticker in ticker_list:
+        raw = await redis_manager.get_cached(f"market:quote:{ticker}")
+        if raw:
+            try:
+                data = json.loads(raw)
+                data["symbol"] = ticker
+                result.append(data)
+            except json.JSONDecodeError:
+                pass
+
+    return APIResponse(
+        success=True,
+        data=result,
+        meta={"count": len(result)},
+    )
+
+
+@router.get("/live-indices", response_model=APIResponse)
+async def get_live_indices():
+    """Redis cache'ten canlı BIST endeks verilerini döner."""
+    result: list[dict] = []
+
+    if redis_manager.client:
+        keys = []
+        async for key in redis_manager.client.scan_iter("market:index:*", count=50):
+            keys.append(key)
+
+        for key in keys:
+            raw = await redis_manager.get_cached(key)
+            if raw:
+                try:
+                    data = json.loads(raw)
+                    data["code"] = key.replace("market:index:", "")
+                    result.append(data)
+                except json.JSONDecodeError:
+                    pass
+
+    return APIResponse(success=True, data=result, meta={"count": len(result)})

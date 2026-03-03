@@ -81,13 +81,13 @@ function statusBadge(status: OrderStatus) {
   );
 }
 
-function formatCurrency(v: number | null) {
+function formatCurrency(v: number | string | null) {
   if (v === null || v === undefined) return "—";
   return new Intl.NumberFormat("tr-TR", {
     style: "currency",
     currency: "TRY",
     minimumFractionDigits: 2,
-  }).format(v);
+  }).format(Number(v) || 0);
 }
 
 function formatDate(iso: string) {

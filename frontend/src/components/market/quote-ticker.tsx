@@ -15,11 +15,14 @@ interface QuoteTickerProps {
 }
 
 export function QuoteTicker({
-  price,
-  change,
-  changePct,
+  price: rawPrice,
+  change: rawChange,
+  changePct: rawChangePct,
   className,
 }: QuoteTickerProps) {
+  const price = Number(rawPrice) || 0;
+  const change = Number(rawChange) || 0;
+  const changePct = Number(rawChangePct) || 0;
   const prevPriceRef = useRef(price);
   const [flash, setFlash] = useState<"up" | "down" | null>(null);
 
