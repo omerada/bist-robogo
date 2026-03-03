@@ -1,35 +1,37 @@
 # bist-robogo — Proje Durumu
 
-> **Son Güncelleme:** Faz 2 Sprint 2.2 tamamlandı — backend 87/87 test, frontend build OK  
+> **Son Güncelleme:** Faz 2 Sprint 2.3 tamamlandı — backend 121/121 test, frontend build OK  
 > **Aktif Faz:** Faz 2 — Genişletme  
-> **Aktif Sprint:** Sprint 2.3 — Broker + Bildirimler (sırada)
+> **Aktif Sprint:** Faz 2 tamamlandı — Faz 3 AI/ML Entegrasyonu sırada
 
 ---
 
 ## Genel Durum Özeti
 
-| Faz | Ad                       | Durum           | İlerleme   |
-| --- | ------------------------ | --------------- | ---------- |
-| 0   | Altyapı Kurulumu         | ✅ Tamamlandı   | 6/6 adım   |
-| 1   | MVP Temel Özellikler     | ✅ Tamamlandı   | 3/3 sprint |
-| 2   | Genişletme               | 🔄 Devam Ediyor | 2/3 sprint |
-| 3   | AI/ML Entegrasyonu       | ⏳ Bekliyor     | —          |
-| 4   | Ölçekleme ve Prodüksiyon | ⏳ Bekliyor     | —          |
+| Faz | Ad                       | Durum         | İlerleme   |
+| --- | ------------------------ | ------------- | ---------- |
+| 0   | Altyapı Kurulumu         | ✅ Tamamlandı | 6/6 adım   |
+| 1   | MVP Temel Özellikler     | ✅ Tamamlandı | 3/3 sprint |
+| 2   | Genişletme               | ✅ Tamamlandı | 3/3 sprint |
+| 3   | AI/ML Entegrasyonu       | ⏳ Bekliyor   | —          |
+| 4   | Ölçekleme ve Prodüksiyon | ⏳ Bekliyor   | —          |
 
 ---
 
-## Test Durumu — 87/87 ✅
+## Test Durumu — 121/121 ✅
 
-| Test Dosyası         | Test Sayısı | Durum     |
-| -------------------- | ----------- | --------- |
-| `test_auth.py`       | 10          | ✅        |
-| `test_health.py`     | 2           | ✅        |
-| `test_market.py`     | 13          | ✅        |
-| `test_trading.py`    | 20          | ✅        |
-| `test_trends.py`     | 10          | ✅        |
-| `test_strategies.py` | 15          | ✅        |
-| `test_backtest.py`   | 17          | ✅        |
-| **Toplam**           | **87**      | **9.66s** |
+| Test Dosyası            | Test Sayısı | Durum      |
+| ----------------------- | ----------- | ---------- |
+| `test_auth.py`          | 10          | ✅         |
+| `test_health.py`        | 2           | ✅         |
+| `test_market.py`        | 13          | ✅         |
+| `test_trading.py`       | 20          | ✅         |
+| `test_trends.py`        | 10          | ✅         |
+| `test_strategies.py`    | 15          | ✅         |
+| `test_backtest.py`      | 17          | ✅         |
+| `test_notifications.py` | 18          | ✅         |
+| `test_risk.py`          | 16          | ✅         |
+| **Toplam**              | **121**     | **12.23s** |
 
 ---
 
@@ -73,6 +75,7 @@
 | 21  | Root URL 404 fix — `app/page.tsx` redirect("/dashboard")                        | `frontend/src/app/page.tsx`                   |
 | 22  | MissingGreenlet fix — ORM lazy-load yerine raw SQL UPDATE                       | `repositories/backtest_repository.py`         |
 | 23  | Test izolasyonu — `test_list_strategies_empty` → `test_list_strategies_initial` | `tests/test_strategies.py`                    |
+| 24  | MissingGreenlet fix — risk rule update sonrası `db.refresh()` (onupdate alanı)  | `services/risk_service.py`                    |
 
 ---
 
@@ -161,6 +164,23 @@
 | 2.2.7 | Frontend backtest detay sayfası                   | ✅    | `backtest/[id]/page.tsx` — 8 metrik kart, equity curve, trade tablo      |
 | 2.2.8 | Backtest testleri                                 | ✅    | `test_backtest.py` — 17 test                                             |
 
+### Sprint 2.3 — Broker + Bildirimler + Risk ✅
+
+| #      | Görev                                                  | Durum | Not                                                                          |
+| ------ | ------------------------------------------------------ | ----- | ---------------------------------------------------------------------------- |
+| 2.3.1  | Risk repository (RiskRule + RiskEvent)                 | ✅    | `repositories/risk_repository.py` — ensure_defaults (9 varsayılan kural)     |
+| 2.3.2  | Notification repository (raw UPDATE)                   | ✅    | `repositories/notification_repository.py` — mark_read, mark_all_read         |
+| 2.3.3  | Risk service (9 kural doğrulama)                       | ✅    | `services/risk_service.py` — validate_order, risk level hesaplama            |
+| 2.3.4  | Notification service                                   | ✅    | `services/notification_service.py` — CRUD + mark read                        |
+| 2.3.5  | Risk API (4 endpoint)                                  | ✅    | GET status/rules/events, PUT rules/{id}                                      |
+| 2.3.6  | Notification API (5 endpoint)                          | ✅    | GET list/unread-count, PUT read/read-all, DELETE                             |
+| 2.3.7  | Celery notification tasks (email+telegram)             | ✅    | `tasks/notification_tasks.py` — 4 task, SMTP + Telegram Bot API              |
+| 2.3.8  | Risk + Notification şemaları                           | ✅    | `schemas/risk.py` (RiskEventResponse), `schemas/notification.py`             |
+| 2.3.9  | Frontend ayarlar sayfası (3 tab: risk/bildirim/profil) | ✅    | `settings/page.tsx` — kural düzenleme, toggle, risk durum kartları           |
+| 2.3.10 | Frontend bildirim zili (gerçek API)                    | ✅    | `notification-bell.tsx` — useNotifications, useUnreadCount, mark read        |
+| 2.3.11 | Frontend API + hooks                                   | ✅    | `lib/api/risk.ts`, `notifications.ts`, `use-risk.ts`, `use-notifications.ts` |
+| 2.3.12 | Risk + Notification testleri                           | ✅    | `test_risk.py` (16), `test_notifications.py` (18)                            |
+
 ---
 
 ## Doğrulanmış API Akışları
@@ -183,6 +203,11 @@
 | Backtest Run               | ✅    | Create + simülasyon, 12 metrik, equity curve        |
 | Backtest Detail            | ✅    | Trade listesi, parametreler, equity grafik          |
 | Backtest Management        | ✅    | List, filter, delete, pagination                    |
+| Risk Status + Rules        | ✅    | Otomatik 9 varsayılan kural, risk seviye hesaplama  |
+| Risk Rule Update           | ✅    | Değer/aktiflik güncelleme, toggle                   |
+| Risk Events                | ✅    | Olay listesi, sayfalama, tip filtresi               |
+| Notification CRUD          | ✅    | List, create, delete, read/unread filtre            |
+| Notification Mark Read     | ✅    | Tek/tümü okundu, unread count                       |
 
 ---
 
@@ -194,7 +219,7 @@
 | Frontend (Next.js) | ✅    | 16 sayfa, 0 TypeScript hatası |
 | PostgreSQL 16      | ✅    | 20 tablo + TimescaleDB        |
 | Redis 7            | ✅    | Cache + Celery broker         |
-| pytest             | ✅    | 87/87, 9.66s, %58 coverage    |
+| pytest             | ✅    | 121/121, 12.23s, %58 coverage |
 
 ---
 
@@ -203,15 +228,15 @@
 ### Backend (~70+ kaynak dosya)
 
 - **Modeller (11):** user, market, order, portfolio, strategy, backtest, risk, broker, notification, audit, base
-- **Şemalar (10):** common, auth, market, order, portfolio, strategy, backtest, risk, analysis
+- **Şemalar (11):** common, auth, market, order, portfolio, strategy, backtest, risk, notification, analysis
 - **API v1 (9):** auth, market, orders, portfolio, strategies, backtest, risk, trends, notifications
 - **Core (4):** security, redis_client, rate_limiter, websocket_manager
-- **Servisler (7):** auth_service, market_data_service, trading_service, portfolio_service, trend_analysis_service, strategy_service, backtest_service
-- **Repositories (6):** user_repository, market_repository, order_repository, portfolio_repository, strategy_repository, backtest_repository
+- **Servisler (9):** auth_service, market_data_service, trading_service, portfolio_service, trend_analysis_service, strategy_service, backtest_service, risk_service, notification_service
+- **Repositories (8):** user_repository, market_repository, order_repository, portfolio_repository, strategy_repository, backtest_repository, risk_repository, notification_repository
 - **İndikatörler (2):** indicators/momentum, indicators/trend (ADX, OBV, S/R, MACD crossover)
 - **Stratejiler (3):** strategies/base, strategies/ma_crossover, strategies/rsi_reversal
-- **Altyapı:** celery_app, market_tasks, backtest_tasks, brokers (3), websocket/market_stream
-- **Testler (7):** test_auth (10), test_health (2), test_market (13), test_trading (20), test_trends (10), test_strategies (15), test_backtest (17)
+- **Altyapı:** celery_app, market_tasks, backtest_tasks, notification_tasks, brokers (3), websocket/market_stream
+- **Testler (9):** test_auth (10), test_health (2), test_market (13), test_trading (20), test_trends (10), test_strategies (15), test_backtest (17), test_risk (16), test_notifications (18)
 
 ### Frontend (~50+ src/ dosya)
 
@@ -223,10 +248,10 @@
 - **Trend components (2):** dip-candidate-card, breakout-candidate-card
 - **Strategy components (2):** strategy-card, create-strategy-dialog
 - **Backtest components (1):** backtest-equity-curve
-- **Hooks (8):** use-websocket, use-market-data, use-portfolio, use-trading, use-trends, use-strategies, use-backtest
+- **Hooks (10):** use-websocket, use-market-data, use-portfolio, use-trading, use-trends, use-strategies, use-backtest, use-risk, use-notifications
 - **Stores (3):** auth-store, market-store, ui-store
-- **API lib (7):** client, market, orders, trading, analysis, strategies, backtest
-- **Types (5):** market, order, portfolio, strategy, backtest
+- **API lib (9):** client, market, orders, trading, analysis, strategies, backtest, risk, notifications
+- **Types (6):** market, order, portfolio, strategy, backtest, risk
 
 ---
 

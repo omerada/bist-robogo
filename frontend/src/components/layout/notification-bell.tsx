@@ -1,8 +1,7 @@
 // Source: Doc 09 ikon kılavuzu — Notification bell bileşeni
 "use client";
 
-import { useState } from "react";
-import { Bell } from "lucide-react";
+import { Bell, Check, CheckCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
@@ -11,22 +10,20 @@ import {
 } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-
-interface Notification {
-  id: string;
-  title: string;
-  message: string;
-  type: "info" | "success" | "warning" | "error";
-  read: boolean;
-  created_at: string;
-}
-
-// Placeholder — gerçek bildirimler Faz 2'de API'den gelecek
-const mockNotifications: Notification[] = [];
+import {
+  useNotifications,
+  useUnreadCount,
+  useMarkNotificationRead,
+  useMarkAllRead,
+} from "@/hooks/use-notifications";
 
 export function NotificationBell() {
-  const [notifications] = useState<Notification[]>(mockNotifications);
-  const unreadCount = notifications.filter((n) => !n.read).length;
+  const { data: unreadCount = 0 } = useUnreadCount();
+  const { data: notifData } = useNotifications({ per_page: 10 });
+  const markReadMutation = useMarkNotificationRead();
+  const markAllMutation = useMarkAllRead();
+
+  const notifications = notifData?.data || [];
 
   return (
     <Popover>
@@ -45,9 +42,15 @@ export function NotificationBell() {
         <div className="flex items-center justify-between px-4 py-3">
           <h4 className="text-sm font-semibold">Bildirimler</h4>
           {unreadCount > 0 && (
-            <span className="text-xs text-muted-foreground">
-              {unreadCount} okunmamış
-            </span>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 text-xs gap-1"
+              onClick={() => markAllMutation.mutate()}
+            >
+              <CheckCheck className="h-3 w-3" />
+              Tümünü oku
+            </Button>
           )}
         </div>
         <Separator />
@@ -64,13 +67,26 @@ export function NotificationBell() {
               {notifications.map((notification) => (
                 <div
                   key={notification.id}
-                  className={`rounded-lg px-3 py-2 text-sm transition-colors hover:bg-accent ${
-                    !notification.read ? "bg-accent/50" : ""
+                  className={`rounded-lg px-3 py-2 text-sm transition-colors hover:bg-accent cursor-pointer ${
+                    !notification.is_read ? "bg-accent/50" : ""
                   }`}
+                  onClick={() => {
+                    if (!notification.is_read) {
+                      markReadMutation.mutate(notification.id);
+                    }
+                  }}
                 >
-                  <p className="font-medium">{notification.title}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {notification.message}
+                  <div className="flex items-start justify-between gap-2">
+                    <p className="font-medium">{notification.title}</p>
+                    {!notification.is_read && (
+                      <span className="mt-1 h-2 w-2 rounded-full bg-blue-500 flex-shrink-0" />
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground line-clamp-2">
+                    {notification.body}
+                  </p>
+                  <p className="text-[10px] text-muted-foreground/60 mt-1">
+                    {new Date(notification.sent_at).toLocaleString("tr-TR")}
                   </p>
                 </div>
               ))}

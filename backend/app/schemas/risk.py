@@ -40,3 +40,15 @@ class RiskRuleResponse(BaseModel):
 class RiskRuleUpdate(BaseModel):
     value: dict | None = None
     is_active: bool | None = None
+
+
+class RiskEventResponse(BaseModel):
+    """Risk olayı yanıt şeması."""
+    id: UUID
+    user_id: UUID
+    event_type: str
+    rule_id: UUID | None = None
+    details: dict
+    created_at: datetime
+
+    model_config = {"from_attributes": True}

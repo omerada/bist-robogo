@@ -888,18 +888,23 @@ curl http://localhost:8000/api/v1/portfolio/summary \
 | 9   | Stratejiler sayfası — liste, oluşturma, parametre düzenleme |
 | 10  | Strateji detay — sinyal geçmişi, performans metrikleri      |
 
-#### Sprint 2.3 (Hafta 13-14): Backtest
+#### Sprint 2.3 (Hafta 13-14): Broker + Bildirimler + Risk
 
-| #   | Görev                                                                       |
-| --- | --------------------------------------------------------------------------- |
-| 1   | Backtest modeli + migration                                                 |
-| 2   | Backtest engine (vektörel hesaplama, komisyon simülasyonu)                  |
-| 3   | Backtest API endpoints (create, get, list, compare)                         |
-| 4   | Backtest parametreleri: başlangıç sermaye, komisyon oranı, slippage         |
-| 5   | Backtest metrikleri: Sharpe, Sortino, max drawdown, win rate, profit factor |
-| 6   | Celery task: async backtest çalıştırma                                      |
-| 7   | Backtest sayfası — parametre formu, sonuçlar                                |
-| 8   | Backtest sonuç grafiği — equity curve overlay                               |
+> **Not:** Orijinal planda Sprint 2.3 "Backtest" olarak tanımlanmıştı ancak Backtest Sprint 2.2'de implemente edilmiştir.
+> Güncel Sprint 2.3 = Doc 11 §Sprint 2.3 — Broker + Bildirimler.
+
+| #   | Görev                                                                        |
+| --- | ---------------------------------------------------------------------------- |
+| 1   | Risk service tam implementasyon (9 kural: max pozisyon, günlük kayıp limiti) |
+| 2   | Risk API endpoints (status, rules CRUD, events)                              |
+| 3   | Notification service (CRUD + in-app)                                         |
+| 4   | Notification API endpoints (list, mark read, mark all read)                  |
+| 5   | Email gönderim (SMTP) — Celery task                                          |
+| 6   | Telegram bot bildirim — Celery task                                          |
+| 7   | Celery beat schedule (periyodik görevler)                                    |
+| 8   | Settings sayfası (profil, bildirim, risk ayarları)                           |
+| 9   | Notification frontend (API + hooks + bildirim paneli)                        |
+| 10  | Risk + Notification testleri                                                 |
 
 ---
 
