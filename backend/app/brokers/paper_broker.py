@@ -99,7 +99,7 @@ class PaperBroker(AbstractBroker):
         )
 
     async def get_quote(self, symbol: str) -> BrokerQuote:
-        """Redis cache'ten fiyat bilgisi al."""
+        """Redis cache'ten fiyat bilgisi al. Yoksa simülasyon fiyatı kullan."""
         import json
 
         cached = await redis_manager.get_cached(f"market:quote:{symbol}")
@@ -112,7 +112,20 @@ class PaperBroker(AbstractBroker):
                 ask=Decimal(str(data.get("ask", data["price"]))),
                 volume=data.get("volume", 0),
             )
-        raise ValueError(f"Fiyat bilgisi bulunamadı: {symbol}")
+
+        # Fallback: Simülasyon fiyatı — gerçek veri olmadan paper trading devam edebilsin
+        import hashlib
+
+        h = int(hashlib.md5(symbol.encode()).hexdigest()[:8], 16)
+        sim_price = Decimal(str(50 + (h % 200)))  # 50–250 arası sabit simüle fiyat
+        logger.info("paper_broker_simulated_price", symbol=symbol, price=float(sim_price))
+        return BrokerQuote(
+            symbol=symbol,
+            price=sim_price,
+            bid=sim_price * Decimal("0.999"),
+            ask=sim_price * Decimal("1.001"),
+            volume=100_000,
+        )
 
     async def get_positions(self) -> list[dict]:
         return []

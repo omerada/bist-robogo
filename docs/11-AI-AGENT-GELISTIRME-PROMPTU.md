@@ -1,8 +1,9 @@
 # bist-robogo — AI Agent Geliştirme Promptu
 
 > **Proje:** bist-robogo — BIST İçin AI Destekli Otomatik Ticaret Platformu  
-> **Versiyon:** 1.0  
+> **Versiyon:** 1.1  
 > **Tarih:** 2026-03-03  
+> **Güncelleme:** Faz 0 tamamlandı, implementasyon düzeltmeleri uygulandı.  
 > **Amaç:** Bu doküman, bir AI Agent'ın (Copilot, Cursor vb.) projeyi uçtan uca SIFIR HATA ile geliştirebilmesi için yazılmış master prompt ve yol haritasıdır.  
 > **Kapsam:** Tüm backend, frontend, altyapı, test ve deployment adımları.
 
@@ -35,6 +36,17 @@
 | 7   | **docker-compose dosya yolu:** Makefile `infra/docker/docker-compose.yml` referansı vs Doc 10 root-level       | ✅ **`docker-compose.yml`'yi proje kök dizinine koy.** Makefile'ı buna göre güncelle (`docker-compose up -d`).                                                             |
 | 8   | **Doc 10 §7 referans haritası bölüm numaraları:** Kayma var                                                    | ✅ **Bu dokümandaki (Doc 11) referans haritasını kullan.** Doc 10 §7'yi yoksay, aşağıdaki haritayı takip et.                                                               |
 | 9   | **FastAPI app import:** `app.main:app` vs `app.main:create_app`                                                | ✅ **`create_app()` factory kullan.** uvicorn'da `app.main:app` çağır — `app = create_app()` satırı main.py sonunda olmalı.                                                |
+
+### İmplementasyon Sırasında Keşfedilen Ek Düzeltmeler
+
+| #   | Sorun                                                                  | Uygulanan Çözüm                                                                                   |
+| --- | ---------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| 10  | **passlib + bcrypt 4.2+ uyumsuzluğu**                                  | ✅ `passlib` yerine doğrudan `bcrypt` modülü kullanıldı (`security.py`'de `bcrypt.hashpw` / `bcrypt.checkpw`)  |
+| 11  | **`CORS_ORIGINS` string parse hatası**                                  | ✅ JSON format `["http://localhost:3000"]` + `field_validator` ile parse (`config.py`)              |
+| 12  | **`ACCESS_TOKEN_EXPIRE_MINUTES` env var adı**                           | ✅ `JWT_ACCESS_TOKEN_EXPIRE_MINUTES` olarak değiştirildi (`auth_service.py`'de 2 yerde)              |
+| 13  | **backend venv Docker volume gereksinimi**                              | ✅ `backend_venv:/app/.venv` volume eklendi (backend + celery-worker + celery-beat)                   |
+| 14  | **`.dockerignore` eksikliği**                                           | ✅ `backend/.dockerignore` oluşturuldu                                                               |
+| 15  | **`api/v1/analysis.py` adlandırması**                                  | ✅ `api/v1/trends.py` olarak adlandırıldı (Doc 10 Sprint 2.1 ile tutarlılık)                          |
 
 ---
 
@@ -115,7 +127,7 @@ bist-robogo/
 │   │   │       ├── strategies.py            # Strategy endpoints ← Doc 02 §2.5
 │   │   │       ├── backtest.py              # Backtest endpoints ← Doc 02 §2.7
 │   │   │       ├── risk.py                  # Risk endpoints ← Doc 03 §3.7
-│   │   │       ├── analysis.py              # Trend analysis endpoints ← Doc 03 §3.6
+│   │   │       ├── trends.py                # Trend analysis endpoints ← Doc 03 §3.6 (İMPL: analysis.py → trends.py)
 │   │   │       └── notifications.py         # Notification endpoints ← Doc 02 §2.9
 │   │   │
 │   │   ├── core/                            # Çekirdek modüller
@@ -411,7 +423,7 @@ bist-robogo/
 | `backend/app/api/v1/strategies.py`       | Doc 02         | §2.5                     | Strateji CRUD + aktivasyon               |
 | `backend/app/api/v1/backtest.py`         | Doc 02         | §2.7                     | Backtest çalıştır, sonuç sorgula         |
 | `backend/app/api/v1/risk.py`             | Doc 02         | §2.4 + Doc 03 §3.7       | Risk kuralları, durum, uyarılar          |
-| `backend/app/api/v1/analysis.py`         | Doc 03         | §3.6                     | Trend analiz, dip/kırılım                |
+| `backend/app/api/v1/trends.py`         | Doc 03         | §3.6                     | Trend analiz, dip/kırılım (İMPL: analysis.py → trends.py) |
 | `backend/app/schemas/common.py`          | Doc 07         | §11.1                    | APIResponse, PaginationMeta              |
 | `backend/app/schemas/auth.py`            | Doc 07         | §11.2                    | Register, Login, Token şemaları          |
 | `backend/app/schemas/*.py` (diğer)       | Doc 03         | §4 — Pydantic Modelleri  | Tüm request/response şemaları            |
@@ -503,7 +515,15 @@ bist-robogo/
 
 ## 🗺️ GELİŞTİRME SIRASI — FAZ BAZLI MASTER YOL HARİTASI
 
-### Faz 0 — Altyapı Kurulumu (Hafta 1-2)
+### Faz 0 — Altyapı Kurulumu (Hafta 1-2) — ✅ TAMAMLANDI
+
+> **Durum:** Tüm 6 adım başarıyla tamamlanmıştır.
+> - Docker: 6 servis (postgres, redis, backend, celery-worker, celery-beat, frontend — ilk 5'i healthy)
+> - Backend: 50+ dosya, 33 API endpoint, 20 DB tablosu, auth flow tam çalışır
+> - Frontend: 38+ dosya, placeholder sayfalar ve temel bileşenler mevcut
+> - Seed data: 30 BIST sembolü + 5 endeks yüklü
+> - Alembic migration: `622228031e14_initial_schema` başarılı
+> - İmplementasyon düzeltmeleri için "Bilinen Tutarsızlıklar" bölümüne bakınız.
 
 > **Amaç:** Proje iskeleti, Docker ortamı, veritabanı, temel backend ve frontend projelerinin çalışır hale gelmesi.
 
@@ -1034,12 +1054,12 @@ Kontrol: Frontend gönderdiği veri backend'in beklediğiyle aynı mı?
 
 Proje tamamlandığında aşağıdaki kriterler sağlanmalıdır:
 
-### Faz 0 Tamamlanma Kriterleri
+### Faz 0 Tamamlanma Kriterleri — ✅ TAMAMLANDI
 
-- [ ] Docker compose ile tüm servisler ayağa kalkıyor
-- [ ] Backend health check 200 dönüyor
-- [ ] Frontend build hatasız tamamlanıyor
-- [ ] Alembic migration başarılı, 16+ tablo oluşmuş
+- [x] Docker compose ile tüm servisler ayağa kalkıyor
+- [x] Backend health check 200 dönüyor
+- [x] Frontend build hatasız tamamlanıyor
+- [x] Alembic migration başarılı, 20 tablo oluşmuş
 - [ ] CI pipeline (GitHub Actions) çalışıyor
 
 ### MVP (Faz 1) Tamamlanma Kriterleri

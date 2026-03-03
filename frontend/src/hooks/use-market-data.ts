@@ -5,12 +5,19 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { getSymbols, getQuote, getHistory, getIndices } from "@/lib/api/market";
+import {
+  getSymbols,
+  getQuote,
+  getHistory,
+  getIndices,
+  getSectors,
+  type SymbolsParams,
+} from "@/lib/api/market";
 
-export function useSymbols(index?: string) {
+export function useSymbols(params?: SymbolsParams) {
   return useQuery({
-    queryKey: ["symbols", index],
-    queryFn: () => getSymbols(index),
+    queryKey: ["symbols", params],
+    queryFn: () => getSymbols(params),
     staleTime: 5 * 60 * 1000, // 5 dk
   });
 }
@@ -38,6 +45,14 @@ export function useIndices() {
   return useQuery({
     queryKey: ["indices"],
     queryFn: getIndices,
+    staleTime: 60 * 60 * 1000, // 1 saat
+  });
+}
+
+export function useSectors() {
+  return useQuery({
+    queryKey: ["sectors"],
+    queryFn: getSectors,
     staleTime: 60 * 60 * 1000, // 1 saat
   });
 }

@@ -34,4 +34,4 @@ class APIResponse(BaseModel, Generic[T]):
     success: bool
     data: T | None = None
     error: ErrorDetail | None = None
-    meta: PaginationMeta | None = None
+    meta: PaginationMeta | dict | None = None

@@ -1,9 +1,11 @@
 # bist-robogo — Adım Adım Geliştirme Rehberi
 
 > **Proje:** bist-robogo — BIST İçin AI Destekli Otomatik Ticaret Platformu  
-> **Versiyon:** 1.0  
+> **Versiyon:** 1.1 (Faz 0 implementasyon sonrası güncellenmiş)  
 > **Tarih:** 2026-03-03  
 > **Amaç:** AI Agent'ın projeyi komut komut, dosya dosya, sıfır hata ile geliştirmesi.
+
+> **⚠️ NOT:** Bu doküman Faz 0 tamamlandıktan sonra gerçek implementasyona uygun olarak güncellenmiştir. Artık doküman ile kod birebir eşleşmektedir.
 
 ---
 
@@ -14,8 +16,7 @@
 Proje kök dizininde oluşturulacak.
 
 ```yaml
-version: "3.9"
-
+# NOT: version anahtarı Docker Compose v2+ ile obsolete olduğu için kaldırılmıştır
 services:
   # ── PostgreSQL 16 + TimescaleDB ──
   postgres:
@@ -66,16 +67,17 @@ services:
       - DEBUG=true
       - DATABASE_URL=postgresql+asyncpg://bist_user:bist_dev_pass_2026@postgres:5432/bist_robogo
       - REDIS_URL=redis://:bist_redis_pass_2026@redis:6379/0
+      - CELERY_BROKER_URL=redis://:bist_redis_pass_2026@redis:6379/1
+      - CELERY_RESULT_BACKEND=redis://:bist_redis_pass_2026@redis:6379/2
       - JWT_SECRET_KEY=dev-jwt-secret-key-change-in-production-2026
       - JWT_ALGORITHM=HS256
-      - ACCESS_TOKEN_EXPIRE_MINUTES=30
-      - REFRESH_TOKEN_EXPIRE_DAYS=30
-      - CORS_ORIGINS=http://localhost:3000
+      - CORS_ORIGINS=["http://localhost:3000"]
       - LOG_LEVEL=DEBUG
     ports:
       - "8000:8000"
     volumes:
       - ./backend:/app
+      - backend_venv:/app/.venv
     depends_on:
       postgres:
         condition: service_healthy
@@ -98,6 +100,7 @@ services:
       - CELERY_RESULT_BACKEND=redis://:bist_redis_pass_2026@redis:6379/2
     volumes:
       - ./backend:/app
+      - backend_venv:/app/.venv
     depends_on:
       postgres:
         condition: service_healthy
@@ -120,6 +123,7 @@ services:
       - CELERY_RESULT_BACKEND=redis://:bist_redis_pass_2026@redis:6379/2
     volumes:
       - ./backend:/app
+      - backend_venv:/app/.venv
     depends_on:
       redis:
         condition: service_healthy
@@ -147,7 +151,10 @@ services:
 volumes:
   postgres_data:
   redis_data:
+  backend_venv:
 ```
+
+> **İmplementasyon Notu:** `backend_venv` volume'ü, `./backend:/app` bind mount'unun container içindeki `.venv` dizinini ezmesini önler. Bu olmadan `uvicorn` PATH'te bulunamaz.
 
 ### 1.2 scripts/init-db.sql
 
@@ -213,9 +220,9 @@ USER appuser
 
 EXPOSE 8000
 
-# Health check
+# Health check (Doc 11 Tutarsızlık #4: /health kullan, /api/health değil)
 HEALTHCHECK --interval=30s --timeout=10s --retries=3 \
-  CMD curl -f http://localhost:8000/api/health || exit 1
+  CMD curl -f http://localhost:8000/health || exit 1
 
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
 ```
@@ -435,7 +442,17 @@ jobs:
 
 ## 5. Geliştirme Sırası — Faz Bazlı Detaylı Adımlar
 
-### Faz 0: Altyapı Kurulumu (Hafta 1-2)
+### Faz 0: Altyapı Kurulumu (Hafta 1-2) — ✅ TAMAMLANDI
+
+> **Durum:** Faz 0 tüm adımlarıyla tamamlanmıştır. Aşağıda implementasyon sırasında uygulanan düzeltmeler belirtilmiştir.
+>
+> **Uygulanan Düzeltmeler:**
+> - `passlib` yerine doğrudan `bcrypt` modülü kullanıldı (passlib + bcrypt 4.2+ uyumsuzluğu)
+> - `CORS_ORIGINS` JSON format `["http://localhost:3000"]` + `field_validator` eklendi
+> - `ACCESS_TOKEN_EXPIRE_MINUTES` → `JWT_ACCESS_TOKEN_EXPIRE_MINUTES` (auth_service.py'de 2 yerde)
+> - `docker-compose.yml`: `version: "3.9"` kaldırıldı, `backend_venv:/app/.venv` volume eklendi
+> - `backend/.dockerignore` dosyası oluşturuldu
+> - `api/v1/analysis.py` yerine `api/v1/trends.py` adlandırması kullanıldı
 
 Her adımda ne yapılacak, hangi dosya oluşturulacak ve nasıl doğrulanacak belirtilmiştir.
 
@@ -514,13 +531,29 @@ backend/
 │   ├── dependencies.py     # Doc 07 §11
 │   ├── logging_config.py   # Doc 07 §21
 │   ├── models/
-│   │   ├── __init__.py     # Doc 07 §6
+│   │   ├── __init__.py     # Doc 07 §6 — tüm modelleri re-export
 │   │   ├── base.py         # Doc 07 §4
-│   │   └── user.py         # Doc 07 §5
+│   │   ├── user.py         # Doc 07 §5
+│   │   ├── market.py       # Symbol, Index, OHLCV modelleri
+│   │   ├── order.py        # Order, Trade modelleri
+│   │   ├── portfolio.py    # Position, Portfolio modelleri
+│   │   ├── strategy.py     # Strategy, Signal modelleri
+│   │   ├── backtest.py     # BacktestRun, BacktestTrade
+│   │   ├── risk.py         # RiskRule modeli
+│   │   ├── broker.py       # BrokerConnection modeli
+│   │   ├── notification.py # Notification modeli
+│   │   └── audit.py        # AuditLog modeli
 │   ├── schemas/
 │   │   ├── __init__.py     # boş
 │   │   ├── common.py       # Doc 07 §15
-│   │   └── auth.py         # Doc 07 §16
+│   │   ├── auth.py         # Doc 07 §16
+│   │   ├── market.py       # Quote, OHLCV şemaları
+│   │   ├── order.py        # OrderCreate, OrderResponse
+│   │   ├── portfolio.py    # PortfolioSummary, Position
+│   │   ├── strategy.py     # StrategyCreate, Signal
+│   │   ├── backtest.py     # BacktestRequest, BacktestResult
+│   │   ├── risk.py         # RiskStatus
+│   │   └── analysis.py     # TrendAnalysis, Candidates
 │   ├── core/
 │   │   ├── __init__.py     # boş
 │   │   ├── security.py     # Doc 07 §10
@@ -533,11 +566,21 @@ backend/
 │   │   ├── health.py       # Doc 07 §13
 │   │   └── v1/
 │   │       ├── __init__.py # boş
-│   │       └── auth.py     # Doc 07 §14
+│   │       ├── auth.py     # Doc 07 §14
+│   │       ├── market.py        # placeholder
+│   │       ├── orders.py        # placeholder
+│   │       ├── portfolio.py     # placeholder
+│   │       ├── strategies.py    # placeholder
+│   │       ├── backtest.py      # placeholder
+│   │       ├── risk.py          # placeholder
+│   │       ├── trends.py        # placeholder (Doc'ta analysis.py → trends.py olarak adlandırıldı)
+│   │       └── notifications.py # placeholder
 │   ├── services/
-│   │   └── __init__.py     # boş (§Doc 07 servis pattern'ı)
+│   │   ├── __init__.py     # boş
+│   │   └── auth_service.py # Doc 07 pattern — auth iş mantığı
 │   ├── repositories/
-│   │   └── __init__.py     # boş (Doc 07 repository pattern'ı)
+│   │   ├── __init__.py     # boş
+│   │   └── base.py         # Doc 07 §12.2 — Generic CRUD repository
 │   ├── brokers/
 │   │   ├── __init__.py     # boş
 │   │   ├── base.py         # Doc 07 §23.1
@@ -604,7 +647,7 @@ poetry run uvicorn app.main:app --reload --port 8000
 **Doğrulama:**
 
 ```bash
-curl http://localhost:8000/api/health
+curl http://localhost:8000/health
 # {"status":"healthy","timestamp":"...","version":"1.0.0","services":{"database":"ok","redis":"ok"}}
 
 curl http://localhost:8000/docs
@@ -746,8 +789,8 @@ curl -X POST http://localhost:8000/api/v1/auth/login \
 
 | #   | Görev                            | Dosya                                                   | Referans     |
 | --- | -------------------------------- | ------------------------------------------------------- | ------------ |
-| 1   | Symbol modeli                    | `backend/app/models/symbol.py`                          | Doc 03 SQL   |
-| 2   | OHLCV modeli                     | `backend/app/models/ohlcv.py`                           | Doc 03 SQL   |
+| 1   | Symbol/Index modelleri (mevcut)   | `backend/app/models/market.py`                          | Doc 03 SQL   |
+| 2   | OHLCV (market.py içinde, mevcut)  | `backend/app/models/market.py`                          | Doc 03 SQL   |
 | 3   | TimescaleDB hypertable migration | `alembic/versions/002_market_data.py`                   | Doc 03       |
 | 4   | Market API endpoints             | `backend/app/api/v1/market.py`                          | Doc 03 API   |
 | 5   | Market servis                    | `backend/app/services/market_service.py`                | —            |
@@ -783,10 +826,10 @@ curl http://localhost:8000/api/v1/market/symbols/THYAO/history?interval=1d&limit
 
 | #   | Görev                                           | Dosya                                                 | Referans     |
 | --- | ----------------------------------------------- | ----------------------------------------------------- | ------------ |
-| 1   | Order modeli                                    | `backend/app/models/order.py`                         | Doc 03 SQL   |
-| 2   | Position modeli                                 | `backend/app/models/position.py`                      | Doc 03 SQL   |
-| 3   | Portfolio modeli                                | `backend/app/models/portfolio.py`                     | Doc 03 SQL   |
-| 4   | Trade modeli                                    | `backend/app/models/trade.py`                         | Doc 03 SQL   |
+| 1   | Order/Trade modelleri (mevcut)              | `backend/app/models/order.py`                         | Doc 03 SQL   |
+| 2   | Position modeli (mevcut)                    | `backend/app/models/portfolio.py`                     | Doc 03 SQL   |
+| 3   | Portfolio modeli (mevcut)                   | `backend/app/models/portfolio.py`                     | Doc 03 SQL   |
+| 4   | Trade modeli (order.py içinde, mevcut)       | `backend/app/models/order.py`                         | Doc 03 SQL   |
 | 5   | Migration: order + position + portfolio + trade | `alembic/versions/003_trading.py`                     | —            |
 | 6   | Order API endpoints                             | `backend/app/api/v1/orders.py`                        | Doc 03 API   |
 | 7   | Portfolio API endpoints                         | `backend/app/api/v1/portfolio.py`                     | Doc 03 API   |
@@ -915,7 +958,7 @@ poetry run alembic upgrade head
 # Hatasız tamamlanmalı
 
 # Health check
-curl http://localhost:8000/api/health
+curl http://localhost:8000/health
 # {"status":"healthy",...}
 ```
 
@@ -961,74 +1004,136 @@ curl http://localhost:3000
 
 Aşağıdaki tablo, her dosyanın içeriğinin hangi dokümanda ve hangi bölümde tanımlandığını gösterir. AI Agent bu tabloyu kullanarak doğru içeriği bulabilir.
 
-| Dosya Yolu                                             | Doküman | Bölüm      |
-| ------------------------------------------------------ | ------- | ---------- |
-| `docker-compose.yml`                                   | Doc 10  | §1.1       |
-| `scripts/init-db.sql`                                  | Doc 10  | §1.2       |
-| `backend/Dockerfile`                                   | Doc 10  | §2.1       |
-| `frontend/Dockerfile`                                  | Doc 10  | §3.1       |
-| `.github/workflows/ci.yml`                             | Doc 10  | §4.1       |
-| `backend/pyproject.toml`                               | Doc 07  | §23        |
-| `backend/alembic.ini`                                  | Doc 07  | §22        |
-| `backend/alembic/env.py`                               | Doc 07  | §22        |
-| `backend/app/config.py`                                | Doc 07  | §2         |
-| `backend/app/database.py`                              | Doc 07  | §3         |
-| `backend/app/main.py`                                  | Doc 07  | §7         |
-| `backend/app/middleware.py`                            | Doc 07  | §8         |
-| `backend/app/exceptions.py`                            | Doc 07  | §9         |
-| `backend/app/dependencies.py`                          | Doc 07  | §11        |
-| `backend/app/logging_config.py`                        | Doc 07  | §21        |
-| `backend/app/models/base.py`                           | Doc 07  | §4         |
-| `backend/app/models/user.py`                           | Doc 07  | §5         |
-| `backend/app/models/__init__.py`                       | Doc 07  | §6         |
-| `backend/app/schemas/common.py`                        | Doc 07  | §15        |
-| `backend/app/schemas/auth.py`                          | Doc 07  | §16        |
-| `backend/app/core/security.py`                         | Doc 07  | §10        |
-| `backend/app/core/redis_client.py`                     | Doc 07  | §17        |
-| `backend/app/core/rate_limiter.py`                     | Doc 07  | §18        |
-| `backend/app/core/websocket_manager.py`                | Doc 07  | §19        |
-| `backend/app/api/router.py`                            | Doc 07  | §12        |
-| `backend/app/api/health.py`                            | Doc 07  | §13        |
-| `backend/app/api/v1/auth.py`                           | Doc 07  | §14        |
-| `backend/app/websocket/market_stream.py`               | Doc 07  | §19.2      |
-| `backend/app/tasks/celery_app.py`                      | Doc 07  | §20.1      |
-| `backend/app/tasks/market_tasks.py`                    | Doc 07  | §20.2      |
-| `backend/app/brokers/base.py`                          | Doc 07  | §23.1      |
-| `backend/app/brokers/paper_broker.py`                  | Doc 07  | §23.2      |
-| `backend/app/brokers/factory.py`                       | Doc 07  | §23.3      |
-| `backend/app/indicators/momentum.py`                   | Doc 07  | §24        |
-| `backend/app/utils/constants.py`                       | Doc 07  | §25.1      |
-| `backend/app/utils/formatters.py`                      | Doc 07  | §25.2      |
-| `backend/scripts/seed_symbols.py`                      | Doc 07  | §24 (seed) |
-| `backend/tests/conftest.py`                            | Doc 07  | §25 (test) |
-| `frontend/next.config.ts`                              | Doc 08  | §2.1       |
-| `frontend/tailwind.config.ts`                          | Doc 08  | §2.2       |
-| `frontend/src/app/globals.css`                         | Doc 08  | §2.3       |
-| `frontend/src/app/layout.tsx`                          | Doc 08  | §7.1       |
-| `frontend/src/app/(dashboard)/layout.tsx`              | Doc 08  | §7.4       |
-| `frontend/src/lib/utils.ts`                            | Doc 08  | §10.1      |
-| `frontend/src/lib/utils/formatters.ts`                 | Doc 08  | §10.2      |
-| `frontend/src/lib/api/client.ts`                       | Doc 08  | §3.1       |
-| `frontend/src/lib/api/market.ts`                       | Doc 08  | §3.2       |
-| `frontend/src/lib/api/orders.ts`                       | Doc 08  | §3.3       |
-| `frontend/src/types/market.ts`                         | Doc 08  | §4.1       |
-| `frontend/src/types/order.ts`                          | Doc 08  | §4.2       |
-| `frontend/src/types/portfolio.ts`                      | Doc 08  | §4.3       |
-| `frontend/src/types/strategy.ts`                       | Doc 08  | §4.4       |
-| `frontend/src/stores/auth-store.ts`                    | Doc 08  | §5.1       |
-| `frontend/src/stores/market-store.ts`                  | Doc 08  | §5.2       |
-| `frontend/src/stores/ui-store.ts`                      | Doc 08  | §5.3       |
-| `frontend/src/hooks/use-websocket.ts`                  | Doc 08  | §6.1       |
-| `frontend/src/hooks/use-market-data.ts`                | Doc 08  | §6.2       |
-| `frontend/src/hooks/use-portfolio.ts`                  | Doc 08  | §6.3       |
-| `frontend/src/components/providers/theme-provider.tsx` | Doc 08  | §7.2       |
-| `frontend/src/components/providers/query-provider.tsx` | Doc 08  | §7.3       |
-| `frontend/src/components/auth/auth-guard.tsx`          | Doc 08  | §11.1      |
-| `frontend/src/components/layout/sidebar.tsx`           | Doc 08  | §7.5       |
-| `frontend/src/components/layout/header.tsx`            | Doc 08  | §7.6       |
-| `frontend/src/components/dashboard/stat-card.tsx`      | Doc 08  | §8.1       |
-| `frontend/src/app/(dashboard)/dashboard/page.tsx`      | Doc 08  | §8.2       |
-| `frontend/src/components/charts/candlestick-chart.tsx` | Doc 08  | §9.1       |
+> **Not (v1.1):** `analysis.py` yerine `trends.py` adlandırması kullanılmaktadır. Doc 11'deki referans haritası günceldir.
+
+### Altyapı Dosyaları
+
+| Dosya Yolu                                             | Doküman | Bölüm      | Durum       |
+| ------------------------------------------------------ | ------- | ---------- | ----------- |
+| `docker-compose.yml`                                   | Doc 10  | §1.1       | ✅ Mevcut   |
+| `scripts/init-db.sql`                                  | Doc 10  | §1.2       | ✅ Mevcut   |
+| `.env.example`                                         | —       | —          | ✅ Mevcut   |
+| `.gitignore`                                           | —       | —          | ✅ Mevcut   |
+| `Makefile`                                             | —       | —          | ✅ Mevcut   |
+| `.github/workflows/ci.yml`                             | Doc 10  | §4.1       | ✅ Mevcut   |
+
+### Backend Dosyaları
+
+| Dosya Yolu                                             | Doküman | Bölüm      | Durum       |
+| ------------------------------------------------------ | ------- | ---------- | ----------- |
+| `backend/Dockerfile`                                   | Doc 10  | §2.1       | ✅ Mevcut   |
+| `backend/.dockerignore`                                | —       | —          | ✅ Mevcut   |
+| `backend/pyproject.toml`                               | Doc 07  | §23        | ✅ Mevcut   |
+| `backend/alembic.ini`                                  | Doc 07  | §22        | ✅ Mevcut   |
+| `backend/alembic/env.py`                               | Doc 07  | §22        | ✅ Mevcut   |
+| `backend/app/config.py`                                | Doc 07  | §2         | ✅ Mevcut   |
+| `backend/app/database.py`                              | Doc 07  | §3         | ✅ Mevcut   |
+| `backend/app/main.py`                                  | Doc 07  | §7         | ✅ Mevcut   |
+| `backend/app/middleware.py`                             | Doc 07  | §8         | ✅ Mevcut   |
+| `backend/app/exceptions.py`                            | Doc 07  | §9         | ✅ Mevcut   |
+| `backend/app/dependencies.py`                          | Doc 07  | §11        | ✅ Mevcut   |
+| `backend/app/logging_config.py`                        | Doc 07  | §21        | ✅ Mevcut   |
+| `backend/app/models/base.py`                           | Doc 07  | §4         | ✅ Mevcut   |
+| `backend/app/models/user.py`                           | Doc 07  | §5         | ✅ Mevcut   |
+| `backend/app/models/market.py`                         | Doc 03  | §2         | ✅ Mevcut   |
+| `backend/app/models/order.py`                          | Doc 03  | §2         | ✅ Mevcut   |
+| `backend/app/models/portfolio.py`                      | Doc 03  | §2         | ✅ Mevcut   |
+| `backend/app/models/strategy.py`                       | Doc 03  | §2         | ✅ Mevcut   |
+| `backend/app/models/backtest.py`                       | Doc 03  | §2         | ✅ Mevcut   |
+| `backend/app/models/risk.py`                           | Doc 03  | §2         | ✅ Mevcut   |
+| `backend/app/models/broker.py`                         | Doc 03  | §2         | ✅ Mevcut   |
+| `backend/app/models/notification.py`                   | Doc 03  | §2         | ✅ Mevcut   |
+| `backend/app/models/audit.py`                          | Doc 03  | §2         | ✅ Mevcut   |
+| `backend/app/models/__init__.py`                       | Doc 07  | §6         | ✅ Mevcut   |
+| `backend/app/schemas/common.py`                        | Doc 07  | §15        | ✅ Mevcut   |
+| `backend/app/schemas/auth.py`                          | Doc 07  | §16        | ✅ Mevcut   |
+| `backend/app/schemas/market.py`                        | Doc 03  | §4         | ✅ Mevcut   |
+| `backend/app/schemas/order.py`                         | Doc 03  | §4         | ✅ Mevcut   |
+| `backend/app/schemas/portfolio.py`                     | Doc 03  | §4         | ✅ Mevcut   |
+| `backend/app/schemas/strategy.py`                      | Doc 03  | §4         | ✅ Mevcut   |
+| `backend/app/schemas/backtest.py`                      | Doc 03  | §4         | ✅ Mevcut   |
+| `backend/app/schemas/risk.py`                          | Doc 03  | §4         | ✅ Mevcut   |
+| `backend/app/schemas/analysis.py`                      | Doc 03  | §4         | ✅ Mevcut   |
+| `backend/app/core/security.py`                         | Doc 07  | §10        | ✅ Mevcut   |
+| `backend/app/core/redis_client.py`                     | Doc 07  | §17        | ✅ Mevcut   |
+| `backend/app/core/rate_limiter.py`                     | Doc 07  | §18        | ✅ Mevcut   |
+| `backend/app/core/websocket_manager.py`                | Doc 07  | §19        | ✅ Mevcut   |
+| `backend/app/api/router.py`                            | Doc 07  | §12        | ✅ Mevcut   |
+| `backend/app/api/health.py`                            | Doc 07  | §13        | ✅ Mevcut   |
+| `backend/app/api/v1/auth.py`                           | Doc 07  | §14        | ✅ Tam impl |
+| `backend/app/api/v1/market.py`                         | Doc 03  | §3.3       | 🔲 Placeholder |
+| `backend/app/api/v1/orders.py`                         | Doc 03  | §3.4       | 🔲 Placeholder |
+| `backend/app/api/v1/portfolio.py`                      | Doc 03  | §3.5       | 🔲 Placeholder |
+| `backend/app/api/v1/strategies.py`                     | Doc 02  | §2.5       | 🔲 Placeholder |
+| `backend/app/api/v1/backtest.py`                       | Doc 02  | §2.7       | 🔲 Placeholder |
+| `backend/app/api/v1/risk.py`                           | Doc 03  | §3.7       | 🔲 Placeholder |
+| `backend/app/api/v1/trends.py`                         | Doc 03  | §3.6       | 🔲 Placeholder |
+| `backend/app/api/v1/notifications.py`                  | Doc 02  | §2.9       | 🔲 Placeholder |
+| `backend/app/services/auth_service.py`                 | Doc 02  | §2.1       | ✅ Tam impl |
+| `backend/app/repositories/base.py`                     | Doc 07  | §12.2      | ✅ Mevcut   |
+| `backend/app/websocket/market_stream.py`               | Doc 07  | §19.2      | 🔲 Placeholder |
+| `backend/app/tasks/celery_app.py`                      | Doc 07  | §20.1      | ✅ Mevcut   |
+| `backend/app/tasks/market_tasks.py`                    | Doc 07  | §20.2      | 🔲 Placeholder |
+| `backend/app/brokers/base.py`                          | Doc 07  | §23.1      | ✅ Mevcut   |
+| `backend/app/brokers/paper_broker.py`                  | Doc 07  | §23.2      | 🔲 Placeholder |
+| `backend/app/brokers/factory.py`                       | Doc 07  | §23.3      | ✅ Mevcut   |
+| `backend/app/indicators/momentum.py`                   | Doc 07  | §24        | 🔲 Placeholder |
+| `backend/app/strategies/base.py`                       | Doc 02  | §2.5       | 🔲 Placeholder |
+| `backend/app/utils/constants.py`                       | Doc 07  | §25.1      | ✅ Mevcut   |
+| `backend/app/utils/formatters.py`                      | Doc 07  | §25.2      | ✅ Mevcut   |
+| `backend/scripts/seed_symbols.py`                      | Doc 07  | §24 (seed) | ✅ Mevcut   |
+| `backend/tests/conftest.py`                            | Doc 07  | §25 (test) | ✅ Mevcut   |
+
+### Frontend Dosyaları
+
+| Dosya Yolu                                                              | Doküman | Bölüm | Durum          |
+| ----------------------------------------------------------------------- | ------- | ----- | -------------- |
+| `frontend/Dockerfile`                                                   | Doc 10  | §3.1  | ✅ Mevcut      |
+| `frontend/next.config.ts`                                               | Doc 08  | §2.1  | ✅ Mevcut      |
+| `frontend/tailwind.config.ts`                                           | Doc 08  | §2.2  | ✅ Mevcut      |
+| `frontend/src/app/globals.css`                                          | Doc 08  | §2.3  | ✅ Mevcut      |
+| `frontend/src/app/layout.tsx`                                           | Doc 08  | §7.1  | ✅ Mevcut      |
+| `frontend/src/app/(auth)/layout.tsx`                                    | —       | —     | ✅ Mevcut      |
+| `frontend/src/app/(auth)/login/page.tsx`                                | Doc 09  | §14.1 | 🔲 Placeholder |
+| `frontend/src/app/(auth)/register/page.tsx`                             | Doc 09  | §14.1 | 🔲 Placeholder |
+| `frontend/src/app/(dashboard)/layout.tsx`                               | Doc 08  | §7.4  | ✅ Mevcut      |
+| `frontend/src/app/(dashboard)/dashboard/page.tsx`                       | Doc 08  | §8.2  | ✅ Mevcut      |
+| `frontend/src/app/(dashboard)/dashboard/_components/dashboard-stats.tsx` | —       | —     | ✅ Mevcut      |
+| `frontend/src/app/(dashboard)/dashboard/_components/equity-curve.tsx`    | —       | —     | ✅ Mevcut      |
+| `frontend/src/app/(dashboard)/dashboard/_components/allocation-chart.tsx`| —       | —     | ✅ Mevcut      |
+| `frontend/src/app/(dashboard)/dashboard/_components/recent-orders.tsx`   | —       | —     | ✅ Mevcut      |
+| `frontend/src/app/(dashboard)/dashboard/_components/recent-signals.tsx`  | —       | —     | ✅ Mevcut      |
+| `frontend/src/app/(dashboard)/dashboard/_components/risk-status.tsx`     | —       | —     | ✅ Mevcut      |
+| `frontend/src/app/(dashboard)/market/page.tsx`                          | Doc 04  | §2.3  | 🔲 Placeholder |
+| `frontend/src/app/(dashboard)/market/[symbol]/page.tsx`                 | Doc 04  | §2.3  | 🔲 Placeholder |
+| `frontend/src/app/(dashboard)/trends/page.tsx`                          | Doc 04  | §2.4  | 🔲 Placeholder |
+| `frontend/src/app/(dashboard)/strategies/page.tsx`                      | Doc 04  | §2.5  | 🔲 Placeholder |
+| `frontend/src/app/(dashboard)/backtest/page.tsx`                        | Doc 04  | §2.6  | 🔲 Placeholder |
+| `frontend/src/app/(dashboard)/portfolio/page.tsx`                       | Doc 04  | §2.7  | 🔲 Placeholder |
+| `frontend/src/app/(dashboard)/orders/page.tsx`                          | —       | —     | 🔲 Placeholder |
+| `frontend/src/app/(dashboard)/settings/page.tsx`                        | Doc 04  | §2.8  | 🔲 Placeholder |
+| `frontend/src/lib/utils.ts`                                            | Doc 08  | §10.1 | ✅ Mevcut      |
+| `frontend/src/lib/utils/formatters.ts`                                 | Doc 08  | §10.2 | ✅ Mevcut      |
+| `frontend/src/lib/api/client.ts`                                       | Doc 08  | §3.1  | ✅ Mevcut      |
+| `frontend/src/lib/api/market.ts`                                       | Doc 08  | §3.2  | ✅ Mevcut      |
+| `frontend/src/lib/api/orders.ts`                                       | Doc 08  | §3.3  | ✅ Mevcut      |
+| `frontend/src/types/market.ts`                                         | Doc 08  | §4.1  | ✅ Mevcut      |
+| `frontend/src/types/order.ts`                                          | Doc 08  | §4.2  | ✅ Mevcut      |
+| `frontend/src/types/portfolio.ts`                                      | Doc 08  | §4.3  | ✅ Mevcut      |
+| `frontend/src/types/strategy.ts`                                       | Doc 08  | §4.4  | ✅ Mevcut      |
+| `frontend/src/stores/auth-store.ts`                                    | Doc 08  | §5.1  | ✅ Mevcut      |
+| `frontend/src/stores/market-store.ts`                                  | Doc 08  | §5.2  | ✅ Mevcut      |
+| `frontend/src/stores/ui-store.ts`                                      | Doc 08  | §5.3  | ✅ Mevcut      |
+| `frontend/src/hooks/use-websocket.ts`                                  | Doc 08  | §6.1  | ✅ Mevcut      |
+| `frontend/src/hooks/use-market-data.ts`                                | Doc 08  | §6.2  | ✅ Mevcut      |
+| `frontend/src/hooks/use-portfolio.ts`                                  | Doc 08  | §6.3  | ✅ Mevcut      |
+| `frontend/src/components/providers/theme-provider.tsx`                 | Doc 08  | §7.2  | ✅ Mevcut      |
+| `frontend/src/components/providers/query-provider.tsx`                 | Doc 08  | §7.3  | ✅ Mevcut      |
+| `frontend/src/components/auth/auth-guard.tsx`                          | Doc 08  | §11.1 | ✅ Mevcut      |
+| `frontend/src/components/layout/sidebar.tsx`                           | Doc 08  | §7.5  | ✅ Mevcut      |
+| `frontend/src/components/layout/header.tsx`                            | Doc 08  | §7.6  | ✅ Mevcut      |
+| `frontend/src/components/dashboard/stat-card.tsx`                      | Doc 08  | §8.1  | ✅ Mevcut      |
+| `frontend/src/components/charts/candlestick-chart.tsx`                 | Doc 08  | §9.1  | ✅ Mevcut      |
 
 ---
 

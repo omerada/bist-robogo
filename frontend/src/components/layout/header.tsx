@@ -1,6 +1,7 @@
 "use client";
 
-import { Bell, Moon, Sun, Search, Menu } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Moon, Sun, Search, Menu } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,12 +14,25 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useAuthStore } from "@/stores/auth-store";
 import { useUIStore } from "@/stores/ui-store";
+import { NotificationBell } from "./notification-bell";
 
 export function Header() {
+  const router = useRouter();
   const { theme, setTheme } = useTheme();
   const user = useAuthStore((s) => s.user);
-  const logout = useAuthStore((s) => s.logout);
+  const logoutStore = useAuthStore((s) => s.logout);
   const { toggleSidebar } = useUIStore();
+
+  const handleLogout = async () => {
+    try {
+      const { logout: logoutApi } = await import("@/lib/api/auth");
+      await logoutApi();
+    } catch {
+      // API hatası olsa bile store'u temizle
+    }
+    logoutStore();
+    router.push("/login");
+  };
 
   const initials =
     user?.full_name
@@ -64,12 +78,7 @@ export function Header() {
         </Button>
 
         {/* Bildirimler */}
-        <Button variant="ghost" size="icon" className="relative">
-          <Bell className="h-4 w-4" />
-          <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[10px] text-white">
-            3
-          </span>
-        </Button>
+        <NotificationBell />
 
         {/* Profil */}
         <DropdownMenu>
@@ -90,7 +99,7 @@ export function Header() {
             <DropdownMenuItem asChild>
               <a href="/settings">Ayarlar</a>
             </DropdownMenuItem>
-            <DropdownMenuItem className="text-destructive" onClick={logout}>
+            <DropdownMenuItem className="text-destructive" onClick={handleLogout}>
               Çıkış Yap
             </DropdownMenuItem>
           </DropdownMenuContent>

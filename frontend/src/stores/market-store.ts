@@ -23,7 +23,7 @@ interface MarketState {
 export const useMarketStore = create<MarketState>()((set) => ({
   quotes: {},
   selectedSymbol: null,
-  selectedIndex: "XU030",
+  selectedIndex: "ALL",
 
   updateQuote: (symbol, quoteUpdate) =>
     set((state) => ({

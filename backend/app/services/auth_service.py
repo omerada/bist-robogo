@@ -5,7 +5,6 @@ from uuid import uuid4
 
 import pyotp
 import structlog
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import get_settings
@@ -22,6 +21,7 @@ from app.exceptions import (
     UnauthorizedException,
 )
 from app.models.user import User
+from app.repositories.user_repository import UserRepository
 from app.schemas.auth import (
     Enable2FAResponse,
     LoginRequest,
@@ -38,6 +38,7 @@ class AuthService:
 
     def __init__(self, db: AsyncSession):
         self.db = db
+        self.user_repo = UserRepository(db)
 
     async def register(self, data: RegisterRequest) -> User:
         """Yeni kullanıcı kaydı oluşturur.
@@ -46,10 +47,7 @@ class AuthService:
             ConflictException: E-posta zaten kullanılıyorsa.
         """
         # E-posta kontrolü
-        stmt = select(User).where(User.email == data.email)
-        result = await self.db.execute(stmt)
-        existing = result.scalar_one_or_none()
-        if existing:
+        if await self.user_repo.email_exists(data.email):
             raise ConflictException("Bu e-posta adresi zaten kullanılıyor")
 
         user = User(
@@ -74,9 +72,7 @@ class AuthService:
         Raises:
             UnauthorizedException: E-posta veya şifre hatalıysa.
         """
-        stmt = select(User).where(User.email == data.email)
-        result = await self.db.execute(stmt)
-        user = result.scalar_one_or_none()
+        user = await self.user_repo.get_by_email(data.email)
 
         if not user or not verify_password(data.password, user.password_hash):
             raise UnauthorizedException("Geçersiz e-posta veya şifre")
@@ -94,6 +90,10 @@ class AuthService:
 
         access_token = create_access_token(user.id, user.role)
         refresh_token = create_refresh_token(user.id)
+
+        # Son giriş zamanını güncelle
+        await self.user_repo.update_last_login(user)
+        await self.db.commit()
 
         logger.info("user_logged_in", user_id=str(user.id))
 
@@ -118,7 +118,7 @@ class AuthService:
             raise UnauthorizedException("Geçersiz refresh token")
 
         user_id = payload.get("sub")
-        user = await self.db.get(User, user_id)
+        user = await self.user_repo.get_by_id(user_id)
         if not user or not user.is_active:
             raise UnauthorizedException("Kullanıcı bulunamadı veya devre dışı")
 
