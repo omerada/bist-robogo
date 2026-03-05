@@ -78,6 +78,12 @@ services:
     container_name: bist-celery-worker
     restart: unless-stopped
     command: celery -A app.tasks.celery_app worker --loglevel=info --concurrency=4
+    healthcheck:
+      test:
+        ["CMD-SHELL", "celery -A app.tasks.celery_app inspect ping --timeout 5"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
     environment:
       - APP_ENV=development
       - DATABASE_URL=postgresql+asyncpg://bist_user:bist_dev_pass_2026@postgres:5432/bist_robogo
@@ -100,7 +106,16 @@ services:
       dockerfile: Dockerfile
     container_name: bist-celery-beat
     restart: unless-stopped
-    command: celery -A app.tasks.celery_app beat --loglevel=info
+    command: celery -A app.tasks.celery_app beat --loglevel=info --pidfile=/tmp/celerybeat.pid
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "test -f /tmp/celerybeat.pid && kill -0 $(cat /tmp/celerybeat.pid)",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
     environment:
       - APP_ENV=development
       - DATABASE_URL=postgresql+asyncpg://bist_user:bist_dev_pass_2026@postgres:5432/bist_robogo
