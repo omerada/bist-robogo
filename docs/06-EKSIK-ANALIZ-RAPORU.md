@@ -1,7 +1,7 @@
 # bist-robogo — Eksik Analiz Raporu
 
 > **Proje:** bist-robogo — BIST İçin AI Destekli Otomatik Ticaret Platformu  
-> **Son Güncelleme:** 2026-03-05  
+> **Son Güncelleme:** 2026-03-05 (Sprint 4.4 — CI/CD & Test Altyapısı)  
 > **Amaç:** Mevcut kod tabanı ile dokümanların karşılaştırmalı analizi — sadece GERÇEKTEN EKSİK / YAPILMASI GEREKEN maddeler.
 
 ---
@@ -23,21 +23,22 @@ Aşağıdaki tüm maddeler **artık tamamlanmıştır** ve eski rapordan çıkar
 - ~~O1–O2~~ Docker/Dockerfile eksiklikleri → Tamamlandı
 - ~~T1–T2~~ Backend test eksiklikleri → 272/272 test geçiyor
 - ~~Doc 07, 08, 09, 10 oluşturulması~~ → Tümü oluşturuldu
+- ~~B1–B6~~ pyproject.toml kullanılmayan bağımlılıklar → ✅ Temizlendi (passlib, confluent-kafka, yfinance, aiohttp, factory-boy, ML grubu kaldırıldı)
+- ~~F1~~ error.tsx boundary → ✅ 3 adet oluşturuldu (global, dashboard, auth)
+- ~~F2~~ loading.tsx boundary → ✅ 9 adet oluşturuldu (tüm dashboard sayfaları)
+- ~~F3~~ not-found.tsx 404 sayfası → ✅ Oluşturuldu
+- ~~F4~~ middleware.ts auth koruması → ✅ Oluşturuldu (cookie-based + auth-store sync)
+- ~~F6–F8~~ Eksik type dosyaları → ✅ notification.ts, dashboard.ts, auth.ts oluşturuldu
+- ~~F5~~ Frontend test altyapısı → ✅ vitest.config.ts + 6 test dosyası (60 test), playwright.config.ts + e2e/auth.spec.ts
+- ~~O1~~ GitHub Actions CI/CD → ✅ `.github/workflows/ci.yml` güncellendi (5 job: backend-lint, backend-test, frontend-lint, frontend-test, docker-build)
 
 ---
 
 ## 3. MEVCUT EKSİKLİKLER
 
-### 3.1 Backend — Kullanılmayan / Uyumsuz Bağımlılıklar (pyproject.toml)
+### 3.1 Backend — Kullanılmayan Bağımlılıklar ✅ TEMİZLENDİ
 
-| #   | Bağımlılık                                                         | Durum                         | Açıklama                                                             |
-| --- | ------------------------------------------------------------------ | ----------------------------- | -------------------------------------------------------------------- |
-| B1  | `passlib`                                                          | ⚠️ Kaldırılmalı               | Fix #10 ile `bcrypt` modülüne geçildi, `passlib` artık kullanılmıyor |
-| B2  | `confluent-kafka`                                                  | ⚠️ Kaldırılmalı               | `core/kafka_client.py` hiç oluşturulmadı, Kafka kullanılmıyor        |
-| B3  | `yfinance`                                                         | ⚠️ Kaldırılmalı               | CollectAPI ile değiştirildi (Sprint 4.1)                             |
-| B4  | `aiohttp`                                                          | ⚠️ Değerlendirilmeli          | `httpx` tercih edildi, `aiohttp` kullanılıyor mu kontrol edilmeli    |
-| B5  | `factory-boy` (dev)                                                | ⚠️ Kaldırılmalı               | Test factory dosyası yok, flat fixture yapısı tercih edildi          |
-| B6  | ML grubu: `xgboost`, `lightgbm`, `optuna`, `mlflow`, `onnxruntime` | ⚠️ Kaldırılmalı veya optional | ML servisi kaldırılıp OpenRouter AI ile değiştirildi                 |
+> **Sprint 4.3'te tamamlandı.** `passlib`, `confluent-kafka`, `yfinance`, `aiohttp`, `scikit-learn`, `factory-boy` ve ML grubu (`xgboost`, `lightgbm`, `optuna`, `mlflow`, `onnxruntime`) kaldırıldı. `bcrypt` doğrudan eklendi.
 
 ### 3.2 Backend — Eksik Dosyalar / Özellikler
 
@@ -53,26 +54,26 @@ Aşağıdaki tüm maddeler **artık tamamlanmıştır** ve eski rapordan çıkar
 
 ### 3.3 Frontend — Eksik Dosyalar / Özellikler
 
-| #   | Eksiklik                                  | Öncelik   | Açıklama                                                                                |
-| --- | ----------------------------------------- | --------- | --------------------------------------------------------------------------------------- |
-| F1  | `error.tsx` boundary dosyaları            | 🔴 Kritik | Hiçbir route grubunda `error.tsx` yok — runtime hata yakalama korunmasız                |
-| F2  | `loading.tsx` Suspense boundary dosyaları | 🟡 Yüksek | Hiçbir route grubunda `loading.tsx` yok — sayfa geçişlerinde loading state eksik        |
-| F3  | `not-found.tsx` özel 404 sayfası          | 🟡 Yüksek | Next.js özel 404 sayfası bulunmuyor                                                     |
-| F4  | `middleware.ts` (Next.js middleware)      | 🟡 Yüksek | Auth redirect'leri yalnızca client-side (`auth-guard.tsx`), sunucu tarafında koruma yok |
-| F5  | Frontend test altyapısı                   | 🟡 Yüksek | `vitest.config.ts` ve `playwright.config.ts` yok, hiç test dosyası yok                  |
-| F6  | `types/notification.ts`                   | 🟢 Düşük  | Backend'de model var ama frontend types dizininde tanımsız                              |
-| F7  | `types/dashboard.ts`                      | 🟢 Düşük  | Dashboard tipleri ayrı dosyada değil                                                    |
-| F8  | `types/auth.ts`                           | 🟢 Düşük  | Auth tipleri ayrı dosyada tanımlı değil                                                 |
-| F9  | PWA Service Worker                        | 🟢 Düşük  | `public/manifest.json` var ama service worker dosyası yok                               |
+| #   | Eksiklik                            | Öncelik       | Açıklama                                                                            |
+| --- | ----------------------------------- | ------------- | ----------------------------------------------------------------------------------- |
+| F1  | ~~`error.tsx` boundary dosyaları~~  | ✅ Tamamlandı | 3 boundary oluşturuldu: global, dashboard, auth                                     |
+| F2  | ~~`loading.tsx` Suspense boundary~~ | ✅ Tamamlandı | 9 loading.tsx oluşturuldu (tüm dashboard sayfaları)                                 |
+| F3  | ~~`not-found.tsx` 404 sayfası~~     | ✅ Tamamlandı | Özel 404 sayfası oluşturuldu                                                        |
+| F4  | ~~`middleware.ts`~~                 | ✅ Tamamlandı | Cookie-based auth + auth-store sync eklendi                                         |
+| F5  | ~~Frontend test altyapısı~~         | ✅ Tamamlandı | vitest.config.ts + 6 test dosyası (60 test), playwright.config.ts + e2e oluşturuldu |
+| F6  | ~~`types/notification.ts`~~         | ✅ Tamamlandı | Ayrı type dosyası oluşturuldu                                                       |
+| F7  | ~~`types/dashboard.ts`~~            | ✅ Tamamlandı | Ayrı type dosyası oluşturuldu                                                       |
+| F8  | ~~`types/auth.ts`~~                 | ✅ Tamamlandı | Ayrı type dosyası oluşturuldu                                                       |
+| F9  | PWA Service Worker                  | 🟢 Düşük      | `public/manifest.json` var ama service worker dosyası yok                           |
 
 ### 3.4 DevOps / Altyapı
 
-| #   | Eksiklik                            | Öncelik  | Açıklama                                                      |
-| --- | ----------------------------------- | -------- | ------------------------------------------------------------- |
-| O1  | GitHub Actions CI/CD workflow       | 🟡 Orta  | `.github/workflows/ci.yml` yok                                |
-| O2  | Nginx/Traefik reverse proxy config  | 🟢 Düşük | Prodüksiyon deploy için gerekecek                             |
-| O3  | Grafana dashboard JSON provisioning | 🟢 Düşük | Monitoring dashboard tanımları yok                            |
-| O4  | `.env.example` dosyaları            | 🟢 Düşük | Backend ve frontend için örnek env dosyaları kontrol edilmeli |
+| #   | Eksiklik                            | Öncelik       | Açıklama                                                                      |
+| --- | ----------------------------------- | ------------- | ----------------------------------------------------------------------------- |
+| O1  | ~~GitHub Actions CI/CD workflow~~   | ✅ Tamamlandı | 5 job: backend-lint, backend-test, frontend-lint, frontend-test, docker-build |
+| O2  | Nginx/Traefik reverse proxy config  | 🟢 Düşük      | Prodüksiyon deploy için gerekecek                                             |
+| O3  | Grafana dashboard JSON provisioning | 🟢 Düşük      | Monitoring dashboard tanımları yok                                            |
+| O4  | `.env.example` dosyaları            | 🟢 Düşük      | Backend ve frontend için örnek env dosyaları kontrol edilmeli                 |
 
 ---
 
@@ -98,18 +99,18 @@ Aşağıdaki kalemler Doc 07'de (Backend İmplementasyon Kılavuzu) planlanmış
 
 ## 5. ÖNCELİK SIRASI — YAPILMASI GEREKENLER
 
-| Sıra | Madde                                                         | Öncelik   | Tahmini Efor    |
-| ---- | ------------------------------------------------------------- | --------- | --------------- |
-| 1    | Frontend `error.tsx` boundary'leri oluştur (F1)               | 🔴 Kritik | 1 saat          |
-| 2    | Frontend `loading.tsx` boundary'leri oluştur (F2)             | 🟡 Yüksek | 30 dk           |
-| 3    | Frontend `not-found.tsx` sayfası (F3)                         | 🟡 Yüksek | 30 dk           |
-| 4    | Frontend `middleware.ts` auth koruması (F4)                   | 🟡 Yüksek | 1 saat          |
-| 5    | `pyproject.toml` kullanılmayan bağımlılıkları temizle (B1–B6) | 🟡 Yüksek | 30 dk           |
-| 6    | GitHub Actions CI/CD pipeline (O1, B11)                       | 🟡 Orta   | 2 saat          |
-| 7    | Frontend test altyapısı kurulumu (F5)                         | 🟡 Orta   | 3 saat          |
-| 8    | Frontend eksik type dosyaları (F6–F8)                         | 🟢 Düşük  | 30 dk           |
-| 9    | Gerçek broker adaptörleri (B8)                                | 🟡 Orta   | İhtiyaç halinde |
-| 10   | Ek stratejiler (B7)                                           | 🟢 Düşük  | İhtiyaç halinde |
+| Sıra  | Madde                                             | Öncelik     | Durum           |
+| ----- | ------------------------------------------------- | ----------- | --------------- |
+| ~~1~~ | ~~Frontend `error.tsx` boundary'leri (F1)~~       | ~~Kritik~~  | ✅ Tamamlandı   |
+| ~~2~~ | ~~Frontend `loading.tsx` boundary'leri (F2)~~     | ~~Yüksek~~  | ✅ Tamamlandı   |
+| ~~3~~ | ~~Frontend `not-found.tsx` sayfası (F3)~~         | ~~Yüksek~~  | ✅ Tamamlandı   |
+| ~~4~~ | ~~Frontend `middleware.ts` auth koruması (F4)~~   | ~~Yüksek~~  | ✅ Tamamlandı   |
+| ~~5~~ | ~~`pyproject.toml` bağımlılık temizliği (B1–B6)~~ | ~~Yüksek~~  | ✅ Tamamlandı   |
+| 6     | ~~GitHub Actions CI/CD pipeline (O1, B11)~~       | ~~🟡 Orta~~ | ✅ Tamamlandı   |
+| 7     | ~~Frontend test altyapısı kurulumu (F5)~~         | ~~🟡 Orta~~ | ✅ Tamamlandı   |
+| ~~8~~ | ~~Frontend eksik type dosyaları (F6–F8)~~         | ~~Düşük~~   | ✅ Tamamlandı   |
+| 9     | Gerçek broker adaptörleri (B8)                    | 🟡 Orta     | İhtiyaç halinde |
+| 10    | Ek stratejiler (B7)                               | 🟢 Düşük    | İhtiyaç halinde |
 
 ---
 
@@ -118,10 +119,11 @@ Aşağıdaki kalemler Doc 07'de (Backend İmplementasyon Kılavuzu) planlanmış
 Proje **büyük ölçüde tamamlanmış** durumdadır:
 
 - **Backend:** 106 uygulama dosyası, 272/272 test, 12 servis, 14 API modülü ✅
-- **Frontend:** 107 src dosyası, 14 sayfa, 0 TypeScript hatası, build OK ✅
+- **Frontend:** 107+ src dosyası, 14 sayfa, 60/60 vitest, 0 TypeScript hatası ✅
+- **CI/CD:** GitHub Actions — 5 job (lint, test, docker-build) ✅
 - **Altyapı:** Docker Compose (6 servis), PostgreSQL + TimescaleDB, Redis ✅
 
-Kalan eksiklikler çoğunlukla **kullanıcı deneyimi iyileştirmeleri** (error/loading boundaries), **CI/CD pipeline**, **bağımlılık temizliği** ve **opsiyonel ek özellikler** (gerçek broker, ek stratejiler) kategorisindedir. Hiçbiri mevcut işlevselliği engellemez.
+Kalan eksiklikler çoğunlukla **opsiyonel ek özellikler** (gerçek broker, ek stratejiler, PWA service worker, monitoring dashboards) kategorisindedir. Hiçbiri mevcut işlevselliği engellemez.
 
 ---
 

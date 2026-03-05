@@ -1,9 +1,9 @@
 # bist-robogo — Proje Durumu
 
-> **Son Güncelleme:** 2026-03-05 — Kapsamlı kod-doküman karşılaştırma analizi yapıldı  
+> **Son Güncelleme:** 2026-03-05 — Sprint 4.4 CI/CD & Test Altyapısı tamamlandı  
 > **Aktif Faz:** Faz 4 — Ölçekleme ve Prodüksiyon  
-> **Aktif Sprint:** Faz 4.1–4.2 ✅ tamamlandı, 4.3–4.6 ertelendi (ihtiyaç halinde)  
-> **Durum:** Backend 272/272 test ✅ | Frontend 14 sayfa, 0 TS hatası, build OK ✅
+> **Aktif Sprint:** Faz 4.1–4.4 ✅ tamamlandı, 4.5–4.6 ertelendi (ihtiyaç halinde)  
+> **Durum:** Backend 272/272 test ✅ | Frontend 60/60 vitest + 14 sayfa, 0 TS hatası ✅ | CI/CD 5 job ✅
 
 ---
 
@@ -15,7 +15,7 @@
 | 1   | MVP Temel Özellikler         | ✅ Tamamlandı   | 3/3 sprint                     |
 | 2   | Genişletme                   | ✅ Tamamlandı   | 3/3 sprint                     |
 | 3   | AI Entegrasyonu (OpenRouter) | ✅ Tamamlandı   | 3/3 sprint                     |
-| 4   | Ölçekleme ve Prodüksiyon     | ✅ Tamamlandı\* | 2/2 sprint (4.3–4.6 ertelendi) |
+| 4   | Ölçekleme ve Prodüksiyon     | ✅ Tamamlandı\* | 4/4 sprint (4.5–4.6 ertelendi) |
 
 ---
 
@@ -355,9 +355,11 @@
 | ------------------ | ----- | ----------------------------- |
 | Backend (Docker)   | ✅    | FastAPI + Uvicorn, healthy    |
 | Frontend (Next.js) | ✅    | 14 sayfa, 0 TypeScript hatası |
+| Frontend Tests     | ✅    | 60/60 vitest, 6 test dosyası  |
 | PostgreSQL 16      | ✅    | 20 tablo + TimescaleDB        |
 | Redis 7            | ✅    | Cache + Celery broker         |
 | pytest             | ✅    | 272/272, 23.49s               |
+| CI/CD              | ✅    | GitHub Actions, 5 job         |
 
 ---
 
@@ -402,7 +404,10 @@
 - **API lib (13):** client, auth, market, orders, trading, analysis, strategies, backtest, risk, notifications, ai, brokers, dashboard
 - **Lib utils (2):** utils.ts, utils/formatters.ts
 - **Lib validators (1):** auth.ts
-- **Types (8):** market, order, portfolio, strategy, backtest, risk, ai, broker
+- **Types (11):** market, order, portfolio, strategy, backtest, risk, ai, broker, notification, dashboard, auth
+- **Test dosyaları (6):** `__tests__/lib/formatters.test.ts`, `utils.test.ts`, `validators.test.ts`, `__tests__/stores/auth-store.test.ts`, `market-store.test.ts`, `ui-store.test.ts`
+- **Test altyapı (2):** `vitest.config.ts`, `__tests__/setup.ts`
+- **E2E (2):** `playwright.config.ts`, `e2e/auth.spec.ts`
 
 ---
 
@@ -416,26 +421,27 @@ Tüm backend (122 .py) ve frontend (107 src) dosyaları dokümanlarla (01–12) 
 
 ### Kalan Kritik/Yüksek Öncelikli Maddeler
 
-| #   | Madde                                                                 | Öncelik   | Kategori |
-| --- | --------------------------------------------------------------------- | --------- | -------- |
-| 1   | Frontend `error.tsx` boundary'leri (hiçbir sayfada yok)               | 🔴 Kritik | UX       |
-| 2   | Frontend `loading.tsx` boundary'leri                                  | 🟡 Yüksek | UX       |
-| 3   | Frontend `not-found.tsx` 404 sayfası                                  | 🟡 Yüksek | UX       |
-| 4   | Frontend `middleware.ts` auth koruması (sunucu tarafı)                | 🟡 Yüksek | Güvenlik |
-| 5   | `pyproject.toml` kullanılmayan bağımlılık temizliği                   | 🟡 Yüksek | Bakım    |
-| 6   | GitHub Actions CI/CD pipeline                                         | 🟡 Orta   | DevOps   |
-| 7   | Frontend test altyapısı (vitest + playwright config + test dosyaları) | 🟡 Orta   | Kalite   |
+| #     | Madde                                                                     | Öncelik     | Durum |
+| ----- | ------------------------------------------------------------------------- | ----------- | ----- |
+| ~~1~~ | ~~Frontend `error.tsx` boundary'leri~~                                    | ~~Kritik~~  | ✅    |
+| ~~2~~ | ~~Frontend `loading.tsx` boundary'leri~~                                  | ~~Yüksek~~  | ✅    |
+| ~~3~~ | ~~Frontend `not-found.tsx` 404 sayfası~~                                  | ~~Yüksek~~  | ✅    |
+| ~~4~~ | ~~Frontend `middleware.ts` auth koruması~~                                | ~~Yüksek~~  | ✅    |
+| ~~5~~ | ~~`pyproject.toml` kullanılmayan bağımlılık temizliği~~                   | ~~Yüksek~~  | ✅    |
+| ~~6~~ | ~~GitHub Actions CI/CD pipeline~~                                         | ~~🟡 Orta~~ | ✅    |
+| ~~7~~ | ~~Frontend test altyapısı (vitest + playwright config + test dosyaları)~~ | ~~🟡 Orta~~ | ✅    |
 
-### pyproject.toml — Kaldırılması Gereken Bağımlılıklar
+### pyproject.toml — Bağımlılık Temizliği ✅ TAMAMLANDI
 
-Aşağıdaki bağımlılıklar artık **kullanılmamaktadır** ve temizlenmelidir:
+Aşağıdaki bağımlılıklar Sprint 4.3'te **kaldırılmıştır**:
 
-- `passlib` → `bcrypt` ile değiştirildi
-- `confluent-kafka` → Kafka kullanılmıyor
-- `yfinance` → CollectAPI ile değiştirildi
-- `aiohttp` → `httpx` tercih edildi
-- `factory-boy` → Kullanılmıyor
-- ML grubu (`xgboost`, `lightgbm`, `optuna`, `mlflow`, `onnxruntime`) → OpenRouter AI ile değiştirildi
+- ~~`passlib`~~ → `bcrypt` doğrudan eklendi
+- ~~`confluent-kafka`~~ → Kafka kullanılmıyor
+- ~~`yfinance`~~ → CollectAPI ile değiştirildi
+- ~~`aiohttp`~~ → `httpx` tercih edildi
+- ~~`scikit-learn`~~ → Kullanılmıyor
+- ~~`factory-boy`~~ → Kullanılmıyor
+- ~~ML grubu~~ (`xgboost`, `lightgbm`, `optuna`, `mlflow`, `onnxruntime`) → OpenRouter AI ile değiştirildi
 
 ### Doc 07 Sapma Özeti
 

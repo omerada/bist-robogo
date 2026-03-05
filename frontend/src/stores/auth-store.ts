@@ -10,6 +10,23 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { setAccessToken } from "@/lib/api/client";
 
+/**
+ * Auth cookie senkronizasyonu — Next.js middleware için.
+ * Middleware (edge runtime) localStorage'a erişemez,
+ * bu nedenle auth state'i cookie'ye de yazıyoruz.
+ */
+function syncAuthCookie(accessToken: string | null, isAuthenticated: boolean) {
+  if (typeof document === "undefined") return;
+  if (accessToken && isAuthenticated) {
+    const value = JSON.stringify({
+      state: { accessToken, isAuthenticated },
+    });
+    document.cookie = `auth-storage=${encodeURIComponent(value)}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`;
+  } else {
+    document.cookie = "auth-storage=; path=/; max-age=0; SameSite=Lax";
+  }
+}
+
 interface User {
   id: string;
   email: string;
@@ -39,6 +56,7 @@ export const useAuthStore = create<AuthState>()(
 
       setUser: (user, token) => {
         setAccessToken(token);
+        syncAuthCookie(token, true);
         set({
           user,
           accessToken: token,
@@ -49,6 +67,7 @@ export const useAuthStore = create<AuthState>()(
 
       logout: () => {
         setAccessToken(null);
+        syncAuthCookie(null, false);
         set({
           user: null,
           accessToken: null,
@@ -72,6 +91,8 @@ export const useAuthStore = create<AuthState>()(
           if (state.accessToken) {
             setAccessToken(state.accessToken);
           }
+          // Middleware için cookie'ye de yaz
+          syncAuthCookie(state.accessToken, state.isAuthenticated);
           state.setLoading(false);
         }
       },
