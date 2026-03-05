@@ -4,7 +4,7 @@
 
 "use client";
 
-import { useEffect, useRef, useCallback, useState } from "react";
+import { useEffect, useRef, useCallback, useState, useMemo } from "react";
 import { useMarketStore } from "@/stores/market-store";
 
 const WS_URL = process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:8000";
@@ -31,6 +31,17 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
   const maxRetries = 10;
   const updateQuote = useMarketStore((s) => s.updateQuote);
 
+  // Channels referansını stabilize et — dizinin içeriği değişmedikçe aynı referansı tut
+  const stableChannels = useMemo(
+    () => channels,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [channels.join(",")],
+  );
+
+  // onMessage'ı ref'te tut — callback değiştiğinde reconnect tetiklenmesin
+  const onMessageRef = useRef(onMessage);
+  onMessageRef.current = onMessage;
+
   const connect = useCallback(() => {
     if (wsRef.current?.readyState === WebSocket.OPEN) return;
 
@@ -42,8 +53,10 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
       retriesRef.current = 0;
 
       // Kanallara abone ol
-      if (channels.length > 0) {
-        ws.send(JSON.stringify({ action: "subscribe", channels }));
+      if (stableChannels.length > 0) {
+        ws.send(
+          JSON.stringify({ action: "subscribe", channels: stableChannels }),
+        );
       }
 
       // Heartbeat başlat (her 30 sn)
@@ -57,16 +70,20 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
     ws.onmessage = (event) => {
       try {
         const message = JSON.parse(event.data);
+
+        // Pong yanıtını yoksay
+        if (message.type === "pong") return;
+
         const { channel, data } = message;
 
         // Quote güncellemelerini store'a yaz
         if (channel?.startsWith("quote:")) {
-          const symbol = channel.replace("quote:", "");
-          updateQuote(symbol, data);
+          const sym = channel.replace("quote:", "");
+          updateQuote(sym, data);
         }
 
         // Callback'i çağır
-        onMessage?.(channel, data);
+        onMessageRef.current?.(channel, data);
       } catch {
         // JSON parse hatası — yoksay
       }
@@ -92,11 +109,12 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
     };
 
     wsRef.current = ws;
-  }, [channels, onMessage, updateQuote]);
+  }, [stableChannels, updateQuote]);
 
   const disconnect = useCallback(() => {
     clearTimeout(reconnectTimeoutRef.current!);
     clearInterval(heartbeatRef.current!);
+    retriesRef.current = maxRetries; // Reconnect'i durdur
     wsRef.current?.close();
     wsRef.current = null;
     setState("disconnected");

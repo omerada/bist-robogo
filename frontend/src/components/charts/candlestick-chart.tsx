@@ -18,11 +18,28 @@ import { useHistory } from "@/hooks/use-market-data";
 import { useMarketStore } from "@/stores/market-store";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { BarChart3 } from "lucide-react";
 
 interface CandlestickChartProps {
   symbol: string;
   interval?: string;
   height?: number;
+}
+
+/**
+ * OHLCV zaman dizisini Lightweight Charts'ın beklediği formata çevirir.
+ *
+ * Günlük interval'da: "YYYY-MM-DD" string (business day)
+ * İntraday interval'da: Unix timestamp (seconds) — saat bilgisi korunur
+ */
+function parseChartTime(isoTime: string, interval: string): string | number {
+  const isIntraday = ["1m", "5m", "15m", "1h"].includes(interval);
+  if (isIntraday) {
+    // Unix timestamp (saniye) — intraday veri için saat bilgisi korunur
+    return Math.floor(new Date(isoTime).getTime() / 1000);
+  }
+  // Günlük ve üstü — "YYYY-MM-DD" formatı
+  return isoTime.split("T")[0];
 }
 
 export function CandlestickChart({
@@ -131,18 +148,18 @@ export function CandlestickChart({
       return;
 
     const candleData: CandlestickData[] = history.map((d) => ({
-      time: d.time.split("T")[0] as string,
-      open: d.open,
-      high: d.high,
-      low: d.low,
-      close: d.close,
+      time: parseChartTime(d.time, interval) as string & number,
+      open: Number(d.open),
+      high: Number(d.high),
+      low: Number(d.low),
+      close: Number(d.close),
     }));
 
     const volumeData: HistogramData[] = history.map((d) => ({
-      time: d.time.split("T")[0] as string,
-      value: d.volume,
+      time: parseChartTime(d.time, interval) as string & number,
+      value: Number(d.volume),
       color:
-        d.close >= d.open
+        Number(d.close) >= Number(d.open)
           ? chartColors.upColor + "80"
           : chartColors.downColor + "80",
     }));
@@ -150,24 +167,53 @@ export function CandlestickChart({
     candleSeriesRef.current.setData(candleData);
     volumeSeriesRef.current.setData(volumeData);
     chartRef.current?.timeScale().fitContent();
-  }, [history, chartColors]);
+  }, [history, chartColors, interval]);
 
-  // ── Gerçek zamanlı güncelleme ──
+  // ── Gerçek zamanlı güncelleme (WebSocket quote) ──
   useEffect(() => {
     if (!quote || !candleSeriesRef.current) return;
 
-    const today = new Date().toISOString().split("T")[0];
+    const isIntraday = ["1m", "5m", "15m", "1h"].includes(interval);
+    const time = isIntraday
+      ? Math.floor(Date.now() / 1000)
+      : (new Date().toISOString().split("T")[0] as string);
+
     candleSeriesRef.current.update({
-      time: today as string,
-      open: quote.open,
-      high: quote.high,
-      low: quote.low,
-      close: quote.price,
+      time: time as string & number,
+      open: Number(quote.open) || Number(quote.price),
+      high: Number(quote.high) || Number(quote.price),
+      low: Number(quote.low) || Number(quote.price),
+      close: Number(quote.price),
     });
-  }, [quote]);
+  }, [quote, interval]);
 
   if (isLoading) {
     return <Skeleton className="w-full" style={{ height }} />;
+  }
+
+  // Veri yoksa bilgilendirme göster
+  if (!history || history.length === 0) {
+    return (
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base font-medium">
+            {symbol} — {interval} Grafik
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div
+            className="flex flex-col items-center justify-center text-muted-foreground"
+            style={{ height }}
+          >
+            <BarChart3 className="h-12 w-12 mb-3 opacity-30" />
+            <p className="text-sm font-medium">Grafik verisi bulunamadı</p>
+            <p className="text-xs mt-1">
+              Bu sembol için henüz geçmiş veri mevcut değil.
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+    );
   }
 
   return (

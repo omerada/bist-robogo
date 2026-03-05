@@ -49,6 +49,11 @@ async def market_stream(websocket: WebSocket):
                         "channels": channels,
                     })
 
+                elif action == "ping":
+                    await ws_manager.send_personal(websocket, {
+                        "type": "pong",
+                    })
+
             except json.JSONDecodeError:
                 await ws_manager.send_personal(websocket, {
                     "type": "error",

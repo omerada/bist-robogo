@@ -139,9 +139,11 @@ export default function SymbolDetailPage() {
           />
           <DetailCard
             label="Son Güncelleme"
-            value={new Date(displayQuote.updated_at).toLocaleTimeString(
-              "tr-TR",
-            )}
+            value={
+              displayQuote.updated_at
+                ? new Date(displayQuote.updated_at).toLocaleTimeString("tr-TR")
+                : "—"
+            }
           />
         </div>
       )}

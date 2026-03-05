@@ -84,4 +84,9 @@ celery_app.conf.beat_schedule = {
         "task": "app.tasks.market_tasks.fetch_indices",
         "schedule": crontab(minute="*/5", hour="7-15", day_of_week="1-5"),
     },
+    # Sembol listesi senkronizasyonu — her gün piyasa açılışından önce
+    "daily-symbol-sync": {
+        "task": "app.tasks.market_tasks.sync_symbols_from_collectapi",
+        "schedule": crontab(hour=6, minute=30, day_of_week="1-5"),  # UTC 6:30 = TR 9:30
+    },
 }

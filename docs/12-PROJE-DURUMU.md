@@ -1,9 +1,9 @@
 # bist-robogo — Proje Durumu
 
-> **Son Güncelleme:** 2026-03-05 — Sprint 4.4 CI/CD & Test Altyapısı tamamlandı  
-> **Aktif Faz:** Faz 4 — Ölçekleme ve Prodüksiyon  
-> **Aktif Sprint:** Faz 4.1–4.4 ✅ tamamlandı, 4.5–4.6 ertelendi (ihtiyaç halinde)  
-> **Durum:** Backend 272/272 test ✅ | Frontend 60/60 vitest + 14 sayfa, 0 TS hatası ✅ | CI/CD 5 job ✅
+> **Son Güncelleme:** 2026-03-06 — Sprint 5.1 Piyasa Verisi Pipeline Düzeltmeleri tamamlandı  
+> **Aktif Faz:** Faz 5 — Canlı Veri Pipeline ve UX İyileştirmeleri  
+> **Aktif Sprint:** Faz 5.1 ✅ tamamlandı  
+> **Durum:** Backend 272/272 test ✅ | Frontend 60/60 vitest + 14 sayfa, 0 TS hatası ✅ | CI/CD 5 job ✅ | Canlı veri pipeline ✅
 
 ---
 
@@ -16,6 +16,7 @@
 | 2   | Genişletme                   | ✅ Tamamlandı   | 3/3 sprint                     |
 | 3   | AI Entegrasyonu (OpenRouter) | ✅ Tamamlandı   | 3/3 sprint                     |
 | 4   | Ölçekleme ve Prodüksiyon     | ✅ Tamamlandı\* | 4/4 sprint (4.5–4.6 ertelendi) |
+| 5   | Canlı Veri Pipeline & UX     | ✅ Tamamlandı   | 1/1 sprint                     |
 
 ---
 
@@ -446,6 +447,64 @@ Aşağıdaki bağımlılıklar Sprint 4.3'te **kaldırılmıştır**:
 ### Doc 07 Sapma Özeti
 
 Doc 07 (Backend İmplementasyon Kılavuzu) ile gerçek kod arasında bilinçli sapmalar mevcuttur: ML→AI pivotu, flat test yapısı, `*_repo.py` → `*_repository.py` adlandırma, Kafka kullanılmaması. Detaylar için [06-EKSIK-ANALIZ-RAPORU.md §4](06-EKSIK-ANALIZ-RAPORU.md) incelenebilir.
+
+---
+
+## Faz 5 — Canlı Veri Pipeline & UX ✅
+
+### Sprint 5.1 — Piyasa Verisi Pipeline Düzeltmeleri ✅
+
+**Sorun:** BIST hisseleri gösterilmiyor, canlı veri çekilmiyor, grafik üzerinde görünmüyordu.
+
+**Kök Neden Analizi:**
+
+1. `fetch_and_store_eod_data()` metodu MarketDataService'te YOKTU → Celery task AttributeError
+2. OHLCV tabloları (`ohlcv_1d`, `ohlcv_1m`) migration'da YOKTU → veri yazılamıyordu
+3. `get_quote()` yalnızca boş OHLCV tablolarından okuyordu → tüm fiyatlar 0 dönüyordu
+4. WebSocket `broadcast()` hiçbir yerden çağrılmıyordu → canlı veri akışı yoktu
+5. WS `ping` action desteklenmiyordu → frontend heartbeat'e cevap verilmiyordu
+6. `seed_symbols.py` yalnızca 30 hardcoded sembol içeriyordu
+7. Frontend grafik `time.split("T")[0]` → intraday interval'larda saat bilgisi kayboluyordu
+8. WS channels array referans instability → sonsuz reconnect döngüsü
+9. `displayQuote.updated_at` undefined olabiliyordu → "Invalid Date" gösterimi
+
+**Yapılan Düzeltmeler:**
+
+| #   | Düzeltme                                                                          | Dosya(lar)                                                   |
+| --- | --------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| 1   | OHLCV tabloları migration eklendi (ohlcv_1d, ohlcv_1m + TimescaleDB hypertable)   | `alembic/versions/a1b2c3d4e5f6_add_ohlcv_tables.py`          |
+| 2   | `fetch_and_store_eod_data()` metodu implement edildi                              | `services/market_data_service.py`                            |
+| 3   | `get_quote()` Redis cache fallback eklendi (önce Redis, sonra OHLCV, sonra sıfır) | `services/market_data_service.py`                            |
+| 4   | `OHLCVRepository.upsert_daily()` + `upsert_minute()` eklendi                      | `repositories/market_repository.py`                          |
+| 5   | `fetch_live_prices` → WebSocket broadcast + dakikalık OHLCV kayıt eklendi         | `tasks/market_tasks.py`                                      |
+| 6   | WS `ping` → `pong` handler eklendi                                                | `websocket/market_stream.py`                                 |
+| 7   | `sync_symbols_from_collectapi` task + Celery beat schedule eklendi                | `tasks/market_tasks.py`, `tasks/celery_app.py`               |
+| 8   | `seed_symbols.py` → CollectAPI'den dinamik sembol çekme desteği eklendi           | `scripts/seed_symbols.py`                                    |
+| 9   | Grafik `parseChartTime()` — intraday Unix timestamp / günlük YYYY-MM-DD ayrımı    | `components/charts/candlestick-chart.tsx`                    |
+| 10  | Grafik boş veri durumu — "Grafik verisi bulunamadı" mesajı eklendi                | `components/charts/candlestick-chart.tsx`                    |
+| 11  | Grafik real-time update — `Number()` dönüşümü eklendi                             | `components/charts/candlestick-chart.tsx`                    |
+| 12  | WS hook channels `useMemo` stabilizasyonu + onMessage ref pattern                 | `hooks/use-websocket.ts`                                     |
+| 13  | `updated_at` undefined guard eklendi                                              | `app/(dashboard)/market/[symbol]/page.tsx`                   |
+| 14  | Market sayfası hata durumu (Alert bileşeni) eklendi                               | `app/(dashboard)/market/page.tsx`, `components/ui/alert.tsx` |
+
+**Veri Akış Mimarisi (Düzeltme Sonrası):**
+
+```
+CollectAPI
+    ↓
+Celery Beat (1dk aralık)
+    ↓
+fetch_live_prices task
+    ├── Redis cache (market:quote:*)     → /live-prices API → Market sayfa tablosu
+    ├── WebSocket broadcast (quote:*)     → Frontend WS hook → Zustand store → Anlık güncelleme
+    └── ohlcv_1m UPSERT                  → /history API → Candlestick grafik
+
+fetch_eod_data task (18:30)
+    └── ohlcv_1d UPSERT                  → /quote API (fallback) → Sembol detay sayfası
+
+sync_symbols_from_collectapi (09:30)
+    └── symbols tablosu                   → /symbols API → Sembol listesi
+```
 
 ---
 

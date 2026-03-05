@@ -230,6 +230,78 @@ class OHLCVRepository:
             await self.db.rollback()
             return False
 
+    async def upsert_daily(
+        self,
+        symbol: str,
+        time: "datetime",
+        open_price: float,
+        high: float,
+        low: float,
+        close: float,
+        volume: int,
+    ) -> None:
+        """Günlük OHLCV verisini ekle veya güncelle (UPSERT).
+
+        Aynı symbol + tarih için zaten kayıt varsa günceller.
+        """
+        sql = text("""
+            INSERT INTO ohlcv_1d (time, symbol, open, high, low, close, volume)
+            VALUES (:time, :symbol, :open, :high, :low, :close, :volume)
+            ON CONFLICT (symbol, time) DO UPDATE SET
+                open = EXCLUDED.open,
+                high = GREATEST(ohlcv_1d.high, EXCLUDED.high),
+                low = LEAST(ohlcv_1d.low, EXCLUDED.low),
+                close = EXCLUDED.close,
+                volume = EXCLUDED.volume
+        """)
+        try:
+            await self.db.execute(sql, {
+                "time": time,
+                "symbol": symbol.upper(),
+                "open": open_price,
+                "high": high,
+                "low": low,
+                "close": close,
+                "volume": volume,
+            })
+        except Exception as exc:
+            logger.warning("ohlcv_upsert_failed: %s", exc)
+            await self.db.rollback()
+
+    async def upsert_minute(
+        self,
+        symbol: str,
+        time: "datetime",
+        open_price: float,
+        high: float,
+        low: float,
+        close: float,
+        volume: int,
+    ) -> None:
+        """Dakikalık OHLCV verisini ekle veya güncelle (UPSERT)."""
+        sql = text("""
+            INSERT INTO ohlcv_1m (time, symbol, open, high, low, close, volume)
+            VALUES (:time, :symbol, :open, :high, :low, :close, :volume)
+            ON CONFLICT (symbol, time) DO UPDATE SET
+                high = GREATEST(ohlcv_1m.high, EXCLUDED.high),
+                low = LEAST(ohlcv_1m.low, EXCLUDED.low),
+                close = EXCLUDED.close,
+                volume = EXCLUDED.volume
+        """)
+        try:
+            await self.db.execute(sql, {
+                "time": time,
+                "symbol": symbol.upper(),
+                "open": open_price,
+                "high": high,
+                "low": low,
+                "close": close,
+                "volume": volume,
+            })
+        except Exception as exc:
+            logger.warning("ohlcv_1m_upsert_failed: %s", exc)
+            await self.db.rollback()
+
     def _get_table_for_interval(self, interval: str) -> str:
         """Interval'a göre tablo adı döner."""
         if interval in ("1m", "5m", "15m"):

@@ -1,6 +1,9 @@
 """BIST sembol ve endeks verilerini veritabanına yükler.
 
 Kullanım: python -m scripts.seed_symbols
+
+CollectAPI key varsa tüm BIST sembollerini dinamik olarak çeker.
+Key yoksa veya API erişimi başarısız olursa statik BIST 30 listesini kullanır.
 """
 
 import asyncio
@@ -68,13 +71,17 @@ INDEX_COMPONENTS = {
 
 
 async def seed():
+    # CollectAPI'den dinamik olarak tüm sembolleri çekmeye çalış
+    dynamic_symbols = await _fetch_dynamic_symbols()
+    all_symbols = dynamic_symbols if dynamic_symbols else BIST_30_SYMBOLS
+
     async with async_session_factory() as db:
         # Semboller — zaten var mı kontrol et
         existing = await db.execute(select(Symbol.ticker))
         existing_tickers = set(existing.scalars().all())
 
         new_symbols = 0
-        for sym_data in BIST_30_SYMBOLS:
+        for sym_data in all_symbols:
             if sym_data["ticker"] not in existing_tickers:
                 symbol = Symbol(**sym_data, is_active=True)
                 db.add(symbol)
@@ -127,9 +134,50 @@ async def seed():
                     new_components += 1
 
         await db.commit()
-        print(f"✅ Semboller: {new_symbols} yeni ({len(BIST_30_SYMBOLS)} toplam)")
+        print(f"✅ Semboller: {new_symbols} yeni ({len(all_symbols)} toplam)")
         print(f"✅ Endeksler: {new_indices} yeni ({len(INDICES)} toplam)")
         print(f"✅ Endeks bileşenleri: {new_components} yeni ilişki oluşturuldu")
+
+
+async def _fetch_dynamic_symbols() -> list[dict]:
+    """CollectAPI'den tüm BIST sembollerini dinamik olarak çeker.
+
+    API key yoksa veya hata olursa boş liste döner (statik listeye fallback yapılır).
+    """
+    try:
+        from app.config import get_settings
+        settings = get_settings()
+        if not settings.COLLECTAPI_KEY:
+            print("⚠️ COLLECTAPI_KEY tanımlı değil — statik BIST 30 listesi kullanılacak")
+            return []
+
+        from app.core.collectapi_client import CollectAPIClient
+        client = CollectAPIClient()
+        try:
+            stocks = await client.get_all_stocks()
+            if not stocks:
+                print("⚠️ CollectAPI'den veri alınamadı — statik liste kullanılacak")
+                return []
+
+            symbols = []
+            for stock in stocks:
+                code = stock.get("code", "").upper().strip()
+                name = stock.get("text", "").strip()
+                if not code or not name:
+                    continue
+                symbols.append({
+                    "ticker": code,
+                    "name": name,
+                    "sector": None,  # CollectAPI sektör bilgisi vermez
+                })
+
+            print(f"🔄 CollectAPI'den {len(symbols)} sembol çekildi")
+            return symbols
+        finally:
+            await client.close()
+    except Exception as exc:
+        print(f"⚠️ Dinamik sembol çekme başarısız: {exc} — statik liste kullanılacak")
+        return []
 
 
 if __name__ == "__main__":

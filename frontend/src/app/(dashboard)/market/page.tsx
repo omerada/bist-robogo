@@ -1,10 +1,11 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Search, Radio } from "lucide-react";
+import { Search, Radio, AlertCircle } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { SymbolTable } from "@/components/market/symbol-table";
 import { MarketPageSkeleton } from "@/components/shared/loading-skeleton";
 import { useSymbols, useIndices } from "@/hooks/use-market-data";
@@ -25,7 +26,7 @@ export default function MarketPage() {
   const setSelectedIndex = useMarketStore((s) => s.setSelectedIndex);
 
   const { data: indicesData } = useIndices();
-  const { data, isLoading } = useSymbols({
+  const { data, isLoading, isError } = useSymbols({
     index_code: selectedIndex === "ALL" ? undefined : selectedIndex,
     search: search.length >= 2 ? search : undefined,
     per_page: 100,
@@ -104,7 +105,16 @@ export default function MarketPage() {
       </div>
 
       {/* Tablo */}
-      {isLoading ? (
+      {isError ? (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Veri yüklenemedi</AlertTitle>
+          <AlertDescription>
+            Sembol listesi alınamadı. Lütfen bağlantınızı kontrol edip sayfayı
+            yenileyin.
+          </AlertDescription>
+        </Alert>
+      ) : isLoading ? (
         <MarketPageSkeleton />
       ) : (
         <SymbolTable
