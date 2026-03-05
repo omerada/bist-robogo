@@ -1,231 +1,128 @@
 # bist-robogo — Eksik Analiz Raporu
 
 > **Proje:** bist-robogo — BIST İçin AI Destekli Otomatik Ticaret Platformu  
-> **Versiyon:** 1.0  
-> **Tarih:** 2026-03-03  
-> **Amaç:** Mevcut dokümanların kapsamlı incelenmesi ve bir AI Agent'ın sıfır hata ile geliştirme yapabilmesi için eksik kısımların tespiti.
+> **Son Güncelleme:** 2026-03-05  
+> **Amaç:** Mevcut kod tabanı ile dokümanların karşılaştırmalı analizi — sadece GERÇEKTEN EKSİK / YAPILMASI GEREKEN maddeler.
 
 ---
 
-## 1. İncelenen Dokümanlar
+## 1. Analiz Yöntemi
 
-| #   | Doküman                     | Satır Sayısı | Değerlendirme                                                   |
-| --- | --------------------------- | ------------ | --------------------------------------------------------------- |
-| 01  | Ar-Ge ve Gereksinim Analizi | 396          | ✅ İyi — gereksinimler, teknoloji seçimleri, riskler detaylı    |
-| 02  | Sistem Mimarisi             | 767          | ✅ İyi — modüller, veri akışları, deployment mimarisi kapsanmış |
-| 03  | Veri Modelleri ve API       | 1082         | ✅ İyi — 16 tablo, REST/WS API, Pydantic modelleri detaylı      |
-| 04  | Frontend Tasarım ve UX      | 639          | ⚠️ Orta — wireframe'ler var ama component-level detay eksik     |
-| 05  | Geliştirme Planı ve MVP     | 500          | ✅ İyi — fazlar, sprintler, test stratejisi kapsanmış           |
+Bu rapor, mevcut kod tabanının (`backend/` 122 .py, `frontend/src/` 107 dosya) tüm dizin yapısının dokümanlarla (01–12) satır satır karşılaştırılmasıyla oluşturulmuştur. **Tamamlanan maddeler çıkarılmış**, yalnızca gerçek eksiklikler listelenmiştir.
 
 ---
 
-## 2. Tespit Edilen Eksiklikler
+## 2. ÖNCEKİ RAPORDA TAMAMLANAN (TEMİZLENEN) MADDELER
 
-### 2.1 Backend Implementasyon Eksiklikleri (KRİTİK)
+Aşağıdaki tüm maddeler **artık tamamlanmıştır** ve eski rapordan çıkarılmıştır:
 
-| #   | Eksik                                     | Kritiklik | Açıklama                                                           |
-| --- | ----------------------------------------- | --------- | ------------------------------------------------------------------ |
-| B1  | Proje dizin yapısı                        | 🔴 Kritik | Backend klasör/dosya ağacı tam belirlenmemiş                       |
-| B2  | pyproject.toml / requirements.txt         | 🔴 Kritik | Paket yönetimi yapılandırması yok                                  |
-| B3  | FastAPI uygulama başlatma kodu            | 🔴 Kritik | main.py, app factory pattern, middleware sırası yok                |
-| B4  | Veritabanı bağlantı yönetimi              | 🔴 Kritik | SQLAlchemy engine/session factory, connection pool ayarları yok    |
-| B5  | Alembic migration yapılandırması          | 🔴 Kritik | alembic.ini, env.py, ilk migration script yok                      |
-| B6  | Her servis modülünün dosya yapısı         | 🔴 Kritik | Router, service, repository, schema dosyaları belirsiz             |
-| B7  | Authentication middleware implementasyonu | 🔴 Kritik | JWT encode/decode, dependency injection, guard fonksiyonları yok   |
-| B8  | Error handling pattern                    | 🟡 Yüksek | Custom exception sınıfları, global handler yok                     |
-| B9  | Celery yapılandırması                     | 🟡 Yüksek | celeryconfig.py, task tanımları, beat schedule yok                 |
-| B10 | WebSocket server implementasyonu          | 🟡 Yüksek | Bağlantı yönetimi, room/channel mekanizması yok                    |
-| B11 | Broker adapter pattern                    | 🟡 Yüksek | Abstract broker sınıfı ve mock adapter yok                         |
-| B12 | Loglama yapılandırması                    | 🟡 Yüksek | structlog setup, log formatı, log seviyeleri yok                   |
-| B13 | Ortam değişkeni yükleme                   | 🟡 Yüksek | Pydantic Settings class, config validation yok                     |
-| B14 | Seed data scriptleri                      | 🟡 Yüksek | BIST sembolleri, endeks bileşenleri, varsayılan risk kuralları yok |
-| B15 | Health check endpoint detayı              | 🟢 Orta   | DB, Redis, Kafka bağlantı kontrolü detayları yok                   |
-| B16 | Rate limiting implementasyonu             | 🟢 Orta   | Redis tabanlı rate limiter middleware yok                          |
-| B17 | CORS yapılandırması                       | 🟢 Orta   | İzin verilen origin'ler, header'lar belirsiz                       |
-
-### 2.2 Frontend Implementasyon Eksiklikleri (KRİTİK)
-
-| #   | Eksik                                      | Kritiklik | Açıklama                                                          |
-| --- | ------------------------------------------ | --------- | ----------------------------------------------------------------- |
-| F1  | next.config.ts tam içerik                  | 🔴 Kritik | Image domains, redirects, env ayarları yok                        |
-| F2  | tailwind.config.ts tam içerik              | 🔴 Kritik | Custom renk, font, spacing, animasyon yapılandırması yok          |
-| F3  | shadcn/ui kurulum ve konfigürasyonu        | 🔴 Kritik | components.json, hangi bileşenlerin ekleneceği belirsiz           |
-| F4  | API client implementasyonu                 | 🔴 Kritik | Axios instance, interceptors, error handling, token refresh yok   |
-| F5  | Auth akışı implementasyonu                 | 🔴 Kritik | next-auth config, session provider, middleware, guard yok         |
-| F6  | WebSocket hook implementasyonu             | 🔴 Kritik | Bağlantı yönetimi, reconnect, heartbeat lojiği yok                |
-| F7  | Her sayfa bileşeninin tam component spec'i | 🔴 Kritik | Props, state, data fetching, loading/error states eksik           |
-| F8  | Zustand store yapıları                     | 🟡 Yüksek | Store tanımları, action'lar, selector'lar belirsiz                |
-| F9  | TanStack Query hook'ları                   | 🟡 Yüksek | Query key stratejisi, stale time, prefetch yapılandırması yok     |
-| F10 | Form validation şemaları                   | 🟡 Yüksek | Zod şemaları, react-hook-form entegrasyonu detayı yok             |
-| F11 | TradingView chart entegrasyonu             | 🟡 Yüksek | Chart oluşturma, serie ekleme, gösterge overlay kodu yok          |
-| F12 | Loading/skeleton states                    | 🟡 Yüksek | Her sayfa için loading state tanımı yok                           |
-| F13 | Error boundary'ler                         | 🟡 Yüksek | Global ve sayfa bazlı error boundary yok                          |
-| F14 | Dark/light tema implementasyonu            | 🟡 Yüksek | CSS variable switch, tema provider mekanizması yok                |
-| F15 | Responsive davranış detayları              | 🟢 Orta   | Her bileşenin breakpoint davranışı belirsiz                       |
-| F16 | Animasyon ve transition tanımları          | 🟢 Orta   | Framer Motion / CSS transition spec yok                           |
-| F17 | SEO & meta tag yönetimi                    | 🟢 Orta   | Metadata API kullanımı belirsiz                                   |
-| F18 | Internationalization altyapısı             | 🟢 Orta   | next-intl veya benzeri i18n yapısı yok (ancak şimdilik sadece TR) |
-
-### 2.3 Tasarım Sistemi Eksiklikleri
-
-| #   | Eksik                               | Kritiklik | Açıklama                                                              |
-| --- | ----------------------------------- | --------- | --------------------------------------------------------------------- |
-| D1  | Token sistemi (CSS variables)       | 🔴 Kritik | Tam renk token'ları (background, foreground, border, ring, chart) yok |
-| D2  | Spacing scale                       | 🟡 Yüksek | Tutarlı boşluk değerleri (4px grid sistemi) tanımlı değil             |
-| D3  | Component variant tanımları         | 🟡 Yüksek | Button, Card, Badge varyantları ve kullanım kılavuzu yok              |
-| D4  | Animasyon / Transition spec         | 🟡 Yüksek | Timing, easing, hangi elementlerde kullanılacağı yok                  |
-| D5  | Erişilebilirlik (a11y) kuralları    | 🟡 Yüksek | WCAG 2.1 AA uyum detayları, focus, aria yok                           |
-| D6  | İkon kullanım kılavuzu              | 🟢 Orta   | Lucide icon adları, boyutları, kullanım yerleri yok                   |
-| D7  | Boş durum (empty state) tasarımları | 🟢 Orta   | Veri yokken gösterilecek ekranlar belirsiz                            |
-| D8  | Toast/notification tasarımı         | 🟢 Orta   | Bildirim stillleri, süreler, pozisyon belirsiz                        |
-
-### 2.4 DevOps ve Altyapı Eksiklikleri
-
-| #   | Eksik                               | Kritiklik | Açıklama                                                       |
-| --- | ----------------------------------- | --------- | -------------------------------------------------------------- |
-| O1  | docker-compose.yml tam içerik       | 🔴 Kritik | Servis tanımları, volume'lar, network'ler, healthcheck'ler yok |
-| O2  | Dockerfile'lar (backend + frontend) | 🔴 Kritik | Multi-stage build, optimize image yok                          |
-| O3  | GitHub Actions workflow YAML        | 🟡 Yüksek | CI/CD pipeline dosyaları yok                                   |
-| O4  | Nginx/Traefik yapılandırması        | 🟢 Orta   | Reverse proxy config yok                                       |
-| O5  | Grafana dashboard JSON              | 🟢 Orta   | Provisioned dashboard tanımları yok                            |
-
-### 2.5 Test Eksiklikleri
-
-| #   | Eksik                      | Kritiklik | Açıklama                                                |
-| --- | -------------------------- | --------- | ------------------------------------------------------- |
-| T1  | conftest.py yapılandırması | 🟡 Yüksek | Test fixture'ları, test DB setup, factory tanımları yok |
-| T2  | Test dosya yapısı          | 🟡 Yüksek | Hangi testlerin hangi dosyalarda olacağı belirsiz       |
-| T3  | vitest.config.ts           | 🟢 Orta   | Frontend test yapılandırması yok                        |
-| T4  | Playwright config          | 🟢 Orta   | E2E test yapılandırması yok                             |
+- ~~B1–B17~~ Backend implementasyon eksiklikleri → Tümü tamamlandı (Faz 0–4.2)
+- ~~F1–F7~~ Frontend kritik eksiklikler → Tümü tamamlandı
+- ~~F8–F11~~ Frontend yüksek eksiklikler → Tümü tamamlandı
+- ~~D1–D4~~ Tasarım sistemi eksiklikleri → Doc 09 + globals.css ile tamamlandı
+- ~~O1–O2~~ Docker/Dockerfile eksiklikleri → Tamamlandı
+- ~~T1–T2~~ Backend test eksiklikleri → 272/272 test geçiyor
+- ~~Doc 07, 08, 09, 10 oluşturulması~~ → Tümü oluşturuldu
 
 ---
 
-## 3. Oluşturulması Gereken Yeni Dokümanlar
+## 3. MEVCUT EKSİKLİKLER
 
-### 3.1 Doküman 07: Backend Implementasyon Kılavuzu
+### 3.1 Backend — Kullanılmayan / Uyumsuz Bağımlılıklar (pyproject.toml)
 
-**Amaç:** AI Agent'ın backend'i dosya dosya, satır satır geliştirebilmesi.
+| #   | Bağımlılık                                                         | Durum                         | Açıklama                                                             |
+| --- | ------------------------------------------------------------------ | ----------------------------- | -------------------------------------------------------------------- |
+| B1  | `passlib`                                                          | ⚠️ Kaldırılmalı               | Fix #10 ile `bcrypt` modülüne geçildi, `passlib` artık kullanılmıyor |
+| B2  | `confluent-kafka`                                                  | ⚠️ Kaldırılmalı               | `core/kafka_client.py` hiç oluşturulmadı, Kafka kullanılmıyor        |
+| B3  | `yfinance`                                                         | ⚠️ Kaldırılmalı               | CollectAPI ile değiştirildi (Sprint 4.1)                             |
+| B4  | `aiohttp`                                                          | ⚠️ Değerlendirilmeli          | `httpx` tercih edildi, `aiohttp` kullanılıyor mu kontrol edilmeli    |
+| B5  | `factory-boy` (dev)                                                | ⚠️ Kaldırılmalı               | Test factory dosyası yok, flat fixture yapısı tercih edildi          |
+| B6  | ML grubu: `xgboost`, `lightgbm`, `optuna`, `mlflow`, `onnxruntime` | ⚠️ Kaldırılmalı veya optional | ML servisi kaldırılıp OpenRouter AI ile değiştirildi                 |
 
-**İçerik:**
+### 3.2 Backend — Eksik Dosyalar / Özellikler
 
-- Tam dizin ağacı (her dosya ve klasör)
-- pyproject.toml / Poetry yapılandırması (tam içerik)
-- FastAPI uygulama fabrikası (app factory)
-- Middleware zinciri ve sırası
-- Veritabanı bağlantı yönetimi (engine, session, base model)
-- Alembic yapılandırması ve ilk migration
-- Her servis modülünün implementasyon şablonu (router → service → repository)
-- Authentication/Authorization implementasyonu
-- Error handling sistemi
-- Celery yapılandırması ve görevler
-- WebSocket sunucu implementasyonu
-- Broker adapter pattern
-- Loglama ve monitoring
-- Seed data scriptleri
-- Health check endpoint'leri
-- Ortam değişkeni yönetimi (Settings class)
+| #   | Eksiklik                                                                       | Öncelik  | Açıklama                                                              |
+| --- | ------------------------------------------------------------------------------ | -------- | --------------------------------------------------------------------- |
+| B7  | Ek strateji dosyaları (`macd_signal`, `bollinger_breakout`, `momentum_ranker`) | 🟢 Düşük | Doc 07'de planlanmış, mevcut 4 strateji yeterli olabilir              |
+| B8  | Gerçek broker adaptörleri (İş Yatırım, Gedik)                                  | 🟡 Orta  | `brokers/paper_broker.py` var, gerçek broker yok (Faz 4.3+ ertelendi) |
+| B9  | `scripts/seed_historical.py`                                                   | 🟢 Düşük | Geçmiş veri yükleme scripti eksik                                     |
+| B10 | `scripts/create_admin.py`                                                      | 🟢 Düşük | Admin kullanıcı oluşturma scripti eksik                               |
+| B11 | GitHub Actions CI/CD pipeline                                                  | 🟡 Orta  | `.github/workflows/` dizini yok                                       |
+| B12 | Sentry entegrasyonu doğrulaması                                                | 🟢 Düşük | Bağımlılıkta var ama yapılandırılmış mı belirsiz                      |
+| B13 | Prometheus metrikleri doğrulaması                                              | 🟢 Düşük | Bağımlılıkta var ama aktif kullanımda mı belirsiz                     |
 
-### 3.2 Doküman 08: Frontend Implementasyon Kılavuzu
+### 3.3 Frontend — Eksik Dosyalar / Özellikler
 
-**Amaç:** AI Agent'ın frontend'i component component, sayfa sayfa geliştirebilmesi.
+| #   | Eksiklik                                  | Öncelik   | Açıklama                                                                                |
+| --- | ----------------------------------------- | --------- | --------------------------------------------------------------------------------------- |
+| F1  | `error.tsx` boundary dosyaları            | 🔴 Kritik | Hiçbir route grubunda `error.tsx` yok — runtime hata yakalama korunmasız                |
+| F2  | `loading.tsx` Suspense boundary dosyaları | 🟡 Yüksek | Hiçbir route grubunda `loading.tsx` yok — sayfa geçişlerinde loading state eksik        |
+| F3  | `not-found.tsx` özel 404 sayfası          | 🟡 Yüksek | Next.js özel 404 sayfası bulunmuyor                                                     |
+| F4  | `middleware.ts` (Next.js middleware)      | 🟡 Yüksek | Auth redirect'leri yalnızca client-side (`auth-guard.tsx`), sunucu tarafında koruma yok |
+| F5  | Frontend test altyapısı                   | 🟡 Yüksek | `vitest.config.ts` ve `playwright.config.ts` yok, hiç test dosyası yok                  |
+| F6  | `types/notification.ts`                   | 🟢 Düşük  | Backend'de model var ama frontend types dizininde tanımsız                              |
+| F7  | `types/dashboard.ts`                      | 🟢 Düşük  | Dashboard tipleri ayrı dosyada değil                                                    |
+| F8  | `types/auth.ts`                           | 🟢 Düşük  | Auth tipleri ayrı dosyada tanımlı değil                                                 |
+| F9  | PWA Service Worker                        | 🟢 Düşük  | `public/manifest.json` var ama service worker dosyası yok                               |
 
-**İçerik:**
+### 3.4 DevOps / Altyapı
 
-- next.config.ts tam yapılandırma
-- tailwind.config.ts tam yapılandırma (token'larla)
-- shadcn/ui kurulum ve component listesi
-- globals.css tam içerik (CSS variables, base stiller)
-- API client (axios instance, interceptors, error handler)
-- Auth implementasyonu (middleware, provider, guard)
-- WebSocket hook (bağlantı, reconnect, heartbeat)
-- Her sayfa için: component tree, props, state, data fetching, loading/error state
-- Zustand store tanımları
-- TanStack Query hook'ları ve cache stratejisi
-- TradingView chart entegrasyonu
-- Form validation (Zod + react-hook-form)
-- Responsive pattern'ler
-- Accessibility kuralları
-
-### 3.3 Doküman 09: UI/UX Tasarım Sistemi
-
-**Amaç:** Tutarlı, temiz, kurumsal ve akıcı bir arayüz için kapsamlı tasarım sistemi.
-
-**İçerik:**
-
-- Tasarım felsefesi ve ilkeleri (net, akıcı, soft, kurumsal, sade)
-- Tam CSS variable token sistemi (dark + light tema)
-- Renk paleti (semantic renk isimleri)
-- Tipografi ölçeği (font-size, line-height, letter-spacing)
-- Spacing sistemi (4px grid)
-- Border radius, shadow, blur değerleri
-- Component variant kataloğu (Button, Card, Badge, Input, Table, vb.)
-- Animasyon ve transition spec'leri
-- İkon kılavuzu
-- Boş durum (empty state) tasarımları
-- Toast/notification stil kılavuzu
-- Erişilebilirlik kuralları (WCAG 2.1 AA)
-- Renk kontrast gereksinimleri
-
-### 3.4 Doküman 10: Adım Adım Geliştirme Rehberi
-
-**Amaç:** AI Agent'ın hangi sırada, hangi dosyayı oluşturacağını bilen bir yol haritası.
-
-**İçerik:**
-
-- Faz 0: Komut komut proje kurulumu
-- Docker Compose dosyası (tam YAML)
-- Dockerfile'lar (backend + frontend)
-- GitHub Actions CI/CD pipeline
-- Her sprint için adım adım görev sırası
-- Her görev için: hangi dosyalar oluşturulacak, bağımlılıklar, doğrulama kriterleri
-- Sıralı task listesi (Task 1 → Task 2 → ... → Task N)
+| #   | Eksiklik                            | Öncelik  | Açıklama                                                      |
+| --- | ----------------------------------- | -------- | ------------------------------------------------------------- |
+| O1  | GitHub Actions CI/CD workflow       | 🟡 Orta  | `.github/workflows/ci.yml` yok                                |
+| O2  | Nginx/Traefik reverse proxy config  | 🟢 Düşük | Prodüksiyon deploy için gerekecek                             |
+| O3  | Grafana dashboard JSON provisioning | 🟢 Düşük | Monitoring dashboard tanımları yok                            |
+| O4  | `.env.example` dosyaları            | 🟢 Düşük | Backend ve frontend için örnek env dosyaları kontrol edilmeli |
 
 ---
 
-## 4. Mevcut Dokümanlardaki Düzeltme ve İyileştirmeler
+## 4. DOC 07 vs GERÇEK KOD — SAPMA RAPORU
 
-### 4.1 Doküman 01 İyileştirmeleri
+Aşağıdaki kalemler Doc 07'de (Backend İmplementasyon Kılavuzu) planlanmış ancak bilinçli kararlarla **farklı uygulanmıştır**. Bunlar hata değil, evrim sürecinde alınmış kararlardır:
 
-- ✅ Genel olarak yeterli, büyük eksik yok
-- 📌 `yfinance` gecikmeli veri sağladığı açıkça belirtilmeli
-- 📌 Paper trading ve gerçek trading ayrımı daha net yapılmalı
-
-### 4.2 Doküman 02 İyileştirmeleri
-
-- ✅ Mimari kapsamlı
-- 📌 Docker Compose servislerin environment değişkenleri eklenmeli
-- 📌 Servisler arası iletişim pattern'leri (sync vs async) daha net tanımlanmalı
-
-### 4.3 Doküman 03 İyileştirmeleri
-
-- ✅ Veri modelleri ve API çok detaylı
-- 📌 Pagination response metadata standardize edilmeli
-- 📌 API versioning stratejisi eklenmeli
-
-### 4.4 Doküman 04 İyileştirmeleri
-
-- ⚠️ Wireframe'ler ASCII tabanlı — yeterli ama tasarım token'ları eksik
-- 📌 Her component'in exact props + state tanımı eklenmeli
-- 📌 Animasyon ve transition bilgisi eklenmeli
-- 📌 Renk token'ları shadcn/ui formatına dönüştürülmeli
-
-### 4.5 Doküman 05 İyileştirmeleri
-
-- ✅ Geliştirme planı genel olarak yeterli
-- 📌 Her görevin "Definition of Done" kriterleri eklenmeli
-- 📌 Adım adım komut bazlı rehber ayrı doküman olmalı
+| Planlanan (Doc 07)                                  | Gerçek Uygulama                           | Açıklama                                                         |
+| --------------------------------------------------- | ----------------------------------------- | ---------------------------------------------------------------- |
+| `*_repo.py` adlandırma                              | `*_repository.py`                         | Daha açık isimlendirme tercih edildi                             |
+| `api/v1/ml.py` + `services/ml_service.py`           | `api/v1/ai.py` + `services/ai_service.py` | ML → OpenRouter AI pivotu                                        |
+| `tasks/ml_tasks.py`                                 | `tasks/ai_tasks.py`                       | Aynı pivot                                                       |
+| `services/scheduler_service.py`                     | Yok (Celery beat)                         | Zamanlama Celery beat ile yönetiliyor                            |
+| `schemas/trend.py`                                  | `schemas/analysis.py`                     | İsim değişikliği                                                 |
+| `schemas/user.py`                                   | `schemas/auth.py` içinde                  | Birleştirildi                                                    |
+| `tests/unit/` + `tests/integration/` hiyerarşisi    | Flat `tests/` yapısı                      | Basitlik tercih edildi                                           |
+| `core/kafka_client.py`                              | Yok                                       | Kafka kullanılmadı                                               |
+| `indicators/volatility.py`, `volume.py`, `utils.py` | `momentum.py` + `trend.py` içinde         | Fonksiyonlar mevcut dosyalara gömüldü                            |
+| `websocket/notification_stream.py`                  | Yok                                       | Bildirim WebSocket'i implemente edilmedi                         |
+| 7 strateji planı                                    | 4 strateji mevcut                         | Base + MA Crossover + RSI Reversal + AI Strategy yeterli görüldü |
 
 ---
 
-## 5. Öncelik Sıralaması
+## 5. ÖNCELİK SIRASI — YAPILMASI GEREKENLER
 
-| Öncelik | Doküman                               | Gerekçe                                     |
-| ------- | ------------------------------------- | ------------------------------------------- |
-| 1       | Backend Implementasyon Kılavuzu (07)  | Tüm servisler, DB, auth temeldir            |
-| 2       | Frontend Implementasyon Kılavuzu (08) | UI geliştirme backend'e paralel yapılabilir |
-| 3       | UI/UX Tasarım Sistemi (09)            | Frontend geliştirmede tutarlılık sağlar     |
-| 4       | Adım Adım Geliştirme Rehberi (10)     | Sıralı geliştirme için kritik               |
+| Sıra | Madde                                                         | Öncelik   | Tahmini Efor    |
+| ---- | ------------------------------------------------------------- | --------- | --------------- |
+| 1    | Frontend `error.tsx` boundary'leri oluştur (F1)               | 🔴 Kritik | 1 saat          |
+| 2    | Frontend `loading.tsx` boundary'leri oluştur (F2)             | 🟡 Yüksek | 30 dk           |
+| 3    | Frontend `not-found.tsx` sayfası (F3)                         | 🟡 Yüksek | 30 dk           |
+| 4    | Frontend `middleware.ts` auth koruması (F4)                   | 🟡 Yüksek | 1 saat          |
+| 5    | `pyproject.toml` kullanılmayan bağımlılıkları temizle (B1–B6) | 🟡 Yüksek | 30 dk           |
+| 6    | GitHub Actions CI/CD pipeline (O1, B11)                       | 🟡 Orta   | 2 saat          |
+| 7    | Frontend test altyapısı kurulumu (F5)                         | 🟡 Orta   | 3 saat          |
+| 8    | Frontend eksik type dosyaları (F6–F8)                         | 🟢 Düşük  | 30 dk           |
+| 9    | Gerçek broker adaptörleri (B8)                                | 🟡 Orta   | İhtiyaç halinde |
+| 10   | Ek stratejiler (B7)                                           | 🟢 Düşük  | İhtiyaç halinde |
 
 ---
 
-_Bu analiz, bist-robogo projesinin mevcut dokümanlarının kapsamlı incelenmesinden üretilmiştir._
+## 6. SONUÇ
+
+Proje **büyük ölçüde tamamlanmış** durumdadır:
+
+- **Backend:** 106 uygulama dosyası, 272/272 test, 12 servis, 14 API modülü ✅
+- **Frontend:** 107 src dosyası, 14 sayfa, 0 TypeScript hatası, build OK ✅
+- **Altyapı:** Docker Compose (6 servis), PostgreSQL + TimescaleDB, Redis ✅
+
+Kalan eksiklikler çoğunlukla **kullanıcı deneyimi iyileştirmeleri** (error/loading boundaries), **CI/CD pipeline**, **bağımlılık temizliği** ve **opsiyonel ek özellikler** (gerçek broker, ek stratejiler) kategorisindedir. Hiçbiri mevcut işlevselliği engellemez.
+
+---
+
+_Bu rapor, 2026-03-05 tarihinde gerçek kod tabanı analizi ile oluşturulmuştur._

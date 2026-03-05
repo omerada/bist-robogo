@@ -1,8 +1,9 @@
 # bist-robogo — Proje Durumu
 
-> **Son Güncelleme:** Proje tamamlandı — backend 272/272 test, frontend 14 sayfa build OK  
+> **Son Güncelleme:** 2026-03-05 — Kapsamlı kod-doküman karşılaştırma analizi yapıldı  
 > **Aktif Faz:** Faz 4 — Ölçekleme ve Prodüksiyon  
-> **Aktif Sprint:** Faz 4.1–4.2 ✅ tamamlandı, 4.3–4.6 ertelendi (ihtiyaç halinde)
+> **Aktif Sprint:** Faz 4.1–4.2 ✅ tamamlandı, 4.3–4.6 ertelendi (ihtiyaç halinde)  
+> **Durum:** Backend 272/272 test ✅ | Frontend 14 sayfa, 0 TS hatası, build OK ✅
 
 ---
 
@@ -402,6 +403,43 @@
 - **Lib utils (2):** utils.ts, utils/formatters.ts
 - **Lib validators (1):** auth.ts
 - **Types (8):** market, order, portfolio, strategy, backtest, risk, ai, broker
+
+---
+
+## 2026-03-05 Kapsamlı Analiz Bulguları
+
+### Kod-Doküman Karşılaştırma Sonuçları
+
+Tüm backend (122 .py) ve frontend (107 src) dosyaları dokümanlarla (01–12) detaylı karşılaştırıldı.
+
+**Genel Değerlendirme:** Proje büyük ölçüde tamamlanmış durumda. Kalan eksiklikler için bkz. [06-EKSIK-ANALIZ-RAPORU.md](06-EKSIK-ANALIZ-RAPORU.md).
+
+### Kalan Kritik/Yüksek Öncelikli Maddeler
+
+| #   | Madde                                                                 | Öncelik   | Kategori |
+| --- | --------------------------------------------------------------------- | --------- | -------- |
+| 1   | Frontend `error.tsx` boundary'leri (hiçbir sayfada yok)               | 🔴 Kritik | UX       |
+| 2   | Frontend `loading.tsx` boundary'leri                                  | 🟡 Yüksek | UX       |
+| 3   | Frontend `not-found.tsx` 404 sayfası                                  | 🟡 Yüksek | UX       |
+| 4   | Frontend `middleware.ts` auth koruması (sunucu tarafı)                | 🟡 Yüksek | Güvenlik |
+| 5   | `pyproject.toml` kullanılmayan bağımlılık temizliği                   | 🟡 Yüksek | Bakım    |
+| 6   | GitHub Actions CI/CD pipeline                                         | 🟡 Orta   | DevOps   |
+| 7   | Frontend test altyapısı (vitest + playwright config + test dosyaları) | 🟡 Orta   | Kalite   |
+
+### pyproject.toml — Kaldırılması Gereken Bağımlılıklar
+
+Aşağıdaki bağımlılıklar artık **kullanılmamaktadır** ve temizlenmelidir:
+
+- `passlib` → `bcrypt` ile değiştirildi
+- `confluent-kafka` → Kafka kullanılmıyor
+- `yfinance` → CollectAPI ile değiştirildi
+- `aiohttp` → `httpx` tercih edildi
+- `factory-boy` → Kullanılmıyor
+- ML grubu (`xgboost`, `lightgbm`, `optuna`, `mlflow`, `onnxruntime`) → OpenRouter AI ile değiştirildi
+
+### Doc 07 Sapma Özeti
+
+Doc 07 (Backend İmplementasyon Kılavuzu) ile gerçek kod arasında bilinçli sapmalar mevcuttur: ML→AI pivotu, flat test yapısı, `*_repo.py` → `*_repository.py` adlandırma, Kafka kullanılmaması. Detaylar için [06-EKSIK-ANALIZ-RAPORU.md §4](06-EKSIK-ANALIZ-RAPORU.md) incelenebilir.
 
 ---
 
