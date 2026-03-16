@@ -38,19 +38,19 @@ class Settings(BaseSettings):
         return v
 
     # ── Veritabanı ── (Doc 11 Tutarsızlık #2: docker-compose değerlerini kullan)
-    DATABASE_URL: str = "postgresql+asyncpg://bist_user:bist_dev_pass_2026@localhost:5432/bist_robogo"
+    DATABASE_URL: str = "postgresql+asyncpg://bist_user:changeme@localhost:5432/bist_robogo"
     DATABASE_POOL_SIZE: int = 20
     DATABASE_MAX_OVERFLOW: int = 10
     DATABASE_POOL_TIMEOUT: int = 30
     DATABASE_ECHO: bool = False
 
     # ── Redis ── (Doc 11 Tutarsızlık #3: parolalı kullan)
-    REDIS_URL: str = "redis://:bist_redis_pass_2026@localhost:6379/0"
+    REDIS_URL: str = "redis://:changeme@localhost:6379/0"
     REDIS_CACHE_TTL: int = 300  # saniye
 
     # ── Celery ── (Doc 11 Tutarsızlık #5: ayrı env var kullan)
-    CELERY_BROKER_URL: str = "redis://:bist_redis_pass_2026@localhost:6379/1"
-    CELERY_RESULT_BACKEND: str = "redis://:bist_redis_pass_2026@localhost:6379/2"
+    CELERY_BROKER_URL: str = "redis://:changeme@localhost:6379/1"
+    CELERY_RESULT_BACKEND: str = "redis://:changeme@localhost:6379/2"
 
     # ── Kafka ──
     KAFKA_BOOTSTRAP_SERVERS: str = "localhost:9092"

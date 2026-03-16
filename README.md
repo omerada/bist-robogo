@@ -1,25 +1,51 @@
-# 🚀 bist-robogo
+<div align="center">
 
-**BIST İçin AI Destekli Otomatik Ticaret Platformu**
+# 🚀 BIST RoboGo
 
-> Türkiye Borsası (BIST) için geliştirilmiş, yapay zeka destekli, gerçek zamanlı ve otomatik alım-satım yapabilen modüler ticaret altyapısı.
+**AI-Powered Automated Trading Platform for Borsa Istanbul (BIST)**
+
+[![CI](https://github.com/omerada/bist-robogo/actions/workflows/ci.yml/badge.svg)](https://github.com/omerada/bist-robogo/actions/workflows/ci.yml)
+[![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
+[![Next.js 15](https://img.shields.io/badge/Next.js-15-black.svg)](https://nextjs.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688.svg)](https://fastapi.tiangolo.com/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.7-3178C6.svg)](https://www.typescriptlang.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+
+<p>
+  <a href="#-features">Features</a> •
+  <a href="#-architecture">Architecture</a> •
+  <a href="#-quick-start">Quick Start</a> •
+  <a href="#-documentation">Documentation</a> •
+  <a href="#-contributing">Contributing</a>
+</p>
+
+</div>
 
 ---
 
-## 📋 Özellikler
+> An open-source, modular, AI-driven trading infrastructure for Borsa Istanbul (BIST) — featuring real-time market data, automated order execution, technical & AI-based strategies, backtesting, and a professional dashboard.
 
-- **Gerçek Zamanlı Veri Takibi** — Canlı piyasa fiyatları, hacim ve order book
-- **Otomatik Emir Sistemi** — Risk kontrollü alım-satım
-- **Trend ve Dip Tespiti** — Teknik göstergeler + AI modelleri
-- **Risk Yönetimi** — Maks günlük zarar, pozisyon limitleri, volatilite kontrolü
-- **Backtest Motoru** — Geçmiş veri üzerinde strateji simülasyonu
-- **Profesyonel Dashboard** — Canlı fiyat, PnL, risk, performans
-- **Endeks Seçimi** — BIST30, BIST100, Katılım Endeksi filtreleme
-- **Trend Analiz Ekranı** — Günlük/haftalık/aylık trend dip ve kırılım analizi
+> **⚠️ Disclaimer:** This platform does **not** provide investment advice. Trading involves risk of loss. Use responsibly.
+
+## ✨ Features
+
+| Feature                       | Description                                                 |
+| ----------------------------- | ----------------------------------------------------------- |
+| **Real-Time Market Data**     | Live prices, volume, and order book via WebSocket           |
+| **Automated Order Execution** | Risk-controlled buy/sell with broker adapters               |
+| **Trend & Bottom Detection**  | Technical indicators (RSI, MACD, Bollinger) + AI models     |
+| **Risk Management**           | Daily loss limits, position sizing, volatility controls     |
+| **Backtesting Engine**        | Historical strategy simulation with detailed metrics        |
+| **Professional Dashboard**    | Real-time P&L, positions, risk gauges, performance charts   |
+| **Index Filtering**           | BIST30, BIST100, Participation Index support                |
+| **AI Strategy Engine**        | ML-powered predictions using XGBoost, scikit-learn, PyTorch |
+| **Paper Trading**             | Safe simulation mode before going live                      |
+| **Notifications**             | Telegram bot & email alerts for signals and risk events     |
 
 ---
 
-## 🏗️ Mimari
+## 🏗️ Architecture
 
 ```
                     Frontend (Next.js 15)
@@ -37,203 +63,177 @@
           PostgreSQL TimescaleDB Redis Kafka MinIO
 ```
 
-## 🛠️ Teknoloji Stack
+## 🛠️ Tech Stack
 
-| Katman         | Teknoloji                                     |
-| -------------- | --------------------------------------------- |
-| **Backend**    | Python 3.12+, FastAPI, Celery, SQLAlchemy     |
-| **Frontend**   | Next.js 15, React 19, TypeScript, TailwindCSS |
-| **Veritabanı** | PostgreSQL 16, TimescaleDB                    |
-| **Cache**      | Redis 7+                                      |
-| **Mesajlaşma** | Kafka / Redpanda                              |
-| **AI/ML**      | scikit-learn, XGBoost, PyTorch, TA-Lib        |
-| **Monitoring** | Prometheus, Grafana, Loki, Sentry             |
-| **DevOps**     | Docker, GitHub Actions, Terraform             |
+| Layer             | Technology                                        |
+| ----------------- | ------------------------------------------------- |
+| **Backend**       | Python 3.12+, FastAPI, Celery, SQLAlchemy 2.0     |
+| **Frontend**      | Next.js 15, React 19, TypeScript 5.7, TailwindCSS |
+| **Database**      | PostgreSQL 16 + TimescaleDB                       |
+| **Cache / Queue** | Redis 7+, Kafka / Redpanda                        |
+| **AI/ML**         | scikit-learn, XGBoost, PyTorch, TA-Lib            |
+| **Monitoring**    | Prometheus, Grafana, Sentry, structlog            |
+| **DevOps**        | Docker, Docker Compose, GitHub Actions            |
+| **Testing**       | pytest, Vitest, Playwright                        |
 
 ---
 
-## 📁 Proje Yapısı
+## 📁 Project Structure
 
 ```
 bist-robogo/
-├── docs/                               # Proje dökümanları (11 adet)
-│   ├── 01-ARGE-GEREKSINIM-ANALIZI.md
-│   ├── 02-SISTEM-MIMARISI.md
-│   ├── 03-VERI-MODELLERI-VE-API.md
-│   ├── 04-FRONTEND-TASARIM-VE-UX.md
-│   ├── 05-GELISTIRME-PLANI-VE-MVP.md
-│   ├── 06-EKSIK-ANALIZ-RAPORU.md
-│   ├── 07-BACKEND-IMPLEMENTASYON-KILAVUZU.md
-│   ├── 08-FRONTEND-IMPLEMENTASYON-KILAVUZU.md
-│   ├── 09-TASARIM-SISTEMI.md
-│   ├── 10-ADIM-ADIM-GELISTIRME-REHBERI.md
-│   └── 11-AI-AGENT-GELISTIRME-PROMPTU.md
-│
-├── backend/                            # Python Backend (FastAPI)
+├── backend/                 # Python Backend (FastAPI)
 │   ├── app/
-│   │   ├── api/                        # API route'ları
-│   │   │   ├── router.py
-│   │   │   ├── health.py
-│   │   │   └── v1/
-│   │   │       ├── auth.py
-│   │   │       ├── market.py
-│   │   │       ├── orders.py
-│   │   │       ├── portfolio.py
-│   │   │       ├── strategies.py
-│   │   │       ├── backtest.py
-│   │   │       ├── risk.py
-│   │   │       └── analysis.py
-│   │   ├── core/                       # Çekirdek yapılandırma
-│   │   │   ├── config.py
-│   │   │   ├── security.py
-│   │   │   ├── database.py
-│   │   │   └── redis_client.py
-│   │   ├── models/                     # SQLAlchemy modelleri
-│   │   ├── schemas/                    # Pydantic şemaları
-│   │   ├── services/                   # İş mantığı
-│   │   │   ├── auth_service.py
-│   │   │   ├── market_data_service.py
-│   │   │   ├── trading_service.py
-│   │   │   ├── risk_service.py
-│   │   │   ├── strategy_service.py
-│   │   │   ├── backtest_service.py
-│   │   │   ├── portfolio_service.py
-│   │   │   ├── ai_ml_service.py
-│   │   │   └── notification_service.py
-│   │   ├── repositories/              # Repository pattern
-│   │   ├── strategies/                 # Trading stratejileri
-│   │   │   ├── base.py
-│   │   │   ├── ma_crossover.py
-│   │   │   ├── rsi_reversal.py
-│   │   │   └── ai_trend.py
-│   │   ├── indicators/                 # Teknik gösterge hesaplamaları
-│   │   │   └── momentum.py
-│   │   ├── brokers/                    # Broker adaptörleri
-│   │   │   ├── base.py
-│   │   │   └── paper_broker.py
-│   │   ├── ml/                         # Makine öğrenmesi
-│   │   │   ├── features.py
-│   │   │   ├── models/
-│   │   │   ├── training.py
-│   │   │   └── serving.py
-│   │   ├── tasks/                      # Celery görevleri
-│   │   │   ├── celery_app.py
-│   │   │   └── market_tasks.py
-│   │   ├── websocket/                  # WebSocket yönetimi
-│   │   │   └── market_stream.py
-│   │   ├── utils/                      # Yardımcı fonksiyonlar
-│   │   └── main.py                     # FastAPI app (create_app factory)
-│   ├── alembic/                        # Alembic migrasyonları
-│   ├── scripts/                        # Yardımcı scriptler
-│   │   └── seed_symbols.py
-│   ├── tests/                          # Testler
-│   ├── pyproject.toml
-│   └── Dockerfile
-│
-├── frontend/                           # Next.js Frontend
+│   │   ├── api/             # REST API routes (v1)
+│   │   ├── brokers/         # Broker adapters (paper, live)
+│   │   ├── core/            # Config, security, Redis, WebSocket
+│   │   ├── indicators/      # Technical indicators (RSI, MACD, etc.)
+│   │   ├── models/          # SQLAlchemy ORM models
+│   │   ├── schemas/         # Pydantic request/response schemas
+│   │   ├── services/        # Business logic layer
+│   │   ├── strategies/      # Trading strategies (MA crossover, AI trend)
+│   │   ├── tasks/           # Celery async tasks
+│   │   └── websocket/       # Real-time WebSocket streams
+│   ├── alembic/             # Database migrations
+│   ├── tests/               # Backend test suite (pytest)
+│   └── pyproject.toml
+├── frontend/                # Next.js 15 Frontend
 │   ├── src/
-│   │   ├── app/                        # Next.js App Router
-│   │   │   ├── layout.tsx
-│   │   │   ├── globals.css
-│   │   │   ├── (auth)/                 # Auth sayfaları
-│   │   │   └── (dashboard)/            # Dashboard sayfaları
-│   │   ├── components/                 # React bileşenleri
-│   │   │   ├── auth/
-│   │   │   ├── charts/
-│   │   │   ├── layout/
-│   │   │   ├── providers/
-│   │   │   └── shared/
-│   │   ├── hooks/                      # Custom hooks
-│   │   ├── lib/                        # API client ve yardımcılar
-│   │   │   ├── api/
-│   │   │   └── utils/
-│   │   ├── stores/                     # Zustand stores
-│   │   └── types/                      # TypeScript tipleri
-│   ├── package.json
-│   └── Dockerfile
-│
-├── docker-compose.yml                  # Tüm servisler (dev ortam)
-├── .github/
-│   └── workflows/
-│       └── ci.yml
-│
-├── .env.example
-├── .gitignore
-├── README.md
-└── Makefile
+│   │   ├── app/             # App Router pages
+│   │   ├── components/      # React components (auth, charts, layout)
+│   │   ├── hooks/           # Custom React hooks
+│   │   ├── lib/             # API client, utilities
+│   │   ├── stores/          # Zustand state management
+│   │   └── types/           # TypeScript type definitions
+│   └── package.json
+├── docs/                    # Design & implementation docs (12 files)
+├── docker-compose.yml       # Full dev environment (6 services)
+├── Makefile                 # Common dev commands
+└── .github/workflows/       # CI pipeline
 ```
 
 ---
 
-## 📚 Dokümantasyon
+## 📚 Documentation
 
-### Ar-Ge ve Tasarım Dokümanları
+The `docs/` directory contains 12 detailed design & implementation documents:
 
-| Doküman                                                                | Açıklama                                           |
-| ---------------------------------------------------------------------- | -------------------------------------------------- |
-| [01 — Ar-Ge ve Gereksinim Analizi](docs/01-ARGE-GEREKSINIM-ANALIZI.md) | Teknoloji araştırması, gereksinimler, risk analizi |
-| [02 — Sistem Mimarisi](docs/02-SISTEM-MIMARISI.md)                     | Modüller, veri akışları, deployment                |
-| [03 — Veri Modelleri ve API](docs/03-VERI-MODELLERI-VE-API.md)         | DB şemaları, API sözleşmeleri, event flow          |
-| [04 — Frontend Tasarım](docs/04-FRONTEND-TASARIM-VE-UX.md)             | UI/UX, ekran planları, component mimari            |
-| [05 — Geliştirme Planı](docs/05-GELISTIRME-PLANI-VE-MVP.md)            | MVP, sprintler, yol haritası                       |
-
-### Implementasyon ve Geliştirme Dokümanları
-
-| Doküman                                                                              | Açıklama                                          |
-| ------------------------------------------------------------------------------------ | ------------------------------------------------- |
-| [06 — Eksik Analiz Raporu](docs/06-EKSIK-ANALIZ-RAPORU.md)                           | Mevcut dokümanların gap analizi                   |
-| [07 — Backend Implementasyon Kılavuzu](docs/07-BACKEND-IMPLEMENTASYON-KILAVUZU.md)   | Backend dosya yapısı, kod şablonları, pattern'ler |
-| [08 — Frontend Implementasyon Kılavuzu](docs/08-FRONTEND-IMPLEMENTASYON-KILAVUZU.md) | Frontend bileşenler, hook'lar, store'lar          |
-| [09 — Tasarım Sistemi](docs/09-TASARIM-SISTEMI.md)                                   | Renk token'ları, tipografi, component catalog     |
-| [10 — Adım Adım Geliştirme Rehberi](docs/10-ADIM-ADIM-GELISTIRME-REHBERI.md)         | Docker, CI/CD, faz bazlı görev sırası             |
-
-### Geliştirme Prompt Dokümanı
-
-| Doküman                                                                    | Açıklama                                         |
-| -------------------------------------------------------------------------- | ------------------------------------------------ |
-| [11 — AI Agent Geliştirme Promptu](docs/11-AI-AGENT-GELISTIRME-PROMPTU.md) | Uçtan uca geliştirme için AI Agent master prompt |
+| #   | Document                                                                     | Topics                                                |
+| --- | ---------------------------------------------------------------------------- | ----------------------------------------------------- |
+| 01  | [R&D & Requirements Analysis](docs/01-ARGE-GEREKSINIM-ANALIZI.md)            | Tech research, functional/non-functional requirements |
+| 02  | [System Architecture](docs/02-SISTEM-MIMARISI.md)                            | Modules, data flows, deployment                       |
+| 03  | [Data Models & API](docs/03-VERI-MODELLERI-VE-API.md)                        | DB schemas, API contracts, event flows                |
+| 04  | [Frontend Design & UX](docs/04-FRONTEND-TASARIM-VE-UX.md)                    | UI/UX, wireframes, component hierarchy                |
+| 05  | [Development Plan & MVP](docs/05-GELISTIRME-PLANI-VE-MVP.md)                 | Sprint planning, roadmap                              |
+| 06  | [Gap Analysis Report](docs/06-EKSIK-ANALIZ-RAPORU.md)                        | Coverage gaps in existing docs                        |
+| 07  | [Backend Implementation Guide](docs/07-BACKEND-IMPLEMENTASYON-KILAVUZU.md)   | File structure, code patterns                         |
+| 08  | [Frontend Implementation Guide](docs/08-FRONTEND-IMPLEMENTASYON-KILAVUZU.md) | Components, hooks, stores                             |
+| 09  | [Design System](docs/09-TASARIM-SISTEMI.md)                                  | Color tokens, typography, component catalog           |
+| 10  | [Step-by-Step Dev Guide](docs/10-ADIM-ADIM-GELISTIRME-REHBERI.md)            | Docker, CI/CD, phased tasks                           |
+| 11  | [AI Agent Dev Prompt](docs/11-AI-AGENT-GELISTIRME-PROMPTU.md)                | End-to-end AI agent master prompt                     |
+| 12  | [Project Status](docs/12-PROJE-DURUMU.md)                                    | Current progress & completed phases                   |
 
 ---
 
-## 🚀 Hızlı Başlangıç
+## 🚀 Quick Start
+
+### Prerequisites
+
+- [Docker](https://docs.docker.com/get-docker/) & Docker Compose
+- [Python 3.12+](https://www.python.org/) & [Poetry](https://python-poetry.org/) (for local backend dev)
+- [Node.js 20+](https://nodejs.org/) & [pnpm](https://pnpm.io/) (for local frontend dev)
+
+### One-Command Setup (Docker)
 
 ```bash
-# Repository'yi klonla
-git clone https://github.com/your-username/bist-robogo.git
+# Clone the repository
+git clone https://github.com/omerada/bist-robogo.git
 cd bist-robogo
 
-# Ortam değişkenlerini ayarla
+# Copy environment template
 cp .env.example .env
-# .env dosyasını düzenle
+# Edit .env with your own secrets (see .env.example for details)
 
-# Docker ile tüm servisleri başlat
+# Start all services
 docker compose up -d --build
 
-# Servis durumlarını kontrol et
+# Verify
 docker compose ps
+# http://localhost:8000/health → 200 OK (Backend)
+# http://localhost:3000         → Dashboard  (Frontend)
+```
 
-# Backend (geliştirme — Docker dışında çalıştırmak için)
+### Local Development (without Docker)
+
+```bash
+# Backend
 cd backend
 poetry install
 poetry run alembic upgrade head
 poetry run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 
-# Frontend (geliştirme — Docker dışında çalıştırmak için)
+# Frontend (in a separate terminal)
 cd frontend
 pnpm install
 pnpm dev
+```
 
-# Doğrulama
-# http://localhost:8000/health → 200 OK
-# http://localhost:3000 → Next.js sayfası
+### Make Commands
+
+```bash
+make dev            # Start all services (Docker)
+make test           # Run all tests (backend + frontend)
+make backend-test   # Backend tests with coverage
+make frontend-test  # Frontend unit tests
+make migrate        # Run database migrations
+make seed           # Seed BIST30 symbols & indexes
 ```
 
 ---
 
-## 📄 Lisans
+## 🧪 Testing
 
-Bu proje özel kullanım içindir. Tüm hakları saklıdır.
+```bash
+# Backend (272+ tests)
+cd backend && poetry run pytest -v --cov=app
+
+# Frontend (Vitest)
+cd frontend && pnpm test
+
+# E2E (Playwright)
+cd frontend && pnpm test:e2e
+```
 
 ---
 
-> **⚠️ Uyarı:** Bu platform yatırım tavsiyesi vermemektedir. Ticaret işlemleri kayıp riski taşır. Sorumlu kullanım esastır.
+## 🤝 Contributing
+
+Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+---
+
+## 🔒 Security
+
+For security concerns, please see [SECURITY.md](SECURITY.md). Do **not** open public issues for security vulnerabilities.
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
+
+---
+
+## ⭐ Star History
+
+If you find this project useful, please consider giving it a star!
+
+---
+
+> **⚠️ Disclaimer:** This platform does **not** provide investment advice. Trading involves risk of loss. Use responsibly. The developers are not liable for any financial losses incurred through the use of this software.

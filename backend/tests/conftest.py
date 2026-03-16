@@ -25,7 +25,7 @@ from app.models.user import User
 # Test DB URL — env variable veya Docker default
 TEST_DATABASE_URL = os.getenv(
     "TEST_DATABASE_URL",
-    "postgresql+asyncpg://bist_user:bist_dev_pass_2026@localhost:5432/bist_robogo_test",
+    "postgresql+asyncpg://bist_user:changeme@localhost:5432/bist_robogo_test",
 )
 
 
